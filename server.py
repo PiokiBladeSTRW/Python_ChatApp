@@ -1,7 +1,8 @@
 class chatServer:
 
     def __init__(self):
-        self.clients = {}     
+        self.clients = {}   
+        asyncio.run(self.start())  
         
     async def start(self):
         async with websockets.serve(self.handleClient, "localhost", 8765):
@@ -39,4 +40,3 @@ class chatServer:
 import asyncio
 import websockets
 server = chatServer()
-asyncio.run(server.start())
