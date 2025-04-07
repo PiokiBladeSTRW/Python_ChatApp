@@ -26,7 +26,6 @@ async def onlineDisplay(sock):
     for client in onlineClients:
         await sock.send(client)
 
-    
 
 async def main():
     async with websockets.serve(handleClient, "localhost", 8765):
