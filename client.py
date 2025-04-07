@@ -7,7 +7,7 @@ class chatClient:
     async def connect(self):
         async with websockets.connect("ws://localhost:8765") as clientSock:        
             self.clientUsrn = input("\nENTER USERNAME: ")
-            await clientSock.send(self.clientUsrn)          #Manually encoded within server
+            await clientSock.send(self.encode("IS ONLINE", "msg"))
 
             await asyncio.gather(self.send(clientSock), self.receive(clientSock))
 

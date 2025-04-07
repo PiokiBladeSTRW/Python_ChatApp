@@ -1,7 +1,7 @@
 class chatServer:
 
     def __init__(self):
-        self.clients = {}   
+        self.clients = []
         asyncio.run(self.start())  
         
 
@@ -11,11 +11,8 @@ class chatServer:
             await asyncio.Future()  #while True: but with 0 CPU usage
         
     async def handleClient(self, clientSock):
-
-        usrname = await clientSock.recv()
-        self.clients[clientSock] = usrname
-        await self.broadcast(clientSock, '{'+f'"sender": "{usrname}", "content": "IS ONLINE", "type": "msg"'+'}')
-
+        self.clients.append(clientSock)
+        
         await self.receive(clientSock)
 
 
