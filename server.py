@@ -4,26 +4,28 @@ class chatServer:
         self.clients = {}   
         asyncio.run(self.start())  
         
+
     async def start(self):
         async with websockets.serve(self.handleClient, "localhost", 8765):
             print("SERVER ON")
             await asyncio.Future()  #while True: but with 0 CPU usage
         
     async def handleClient(self, clientSock):
+
         usrname = await clientSock.recv()
         self.clients[clientSock] = usrname
-
-        await self.broadcast(clientSock, f"[{self.clients[clientSock]} IS ONLINE]")
+        await self.broadcast(clientSock, '{'+f'"sender": "{usrname}", "content": "IS ONLINE", "type": "msg"'+'}')
 
         await self.receive(clientSock)
+
 
     async def receive(self, clientSock):
         async for message in clientSock:
             print(message)
 
-            await self.broadcast(clientSock, f"{self.clients[clientSock]}: {message}")
+            await self.broadcast(clientSock, message)
 
-    async def broadcast(self, clientSock, msg):
+    async def broadcast(self, clientSock, msg:str):
         for client in self.clients:
             if (client != clientSock):
                 await client.send(msg)
