@@ -18,43 +18,51 @@ class chatServer:
 
     async def receive(self, clientSock):
         async for dataRecv in clientSock:
-            print(dataRecv)
+            #print(dataRecv)
+
+            ''' Check whether the given data is a Special Case or Not
+                Type 'usr': Client just connected to Server, is yet to Properly Establish Connection
+                Type 'onl': Client is finalizing connection to Server
+            '''     
 
             decodedData= json.loads(dataRecv)
             match decodedData['type']:
                 case 'usr': 
-                    print(self.clients)
+                    
                     if(decodedData['content']!='%'):
                         self.clients[clientSock].append(decodedData['sender'])
-                    try:
-                        onlinesMsg = {"sender":"sys[ONLINE LIST]", "content": '\n'.join([x[0] for x in self.clients.values()]), "type": "onl"}                        
-                    except IndexError:
-                        onlinesMsg = {"sender":"sys[ONLINE LIST]", "content": "No One Online", "type": "onl"}  
+                    
+                    if(len(self.clients)==1):
+                        onlinesMsg = {"sender":"sys[ONLINE LIST]", "content": "No One Online", "type": "onl"} 
+                    else:
+                        content = '\n'.join([x[0] for x in self.clients.values() if x[0] != self.clients[clientSock][0]])
+                        onlinesMsg = {"sender":"sys[ONLINE LIST]", "content": content, "type": "onl"}                        
 
                     await self.userAlerts(clientSock, json.dumps(onlinesMsg))
-
-
+                    dataRecv= ''
 
                 case 'onl':
                     receiver = next((x for x in self.clients if self.clients[x][0] == decodedData['content']))
                     self.clients[clientSock].append(receiver)
+                    dataRecv= ''
 
                 case _ : pass
 
             del decodedData
-            ''' Check whether the given data is a Special Case or Not '''              
-
+                  
             await self.broadcast(clientSock, dataRecv)
+
 
     async def broadcast(self, clientSock, dataRecv:str):
         # for client in self.clients:
         #     if (client != clientSock):
         #         await client.send(dataRecv)
-        try:
-            receiver = self.clients[clientSock][1]
-            await receiver.send(dataRecv)
-        except IndexError:      #AKA only one online
-            pass
+        if(dataRecv==''):           #Only one online
+            return
+ 
+        receiver = self.clients[clientSock][1]
+        await receiver.send(dataRecv)
+
     
     async def userAlerts(self, clientSock, msg):
         await clientSock.send(msg)
