@@ -14,7 +14,7 @@ class chatServer:
         self.clients.append(clientSock)
 
         await self.userAlerts(clientSock, json.dumps({'sender': 'sys', 'content': '\n'.join(self.clients.values()), 'type':'onl'}))
-                
+
         await self.receive(clientSock)
 
 
