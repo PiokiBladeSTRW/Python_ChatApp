@@ -10,10 +10,10 @@ A **Chat App** coded for Fun and a Learning Experience, planned to be finalized 
 -Avoiding Bloating
 -Priority to Privacy
 
-'''python
+```python
 print("Python is Used in: ")
 print("Backend", "AI Chat Work", "Testing")
-'''
+```
 
 ## Vibe
 
@@ -21,10 +21,10 @@ print("Backend", "AI Chat Work", "Testing")
 -Simple UI
 -Packaging System to avoid Complexity
 
-'''js
+```javascript
 console.log("JavaScript is Used in: ")
 console.log("Backend"+ "Efficiency"+ "Web Based")
-'''
+```
 
 ## Platforms
 
@@ -32,12 +32,12 @@ console.log("Backend"+ "Efficiency"+ "Web Based")
 2. **WEB**
 3. *Possibly the following:* **IOS/Desktop**
 
-'''Dart
+```Dart
 void main() {
     print("Dart is Used in: ")
     print("UI")
 }
-'''
+```
 
 ## Tech Stack
 
