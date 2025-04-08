@@ -2,12 +2,15 @@ class chatClient:
 
     def __init__(self):
         self.clientUsrn = ''
+        self.lock = asyncio.Lock()
         asyncio.run(self.connect())
 
     async def connect(self):
         async with websockets.connect("ws://localhost:8765") as clientSock:        
             self.clientUsrn = input("\nENTER USERNAME: ")
             await clientSock.send(self.encode("IS ONLINE", "usr"))
+
+            await self.chooseCon(clientSock)
 
             await asyncio.gather(self.send(clientSock), self.receive(clientSock))
 
@@ -23,7 +26,7 @@ class chatClient:
                 print("SERVER DOWN") 
                 break
 
-    async def receive(self, clientSock):  
+    async def receive(self, clientSock):
 
         try:
             async for reply in clientSock:  
@@ -32,26 +35,44 @@ class chatClient:
                 match response['type']:
                     case 'msg'|'usr':
                         print(f"{response['sender']}: {response['content']}") 
-                    case 'onl':
-                        print(f"Onlines: {response['content']}")
-                        choiceInput = int(input("->"))
-                        choice = self.receiverSelect(response['content'], choiceInput)     
-                          
 
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN!")
+
+    async def chooseCon(self, clientSock):
+        async def onlineDisp():
+            response= json.loads(await clientSock.recv())
+            print(f"{response['sender']}: \n{response['content']}") 
+
+            return response['content'].split('\n')
+
+        async with self.lock:
+            onlineList = await onlineDisp()
+
+            while True:            
+                choice = int(input("->"))
+
+                if(choice < len(onlineList)):
+                    choice = onlineList[choice]
+                    await clientSock.send(self.encode(choice, 'onl'))
+                    break
+
+                elif(choice == len(onlineList)):                    
+                    await clientSock.send(self.encode('%', 'usr'))
+                    await asyncio.sleep(3)
+
+                    onlineList=  await onlineDisp()
+
+                else:
+                    continue
 
     def encode(self, content, type):
         #Before returning, Content should be encoded
         return json.dumps({"sender": self.clientUsrn, "content": content, "type": type})
     
-    async def receiverSelect(self, onlines, choice):
-        onlines = onlines.split('\n')
-        if(choice < len(onlines)):
-            pass
-        if(choice == len(onlines)):
-           pass
-           
+
+
+
 
 
 #__MAIN__

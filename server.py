@@ -11,9 +11,7 @@ class chatServer:
             await asyncio.Future()  #while True: but with 0 CPU usage
         
     async def handleClient(self, clientSock):
-        self.clients.append(clientSock)
-
-        await self.userAlerts(clientSock, json.dumps({'sender': 'sys', 'content': '\n'.join(self.clients.values()), 'type':'onl'}))
+        self.clients[clientSock]= []
 
         await self.receive(clientSock)
 
@@ -24,7 +22,23 @@ class chatServer:
 
             decodedData= json.loads(dataRecv)
             match decodedData['type']:
-                case 'usr': self.clients[clientSock] = decodedData['sender']
+                case 'usr': 
+                    print(self.clients)
+                    if(decodedData['content']!='%'):
+                        self.clients[clientSock].append(decodedData['sender'])
+                    try:
+                        onlinesMsg = {"sender":"sys[ONLINE LIST]", "content": '\n'.join([x[0] for x in self.clients.values()]), "type": "onl"}                        
+                    except IndexError:
+                        onlinesMsg = {"sender":"sys[ONLINE LIST]", "content": "No One Online", "type": "onl"}  
+
+                    await self.userAlerts(clientSock, json.dumps(onlinesMsg))
+
+
+
+                case 'onl':
+                    receiver = next((x for x in self.clients if self.clients[x][0] == decodedData['content']))
+                    self.clients[clientSock].append(receiver)
+
                 case _ : pass
 
             del decodedData
@@ -33,9 +47,14 @@ class chatServer:
             await self.broadcast(clientSock, dataRecv)
 
     async def broadcast(self, clientSock, dataRecv:str):
-        for client in self.clients:
-            if (client != clientSock):
-                await client.send(dataRecv)
+        # for client in self.clients:
+        #     if (client != clientSock):
+        #         await client.send(dataRecv)
+        try:
+            receiver = self.clients[clientSock][1]
+            await receiver.send(dataRecv)
+        except IndexError:      #AKA only one online
+            pass
     
     async def userAlerts(self, clientSock, msg):
         await clientSock.send(msg)
