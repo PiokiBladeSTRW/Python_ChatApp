@@ -1,7 +1,7 @@
 class chatServer:
 
     def __init__(self):
-        self.clients = []
+        self.clients = {}
         asyncio.run(self.start())  
         
 
@@ -12,20 +12,30 @@ class chatServer:
         
     async def handleClient(self, clientSock):
         self.clients.append(clientSock)
-        
+
+        await self.userAlerts(clientSock, json.dumps({'sender': 'sys', 'content': '\n'.join(self.clients.values()), 'type':'onl'}))
+                
         await self.receive(clientSock)
 
 
     async def receive(self, clientSock):
-        async for message in clientSock:
-            print(message)
+        async for dataRecv in clientSock:
+            print(dataRecv)
 
-            await self.broadcast(clientSock, message)
+            decodedData= json.loads(dataRecv)
+            match decodedData['type']:
+                case 'usr': self.clients[clientSock] = decodedData['sender']
+                case _ : pass
 
-    async def broadcast(self, clientSock, msg:str):
+            del decodedData
+            ''' Check whether the given data is a Special Case or Not '''              
+
+            await self.broadcast(clientSock, dataRecv)
+
+    async def broadcast(self, clientSock, dataRecv:str):
         for client in self.clients:
             if (client != clientSock):
-                await client.send(msg)
+                await client.send(dataRecv)
     
     async def userAlerts(self, clientSock, msg):
         await clientSock.send(msg)
@@ -38,4 +48,5 @@ class chatServer:
 #Run
 import asyncio
 import websockets
+import json
 server = chatServer()
