@@ -2,6 +2,7 @@ class chatServer:
 
     def __init__(self):
         self.clients = {}
+        self.users = {}
         asyncio.run(self.start())  
         
 
@@ -11,57 +12,40 @@ class chatServer:
             await asyncio.Future()  #while True: but with 0 CPU usage
         
     async def handleClient(self, clientSock):
-        self.clients[clientSock]= []
-
         await self.receive(clientSock)
 
 
     async def receive(self, clientSock):
-        async for dataRecv in clientSock:
-            #print(dataRecv)
+        async for dataRecv in clientSock:   
+            response = json.loads(dataRecv)
 
-            ''' Check whether the given data is a Special Case or Not
-                Type 'usr': Client just connected to Server, is yet to Properly Establish Connection
-                Type 'onl': Client is finalizing connection to Server
-            '''     
+            match response['type']:
+                case 'usr':
+                    self.clients[clientSock] = response['sender']
+                    self.users[response['sender']] = clientSock
 
-            decodedData= json.loads(dataRecv)
-            match decodedData['type']:
-                case 'usr': 
+                    destination = response['receiver']
+                    response.pop('receiver')
+                    dataSend = json.dumps(response)
                     
-                    if(decodedData['content']!='%'):
-                        self.clients[clientSock].append(decodedData['sender'])
-                    
-                    if(len(self.clients)==1):
-                        onlinesMsg = {"sender":"sys[ONLINE LIST]", "content": "No One Online", "type": "onl"} 
-                    else:
-                        content = '\n'.join([x[0] for x in self.clients.values() if x[0] != self.clients[clientSock][0]])
-                        onlinesMsg = {"sender":"sys[ONLINE LIST]", "content": content, "type": "onl"}                        
+                    await self.broadcast(clientSock, dataSend, destination)
 
-                    await self.userAlerts(clientSock, json.dumps(onlinesMsg))
-                    dataRecv= ''
+                case 'msg':
+                    destination = response['receiver']
+                    response.pop('receiver')
+                    dataSend = json.dumps(response) 
 
-                case 'onl':
-                    receiver = next((x for x in self.clients if self.clients[x][0] == decodedData['content']))
-                    self.clients[clientSock].append(receiver)
-                    dataRecv= ''
-
-                case _ : pass
-
-            del decodedData
-                  
-            await self.broadcast(clientSock, dataRecv)
+                    await self.broadcast(clientSock, dataSend, destination)
 
 
-    async def broadcast(self, clientSock, dataRecv:str):
-        # for client in self.clients:
-        #     if (client != clientSock):
-        #         await client.send(dataRecv)
-        if(dataRecv==''):           #Only one online
-            return
- 
-        receiver = self.clients[clientSock][1]
-        await receiver.send(dataRecv)
+    async def broadcast(self, clientSock, dataSend:str, destination):
+        if(destination=='.'):
+            for client in self.clients:
+                if(client != clientSock):
+                    await client.send(dataSend)
+            return           
+         
+        await self.users[destination].send(dataSend)
 
     
     async def userAlerts(self, clientSock, msg):
