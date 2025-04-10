@@ -103,11 +103,11 @@ class chatClient:
     def encode(self, content, type):
         '''
         Message Format: {"sender": <username>, "receiver": <username>, "content": '--', "type": 'msg/..'}
-        
+
         Types:
-        ->msg: String Message, most common type
+        ->msg: Default String Message
         ->usr: Entry of Username / Retrieval of '<> IS ONLINE'
-        ->sys: System Message and/or Special Instructions
+        ->sys: System Message / Commands
         ->hbp: Heartbeat Pings. Letting Server know you are there.
         '''
         
