@@ -2,7 +2,7 @@ class chatClient:
 
     def __init__(self):
         self.clientUsrn = ''
-        self.receiver = '.'             #Defaults to All Clients to Display <> is ONLINE
+        self.receiver = ''             #Defaults to All Clients to Display <> is ONLINE
         self.clientSock = None
         asyncio.run(self.connect())
 
@@ -12,9 +12,11 @@ class chatClient:
 
             self.clientUsrn = input("\nENTER USERNAME: ")
             await self.clientSock.send(self.encode("", "usr"))
-            self.receiver = ''
 
-            await asyncio.gather(self.message(), self.receive())
+            try:
+                await asyncio.gather(self.message(), self.receive())
+            except asyncio.exceptions.CancelledError:
+                pass
 
 
     async def message(self):
@@ -33,6 +35,13 @@ class chatClient:
             elif(msg.startswith('/#')):         # DM Removal
                 self.receiver= ''
 
+            elif(msg.startswith('/e')):
+                await self.send(self.encode('/e', 'sys'))
+                await self.clientSock.close()               
+                for task in asyncio.all_tasks():
+                    task.cancel()
+                    return
+
             else:                               # No Commands
                 if(self.receiver):
                     await self.send(self.encode(msg, 'msg'))
@@ -50,6 +59,15 @@ class chatClient:
 
                 elif(response['type'] == 'usr'):
                     print(f"[{response['sender']} is ONLINE]") 
+                
+                elif(response['type'] == 'sys'):
+                    #If Else to allow System to Manipulate Clients
+                    if(response['content'] == '/e'):
+                        print(f"[{response['sender']} is OFFLINE]")
+                        if(self.receiver == response['sender']): self.receiver = ''
+
+                    else:
+                        print(f"SYSTEM: {response['content']}")
 
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN!")
@@ -66,10 +84,16 @@ class chatClient:
 
     def encode(self, content, type):
         #Before returning, Content should be encoded
+        if(type in ('usr', 'sys')):
+            return json.dumps({"sender": self.clientUsrn, 
+                           "content": content, ""
+                           "type": type})
+
         return json.dumps({"sender": self.clientUsrn, 
                            "receiver": self.receiver, 
                            "content": content, ""
                            "type": type})
+        
 
     
 
@@ -84,4 +108,5 @@ Message Format: {"sender": <username>, "receiver": <username>, "content": '--', 
 Types:
 ->msg: String Message, most common type
 ->usr: Entry of Username / Retrieval of '<> IS ONLINE'
+->sys: System Message and/or Special Instructions
 '''

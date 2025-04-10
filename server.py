@@ -1,8 +1,7 @@
 class chatServer:
 
-    def __init__(self):
-        self.clients = {}
-        self.users = {}
+    def __init__(self):        
+        self.clients = {}       # username : socket
         asyncio.run(self.start())  
         
 
@@ -21,35 +20,40 @@ class chatServer:
             response = json.loads(dataRecv)
 
             match response['type']:
-                case 'usr':
-                    self.clients[clientSock] = response['sender']
-                    self.users[response['sender']] = clientSock
+                case 'usr':                   
+                    self.clients[response['sender']] = clientSock
                     
-                    destination = response['receiver']
-                    await self.broadcast(clientSock, self.dataEncode(response), destination)
+                    await self.broadcast(clientSock, dataRecv, '.')
+                
+                case 'sys':
+                    if(response['content']=='/e'):
+                        self.clients.pop(response['sender'])
 
+                        await self.broadcast(clientSock, dataRecv, '.')
+                        
                 case 'msg':
                     destination = response['receiver']
-                    await self.broadcast(clientSock, self.dataEncode(response), destination)
+                    response.pop('receiver')
+                    await self.broadcast(clientSock, json.dumps(response), destination)
+
 
 
     async def broadcast(self, clientSock, dataSend:str, destination):
         if(destination=='.'):
-            for client in self.clients:
+            for client in self.clients.values():
                 if(client != clientSock):
                     await client.send(dataSend)
             return         
         
-        await self.users[destination].send(dataSend)
+        try:
+            await self.clients[destination].send(dataSend)
+        except KeyError:
+            msg = {"content": f"{destination} IS OFFLINE", "type": "sys"}
+            await self.userAlerts(clientSock, json.dumps(msg))
 
     
     async def userAlerts(self, clientSock, msg):
         await clientSock.send(msg)    
-    
-    
-    def dataEncode(self, response):
-        response.pop('receiver')
-        return json.dumps(response)
 
 
 
