@@ -30,7 +30,8 @@ class chatClient:
                 elif(response['type'] == 'usr'):
                     print(f"[{response['sender']} is ONLINE]") 
                 
-                elif(response['type'] == 'sys'):                    
+                elif(response['type'] == 'sys'):        
+
                     #If Else to allow System to Manipulate Clients
                     if(response['content'] == '/e'):
                         print(f"[{response['sender']} is OFFLINE]")
@@ -46,28 +47,35 @@ class chatClient:
         while True:
             msg = await asyncio.to_thread(input)
 
-            '''Check for Command'''
+            '''Check for Command
+            [If parsed, that implies the command is receied by Server (type:sys)]
+
+            /dm <username> <msg> : Initiates a DM with given Username as Receiver
+            /#                   : Removes Receiver, that is closing a DM
+            /exit                : Exit                                            [Parsed as /e]
+            /online              : Online List                                     [Parsed as /o]            
+            '''
             
             if(msg.startswith('/dm')):          # Dm Selection
                 data = msg.split()
                 self.receiver= data[1]
-                msg = ' '.join(data[2::])
 
-                await self.send(self.encode(msg, 'msg'))
+                msg = ' '.join(data[2::])
+                await self.send(msg, 'msg')
 
             elif(msg.startswith('/#')):         # DM Removal
                 self.receiver= ''
 
-            elif(msg.startswith('/e')):
-                await self.send(self.encode('/e', 'sys'))
+            elif(msg.startswith('/exit')):
+                await self.send('/e', 'sys')
                 await self.disconnect()
                 
             elif(msg.startswith('/online')):
-                await self.send(self.encode('/o', 'sys'))
+                await self.send('/o', 'sys')
 
             else:                               # No Commands
                 if(self.receiver):
-                    await self.send(self.encode(msg, 'msg'))
+                    await self.send(msg, 'msg')
                 else:
                     print("[!!ERROR: No Destination Chosen]")
 
@@ -82,7 +90,7 @@ class chatClient:
 
     async def heartbeat(self):
         while True:
-            await self.send(self.encode('', 'hbp'))
+            await self.send('', 'hbp')
             await asyncio.sleep(20)
     
     async def disconnect(self):
@@ -93,7 +101,16 @@ class chatClient:
 
 
     def encode(self, content, type):
-        #Before returning, Content should be encoded
+        '''
+        Message Format: {"sender": <username>, "receiver": <username>, "content": '--', "type": 'msg/..'}
+        
+        Types:
+        ->msg: String Message, most common type
+        ->usr: Entry of Username / Retrieval of '<> IS ONLINE'
+        ->sys: System Message and/or Special Instructions
+        ->hbp: Heartbeat Pings. Letting Server know you are there.
+        '''
+        
         if(type in ('usr', 'sys')):
             return json.dumps({"sender": self.clientUsrn, 
                            "content": content, ""
@@ -113,11 +130,3 @@ import websockets
 import json
 client = chatClient()
 
-'''
-Message Format: {"sender": <username>, "receiver": <username>, "content": '--', "type": 'msg/..'}
-Types:
-->msg: String Message, most common type
-->usr: Entry of Username / Retrieval of '<> IS ONLINE'
-->sys: System Message and/or Special Instructions
-->hbp: Heartbeat Pings. Letting Server know you are there.
-'''
