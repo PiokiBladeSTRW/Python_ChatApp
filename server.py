@@ -1,20 +1,18 @@
 class chatServer:
 
     def __init__(self):        
-        self.clients = {}       # username : socket
-        self.sockets= {}        # socket : username
-        self.timeout= {}        # username: last heartbeat
-
+        self.usernames = {}       # username : socket
+        self.Sclients= {}         # socket : username
+        self.timeout= {}          # socket: last heartbeat
         self.disconnectionPending = ()
         self.clientIteration = False
-        asyncio.run(self.start())  
-        
+
+        asyncio.run(self.start())
 
     async def start(self):
         async with websockets.serve(self.handleClient, "localhost", 8765):
             print("SERVER ON")
-            await asyncio.Future()  #while True: but with 0 CPU usage
-            
+            await asyncio.Future()  #while True: but with 0 CPU usage            
         
     async def handleClient(self, clientSock):
         await asyncio.gather(self.receive(clientSock), self.heartbeats(), self.uDisconnect())
@@ -22,81 +20,73 @@ class chatServer:
 
     async def receive(self, clientSock):
         try:
+            '''
+            Variables: 
+            dataRecv-> Raw String Data Obtained
+            response-> Decoded String to Dictionary Data
+            data    -> Data for modification purpose
+            reply   -> Modified Data to send if Required Modification
+            '''
+
             async for dataRecv in clientSock:   
                 response = json.loads(dataRecv)
 
                 match response['type']:
-                    case 'usr':                   
-                        self.clients[response['sender']] = clientSock
-                        self.sockets[clientSock] = response['sender']
-
-                        self.timeout[response['sender']] = time.time()
+                    case 'usr':
+                        self.usernames[response['sender']] = clientSock
+                        self.Sclients[clientSock] = response['sender']
                         
                         await self.broadcast(clientSock, dataRecv, '.')
                     
                     case 'sys':
                         if(response['content'] == '/e'):
-                            self.disconnectionPending+= (response['sender'],)
+                            self.disconnectionPending+= (clientSock,)
 
-                        elif(response['content'] == '/o'):            
-                            data = list(self.clients.keys())
+                        elif(response['content'] == '/o'):
+                            data = list(self.usernames.keys())
                             data.remove(response['sender'])
                             data = '\n'.join(data)
-                            response = json.dumps({'content': data, 'type':'sys'})                            
 
-                            await self.userAlerts(clientSock, response)
+                            reply = json.dumps({'content': data, 'type':'sys'})
+                            await self.userAlerts(clientSock, reply)
 
                     case 'hbp':
-                        self.timeout[response['sender']] = time.time()
+                        self.timeout[clientSock] = time.time()
 
                     case 'msg':
-                        destination = response['receiver']
+                        destinationU = response['receiver']
                         response.pop('receiver')
-                        await self.broadcast(clientSock, json.dumps(response), destination)
+
+                        reply =json.dumps(response)
+                        await self.broadcast(clientSock, reply, destinationU)
+
         except websockets.exceptions.ConnectionClosed:
             print("CLOSED")
 
-
-    async def broadcast(self, clientSock, dataSend, destination):
-        if(destination=='.'):
+    async def broadcast(self, clientSock, dataSend, destinationU):
+        if(destinationU=='.'):
             self.clientIteration = True
-            for client in self.clients.values():
+            for client in self.Sclients.values():
                 if(client != clientSock):
                     await self.send(client, dataSend)
             self.clientIteration= False
             return      
         
-        elif(destination not in self.clients):
-            await self.userAlerts(clientSock, json.dumps({"sender":destination, "content":"/e", "type":"sys"}))
+        elif(destinationU not in self.usernames):
+            await self.userAlerts(clientSock, json.dumps({"sender":destinationU, "content":"/e", "type":"sys"}))
             return
 
-        await self.send(self.clients[destination], dataSend)
+        await self.send(self.Sclients[destinationU], dataSend)
 
-
-    async def send(self, receiveClientSk, dataSend):    # Prevents Server Crash in case of Lingering Ghost Sockets
+    async def send(self, receiveClient, dataSend):    # Prevents Server Crash in case of Lingering Ghost Sockets
         try:
-            await receiveClientSk.send(dataSend)
+            await receiveClient.send(dataSend)
         except websockets.exceptions.ConnectionClosed:
-            self.disconnectionPending+= (self.sockets[receiveClientSk],)
+            self.disconnectionPending+= (receiveClient)
 
-    
     async def userAlerts(self, clientSock, msg):
         await clientSock.send(msg)    
 
-    async def uDisconnect(self): 
-        while True:
-            await asyncio.sleep(10)
-            if(not self.clientIteration and self.disconnectionPending):
-                for leavingClient in self.disconnectionPending:
-                                        
-                    await self.clients[leavingClient].close()
-                    self.sockets.pop(self.clients.pop(leavingClient))  
-                    self.timeout.pop(leavingClient)  
-                
-                    dataSend = {"sender":leavingClient, "content": "/e", "type":"sys"}
-
-                    await self.broadcast('', json.dumps(dataSend), '.') #Empty clientSock as it doesn't exist in self.client.values()      
-                self.disconnectionPending = ()          
 
     async def heartbeats(self):
         while True:            
@@ -107,6 +97,21 @@ class chatServer:
             
             await asyncio.sleep(25)
 
+    async def uDisconnect(self): 
+        while True:
+            await asyncio.sleep(10)
+            if(not self.clientIteration and self.disconnectionPending):
+                for leavingClient in self.disconnectionPending:
+                                        
+                    await leavingClient.close()              
+                
+                    dataSend = json.dumps({"sender":self.Sclients[leavingClient], "content": "/e", "type":"sys"})
+
+                    self.usernames.pop(self.Sclients.pop(leavingClient))                    
+                    self.timeout.pop(leavingClient)
+
+                    await self.broadcast('', dataSend, '.') #Empty clientSock as it doesn't exist in self.client.values()      
+                self.disconnectionPending = ()          
 
 #Run
 import asyncio

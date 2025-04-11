@@ -94,7 +94,7 @@ class chatClient:
             await asyncio.sleep(20)
     
     async def disconnect(self):
-        await self.clientSock.close()               
+        await self.clientSock.close()
         for task in asyncio.all_tasks():
             task.cancel()
             return
@@ -121,12 +121,8 @@ class chatClient:
                            "content": content, ""
                            "type": type})
         
-
-    
-
 #__MAIN__
 import asyncio
 import websockets
 import json
 client = chatClient()
-
