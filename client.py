@@ -23,7 +23,9 @@ class chatClient:
     async def receive(self):
         try:
             async for response in self.clientSock:                  
-                response = json.loads(response)                                          
+                response = json.loads(response)             
+
+                print(response['timestamp'], end=' ')                            
 
                 if(response['type'] == 'msg'):
                     if(response['sender'] == self.receiver):
@@ -56,7 +58,7 @@ class chatClient:
 
     async def message(self):
         while True:
-            msg = await asyncio.to_thread(input)
+            msg = await asyncio.to_thread(input)            
 
             '''Check for Command
             [If parsed, that implies the command is receied by Server (type:sys)]
@@ -118,7 +120,8 @@ class chatClient:
 
     async def send(self, content, type):
         try:
-            await self.clientSock.send(self.encode(content, type))
+            timestamp =time.strftime('%H:%M', time.localtime())
+            await self.clientSock.send(self.encode(content, type, timestamp))
 
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN") 
@@ -150,7 +153,7 @@ class chatClient:
         print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
 
 
-    def encode(self, content, type):
+    def encode(self, content, type, timestamp):
         '''
         Types:
         ->msg: Default String Message
@@ -162,22 +165,26 @@ class chatClient:
         if(type in ('usr', 'sys', 'hbp')):
             return json.dumps({"sender": self.clientUsrn, 
                            "content": content, ""
-                           "type": type})
+                           "type": type,
+                           "timestamp": timestamp})
 
         return json.dumps({"sender": self.clientUsrn, 
                            "receiver": self.receiver, 
                            "content": content, ""
-                           "type": type})
+                           "type": type,
+                           "timestamp": timestamp})
         
 #__MAIN__
 import asyncio
 import websockets
 import json
+import time
 client = chatClient()
 '''
 Message Format: {"sender": <username>, 
                 "receiver": <username>, 
                 "content": '--', 
-                "type": 'msg/..',}
+                "type": 'msg/..',
+                "timestamp": "[Hour:Minute]"}
         
 '''
