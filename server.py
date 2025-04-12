@@ -66,9 +66,9 @@ class chatServer:
                             await self.userAlerts(clientSock, dataSend)
 
                     case 'hbp':
-                        self.timeout[clientSock] = time.time()
+                        self.timeout[clientSock] = time.time()           
 
-                    case 'msg':
+                    case 'msg': 
                         destinationU = response['receiver']
                         response.pop('receiver')
 
@@ -136,18 +136,18 @@ class chatServer:
 
     async def Disconnect(self): 
         while True:
-            await asyncio.sleep(10)
+            await asyncio.sleep(3)
             if(not self.clientIteration and self.disconnectionPending):
-                for leavingClient in self.disconnectionPending:
-                                        
-                    await leavingClient.close()              
-                
+                for leavingClient in self.disconnectionPending:                    
+
                     dataSend = json.dumps({"sender":self.clients[leavingClient], "content": "/e", "type":"sys"})
 
                     self.usernames.pop(self.clients.pop(leavingClient))                    
                     self.timeout.pop(leavingClient)
 
-                    await self.broadcast('', dataSend, '.') #Empty clientSock as it doesn't exist in self.client.values()      
+                    await leavingClient.close()
+      
+                    await self.broadcast('', dataSend, '.') #Empty clientSock as it doesn't exist in self.client.values()
                 self.disconnectionPending = ()          
 
 #Run

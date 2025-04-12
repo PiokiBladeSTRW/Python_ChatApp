@@ -11,7 +11,7 @@ class chatClient:
         async with websockets.connect("ws://localhost:8765") as clientSocket:   
             self.clientSock = clientSocket 
 
-            self.clientUsrn = input("\nENTER USERNAME: ")
+            self.clientUsrn = input("\nENTER USERNAME: ").strip()
             await self.send("", "usr")
 
             try:
@@ -22,13 +22,12 @@ class chatClient:
 
     async def receive(self):
         try:
-            async for response in self.clientSock:                              
-                response = json.loads(response)
-                print()                             #Line Break
+            async for response in self.clientSock:                  
+                response = json.loads(response)                                          
 
                 if(response['type'] == 'msg'):
                     if(response['sender'] == self.receiver):
-                        print(f"> {response['sender']}: {response['content']}") 
+                        print(f"> {response['content']}\n")                         
                         continue
 
                     print(f"{response['sender']}: {response['content']}") 
@@ -44,6 +43,8 @@ class chatClient:
                         if(self.receiver == response['sender']): self.receiver = ''
                     else:
                         print(f"SYSTEM: {response['content']}")
+                
+                print()
 
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN!")
@@ -65,34 +66,30 @@ class chatClient:
             /rooms                  : List of Rooms                                   [Parsed as /r]
             /b                      : Backtracks Receiver to Swap
             '''
-            
+                       
             if(msg.startswith('/dm')):         
                 data = msg.split()
-                self.pReceiver = self.receiver
-                self.receiver= data[1]
+                self.receiverChange(data[1])
 
                 msg = ' '.join(data[2::])
                 await self.send(msg, 'msg')
             
             elif(msg.startswith('/join')):
                 data = msg.split()
-                self.pReceiver = self.receiver
-                self.receiver = '/r'+data[1]
+                self.receiverChange('/r'+data[1])
 
                 msg= ' '.join(data[2::])
                 await self.send(msg, 'msg')
 
             elif(msg.startswith('/#')): 
-                self.pReceiver = self.receiver        
-                self.receiver= ''
+                self.receiverChange('')
             
             elif(msg.startswith('/b')):
                 self.receiver, self.pReceiver = self.pReceiver, self.receiver                
 
             elif(msg.startswith('/create')):
                 data = msg.split()
-                self.pReceiver = self.receiver
-                self.receiver = '/r'+data[1]
+                self.receiverChange('/r'+data[1])
                 
                 msg = '/c'+data[1]
                 await self.send(msg, 'sys')
@@ -111,7 +108,9 @@ class chatClient:
                 if(self.receiver):
                     await self.send(msg, 'msg')
                 else:
-                    print("[!!ERROR: No Destination Chosen]")
+                    print("[!!ERROR: No Destination Chosen]")   
+
+            print()             
 
     async def send(self, content, type):
         try:
@@ -132,6 +131,19 @@ class chatClient:
         for task in asyncio.all_tasks():
             task.cancel()
             return
+        
+
+    def receiverChange(self, receiver):
+        self.pReceiver = self.receiver
+        self.receiver = receiver
+
+        if(receiver==''): receiver = 'No One'
+        
+        if(receiver.startswith('/r')):
+            print('', "="*25, f"Now Chatting in {receiver[2::]}", "="*25, sep='\n')
+            return
+    
+        print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
 
 
     def encode(self, content, type):
