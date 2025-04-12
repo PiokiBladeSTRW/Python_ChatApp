@@ -55,7 +55,8 @@ class chatClient:
             /exit                   : Exit                                            [Parsed as /e]
             /online                 : Online List                                     [Parsed as /o]        
             /create <room>          : Create a Room                                   [Parsed as /c+<room>]
-            /room <room> <msg>      : Initiates messaging with Room as Receiver        
+            /join <room> <msg>      : Initiates messaging with Room as Receiver        
+            /rooms                  : List of Rooms                                   [Parsed as /r]
             '''
             
             if(msg.startswith('/dm')):         
@@ -65,13 +66,12 @@ class chatClient:
                 msg = ' '.join(data[2::])
                 await self.send(msg, 'msg')
             
-            elif(msg.startswith('/room')):
+            elif(msg.startswith('/join')):
                 data = msg.split()
                 self.receiver = '/r'+data[1]
 
                 msg= ' '.join(data[2::])
                 await self.send(msg, 'msg')
-
 
             elif(msg.startswith('/#')):         
                 self.receiver= ''
@@ -89,6 +89,10 @@ class chatClient:
                 
             elif(msg.startswith('/online')):
                 await self.send('/o', 'sys')
+
+            elif(msg.startswith('/rooms')):
+                await self.send('/r', 'sys')
+                
             else:                              
                 if(self.receiver):
                     await self.send(msg, 'msg')

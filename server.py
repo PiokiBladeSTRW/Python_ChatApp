@@ -5,7 +5,6 @@ class chatServer:
         self.clients= {}                # socket : username
         self.timeout= {}                # socket: last heartbeat        
         self.rooms= {}                  # room name : [sockets]
-        self.roomMembers= {}            # socket : room name
         self.disconnectionPending = ()
         self.clientIteration = False
 
@@ -51,6 +50,12 @@ class chatServer:
                             data = '\n'.join(data)
 
                             dataSend = json.dumps({'content': data, 'type':'sys'})
+                            await self.userAlerts(clientSock, dataSend)
+                        
+                        elif(response['content'] == '/r'):
+                            data = '\n'.join(self.rooms.keys())
+
+                            dataSend = json.dumps({'content': data, 'type': 'sys'})
                             await self.userAlerts(clientSock, dataSend)
                         
                         elif(response['content'].startswith('/c')):                            
