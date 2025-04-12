@@ -23,8 +23,13 @@ class chatClient:
         try:
             async for response in self.clientSock:                              
                 response = json.loads(response)
+                print()                             #Line Break
 
                 if(response['type'] == 'msg'):
+                    if(response['sender'] == self.receiver):
+                        print(f"> {response['sender']}: {response['content']}") 
+                        continue
+
                     print(f"{response['sender']}: {response['content']}") 
 
                 elif(response['type'] == 'usr'):
@@ -92,7 +97,7 @@ class chatClient:
 
             elif(msg.startswith('/rooms')):
                 await self.send('/r', 'sys')
-                
+
             else:                              
                 if(self.receiver):
                     await self.send(msg, 'msg')
