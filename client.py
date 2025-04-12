@@ -157,7 +157,7 @@ class chatClient:
         ->hbp: Heartbeat Pings. Letting Server know you are there.
         '''
         
-        if(type in ('usr', 'sys')):
+        if(type in ('usr', 'sys', 'hbp')):
             return json.dumps({"sender": self.clientUsrn, 
                            "content": content, ""
                            "type": type})
