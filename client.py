@@ -30,7 +30,11 @@ class chatClient:
                         print(f"> {response['content']}\n")                         
                         continue
 
-                    print(f"{response['sender']}: {response['content']}") 
+                    if(response['sender'].startswith('[')): #AKA Room Message, and Room messages are only sent to Members
+                        print(f"{response['sender']}: {response['content']}\n")
+                        continue
+
+                    print(f"< {response['sender']}: {response['content']} >")   # Outsider Message
 
                 elif(response['type'] == 'usr'):
                     print(f"[{response['sender']} is ONLINE]") 
@@ -42,7 +46,7 @@ class chatClient:
                         print(f"[{response['sender']} is OFFLINE]")
                         if(self.receiver == response['sender']): self.receiver = ''
                     else:
-                        print(f"SYSTEM: {response['content']}")
+                        print(f"{{System}}: {response['content']}")
                 
                 print()
 
@@ -148,8 +152,6 @@ class chatClient:
 
     def encode(self, content, type):
         '''
-        Message Format: {"sender": <username>, "receiver": <username>, "content": '--', "type": 'msg/..'}
-
         Types:
         ->msg: Default String Message
         ->usr: Entry of Username / Retrieval of '<> IS ONLINE'
@@ -172,3 +174,10 @@ import asyncio
 import websockets
 import json
 client = chatClient()
+'''
+Message Format: {"sender": <username>, 
+                "receiver": <username>, 
+                "content": '--', 
+                "type": 'msg/..',}
+        
+'''

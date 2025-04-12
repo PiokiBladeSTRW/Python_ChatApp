@@ -84,10 +84,10 @@ class chatServer:
                                 self.rooms[room].append(clientSock)
                             
                             response['sender'] = f"[{room}] {response['sender']}"
-                            destinationU = ''
+                            destinationU = ''                               #Empty Destination as it's useless
 
                         dataSend =json.dumps(response)
-                        await self.broadcast(clientSock, dataSend, destinationU, room)    #Empty Destination as it's useless
+                        await self.broadcast(clientSock, dataSend, destinationU, room)    
 
         except websockets.exceptions.ConnectionClosed:
             print("CLOSED")
