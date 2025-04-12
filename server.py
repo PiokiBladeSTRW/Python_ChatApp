@@ -1,9 +1,11 @@
 class chatServer:
 
     def __init__(self):        
-        self.usernames = {}       # username : socket
-        self.clients= {}          # socket : username
-        self.timeout= {}          # socket: last heartbeat
+        self.usernames = {}             # username : socket
+        self.clients= {}                # socket : username
+        self.timeout= {}                # socket: last heartbeat        
+        self.rooms= {}                  # room name : [sockets]
+        self.roomMembers= {}            # socket : room name
         self.disconnectionPending = ()
         self.clientIteration = False
 
@@ -30,7 +32,7 @@ class chatServer:
             '''
 
             async for dataRecv in clientSock:   
-                response: dict = json.loads(dataRecv)
+                response: dict = json.loads(dataRecv)               
 
                 match response['type']:
                     case 'usr':
@@ -50,6 +52,13 @@ class chatServer:
 
                             dataSend = json.dumps({'content': data, 'type':'sys'})
                             await self.userAlerts(clientSock, dataSend)
+                        
+                        elif(response['content'].startswith('/c')):                            
+                            data = response['content'][2::]
+                            self.rooms[data] = [ self.usernames[response['sender']] ]
+
+                            dataSend = json.dumps({'content': f"Room {data} Is Live", "type":"sys"})
+                            await self.userAlerts(clientSock, dataSend)
 
                     case 'hbp':
                         self.timeout[clientSock] = time.time()
@@ -58,32 +67,54 @@ class chatServer:
                         destinationU = response['receiver']
                         response.pop('receiver')
 
+                        room = ''
+                        if(destinationU.startswith('/r')):                  # Room Handling      
+                            room= destinationU[2::]                     
+                            if(room not in self.rooms):
+                                dataSend = json.dumps({"content": "[INVALID ROOM]", "type": "sys"})
+                                await self.userAlerts(clientSock, dataSend)
+                                continue
+                            
+                            if(clientSock not in self.rooms[room]):
+                                self.rooms[room].append(clientSock)
+                            
+                            response['sender'] = f"[{room}] {response['sender']}"
+                            destinationU = ''
+
                         dataSend =json.dumps(response)
-                        await self.broadcast(clientSock, dataSend, destinationU)
+                        await self.broadcast(clientSock, dataSend, destinationU, room)    #Empty Destination as it's useless
 
         except websockets.exceptions.ConnectionClosed:
             print("CLOSED")
 
-    async def broadcast(self, clientSock, dataSend:str, destinationU:str):
+    async def broadcast(self, clientSock, dataSend:str, destinationU:str, room= ''):
         if(destinationU=='.'):
             self.clientIteration = True
-            for client in self.clients.values():
+            for client in self.clients:
                 if(client != clientSock):
                     await self.send(client, dataSend)
             self.clientIteration= False
-            return      
+            return     
+
+        elif(room):
+            self.clientIteration = True
+            for client in self.rooms[room]:
+                if(client != clientSock):
+                    await self.send(client, dataSend)
+            self.clientIteration = False
+            return
         
         elif(destinationU not in self.usernames):
             await self.userAlerts(clientSock, json.dumps({"sender":destinationU, "content":"/e", "type":"sys"}))
             return
 
-        await self.send(self.clients[destinationU], dataSend)
+        await self.send(self.usernames[destinationU], dataSend)
 
     async def send(self, receiveClient, dataSend:str):    # Prevents Server Crash in case of Lingering Ghost Sockets
-        try:
+        try:        
             await receiveClient.send(dataSend)
         except websockets.exceptions.ConnectionClosed:
-            self.disconnectionPending+= (receiveClient)
+            self.disconnectionPending+= (receiveClient, )
 
     async def userAlerts(self, clientSock, dataSend:str):
         await clientSock.send(dataSend)    

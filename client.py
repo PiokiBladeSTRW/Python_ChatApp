@@ -11,7 +11,7 @@ class chatClient:
             self.clientSock = clientSocket 
 
             self.clientUsrn = input("\nENTER USERNAME: ")
-            await self.clientSock.send("", "usr")
+            await self.send("", "usr")
 
             try:
                 await asyncio.gather(self.message(), self.receive(),self.heartbeat())
@@ -50,30 +50,46 @@ class chatClient:
             '''Check for Command
             [If parsed, that implies the command is receied by Server (type:sys)]
 
-            /dm <username> <msg> : Initiates a DM with given Username as Receiver
-            /#                   : Removes Receiver, that is closing a DM
-            /exit                : Exit                                            [Parsed as /e]
-            /online              : Online List                                     [Parsed as /o]            
+            /dm <username> <msg>    : Initiates a DM with given Username as Receiver
+            /#                      : Removes Receiver, that is closing a DM
+            /exit                   : Exit                                            [Parsed as /e]
+            /online                 : Online List                                     [Parsed as /o]        
+            /create <room>          : Create a Room                                   [Parsed as /c+<room>]
+            /room <room> <msg>      : Initiates messaging with Room as Receiver        
             '''
             
-            if(msg.startswith('/dm')):          # Dm Selection
+            if(msg.startswith('/dm')):         
                 data = msg.split()
                 self.receiver= data[1]
 
                 msg = ' '.join(data[2::])
                 await self.send(msg, 'msg')
+            
+            elif(msg.startswith('/room')):
+                data = msg.split()
+                self.receiver = '/r'+data[1]
 
-            elif(msg.startswith('/#')):         # DM Removal
+                msg= ' '.join(data[2::])
+                await self.send(msg, 'msg')
+
+
+            elif(msg.startswith('/#')):         
                 self.receiver= ''
 
-            elif(msg.startswith('/exit')):
+            elif(msg.startswith('/create')):
+                data = msg.split()
+                self.receiver = '/r'+data[1]
+                
+                msg = '/c'+data[1]
+                await self.send(msg, 'sys')
+
+            elif(msg.startswith('/exit')):      
                 await self.send('/e', 'sys')
                 await self.disconnect()
                 
             elif(msg.startswith('/online')):
                 await self.send('/o', 'sys')
-
-            else:                               # No Commands
+            else:                              
                 if(self.receiver):
                     await self.send(msg, 'msg')
                 else:
