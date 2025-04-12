@@ -2,7 +2,8 @@ class chatClient:
 
     def __init__(self):
         self.clientUsrn = ''
-        self.receiver = ''             #Defaults to All Clients to Display <> is ONLINE
+        self.receiver = ''
+        self.pReceiver = ''
         self.clientSock = None
         asyncio.run(self.connect())
 
@@ -62,10 +63,12 @@ class chatClient:
             /create <room>          : Create a Room                                   [Parsed as /c+<room>]
             /join <room> <msg>      : Initiates messaging with Room as Receiver        
             /rooms                  : List of Rooms                                   [Parsed as /r]
+            /b                      : Backtracks Receiver to Swap
             '''
             
             if(msg.startswith('/dm')):         
                 data = msg.split()
+                self.pReceiver = self.receiver
                 self.receiver= data[1]
 
                 msg = ' '.join(data[2::])
@@ -73,16 +76,22 @@ class chatClient:
             
             elif(msg.startswith('/join')):
                 data = msg.split()
+                self.pReceiver = self.receiver
                 self.receiver = '/r'+data[1]
 
                 msg= ' '.join(data[2::])
                 await self.send(msg, 'msg')
 
-            elif(msg.startswith('/#')):         
+            elif(msg.startswith('/#')): 
+                self.pReceiver = self.receiver        
                 self.receiver= ''
+            
+            elif(msg.startswith('/b')):
+                self.receiver, self.pReceiver = self.pReceiver, self.receiver                
 
             elif(msg.startswith('/create')):
                 data = msg.split()
+                self.pReceiver = self.receiver
                 self.receiver = '/r'+data[1]
                 
                 msg = '/c'+data[1]
