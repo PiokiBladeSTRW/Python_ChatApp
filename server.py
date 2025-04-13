@@ -5,8 +5,8 @@ class chatServer:
         self.clients= {}                # socket : username
         self.timeout= {}                # socket: last heartbeat        
         self.rooms= {}                  # room name : [sockets]
-        self.disconnectionPending = ()
-        self.clientIteration = False
+        self.disconnectionPending = asyncio.Queue()
+        #self.clientIteration = False
 
         asyncio.run(self.start())
 
@@ -42,7 +42,7 @@ class chatServer:
                     
                     case 'sys':
                         if(response['content'] == '/e'):
-                            self.disconnectionPending+= (clientSock,)
+                            await self.disconnectionPending.put(clientSock)
 
                         elif(response['content'] == '/o'):                            
                             data = list(self.usernames.keys())
@@ -94,19 +94,19 @@ class chatServer:
 
     async def broadcast(self, clientSock, dataSend:str, destinationU:str, room= ''):
         if(destinationU=='.'):
-            self.clientIteration = True
-            for client in self.clients:
+            #self.clientIteration = True
+            for client in list(self.clients):
                 if(client != clientSock):
                     await self.send(client, dataSend)
-            self.clientIteration= False
+            #self.clientIteration= False
             return     
 
         elif(room):
-            self.clientIteration = True
-            for client in self.rooms[room]:
+            #self.clientIteration = True
+            for client in list(self.rooms[room]):
                 if(client != clientSock):
                     await self.send(client, dataSend)
-            self.clientIteration = False
+            #self.clientIteration = False
             return
         
         elif(destinationU not in self.usernames):
@@ -119,7 +119,7 @@ class chatServer:
         try:        
             await receiveClient.send(dataSend)            
         except websockets.exceptions.ConnectionClosed:
-            self.disconnectionPending+= (receiveClient, )
+            await self.disconnectionPending.put(receiveClient)
 
     async def userAlerts(self, clientSock, dataSend:str):    
           
@@ -131,25 +131,25 @@ class chatServer:
             for client in self.timeout:
                 cTime = time.time() - self.timeout[client]                
                 if(cTime >= 40):                    
-                    self.disconnectionPending+= (client,)                
+                    await self.disconnectionPending.put(client)
             
             await asyncio.sleep(25)
 
     async def Disconnect(self): 
         while True:
-            await asyncio.sleep(3)            
-            if(not self.clientIteration and self.disconnectionPending):
-                for leavingClient in self.disconnectionPending:                    
+            await asyncio.sleep(3)   
+            leavingClient = await self.disconnectionPending.get()  
+            if(leavingClient):
 
-                    dataSend = json.dumps({"sender":self.clients[leavingClient], "content": "/e", "type":"sys"})
+                dataSend = json.dumps({"sender":self.clients[leavingClient], "content": "/e", "type":"sys"})
 
-                    self.usernames.pop(self.clients.pop(leavingClient))                    
-                    self.timeout.pop(leavingClient)
+                self.usernames.pop(self.clients.pop(leavingClient))                    
+                self.timeout.pop(leavingClient)
 
-                    await leavingClient.close()
-      
-                    await self.broadcast('', dataSend, '.') #Empty clientSock as it doesn't exist in self.client.values()
-                self.disconnectionPending = ()          
+                await leavingClient.close()
+
+                await self.broadcast('', dataSend, '.') #Empty clientSock as it doesn't exist in self.client.values()
+
 
 #Run
 import asyncio
