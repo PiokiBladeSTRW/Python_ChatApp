@@ -158,11 +158,13 @@ class chatClient:
         ->sys: System Message / Commands
         ->hbp: Heartbeat Pings. Letting Server know you are there.
         '''
+        timestamp = time.strftime("%H:%M", time.localtime())
 
         data = {"sender": self.clientUsrn, 
                 "receiver": self.receiver, 
                 "content": content, ""
-                "type": type}
+                "type": type,
+                "timestamp": timestamp}
         
         if(type in ('usr', 'sys', 'hbp')):
             data.pop('receiver')
@@ -173,6 +175,7 @@ class chatClient:
 import asyncio
 import websockets
 import json
+import time
 client = chatClient()
 '''
 Message Format: {"sender": <username>, 
