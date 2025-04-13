@@ -94,19 +94,11 @@ class chatServer:
 
     async def broadcast(self, clientSock, dataSend:str, destinationU:str, room= ''):
         if(destinationU=='.'):
-            #self.clientIteration = True
-            for client in list(self.clients):
-                if(client != clientSock):
-                    await self.send(client, dataSend)
-            #self.clientIteration= False
+            await self.multSend(clientSock, self.clients, dataSend)
             return     
 
         elif(room):
-            #self.clientIteration = True
-            for client in list(self.rooms[room]):
-                if(client != clientSock):
-                    await self.send(client, dataSend)
-            #self.clientIteration = False
+            await self.multSend(clientSock, self.rooms[room], dataSend)
             return
         
         elif(destinationU not in self.usernames):
@@ -121,8 +113,13 @@ class chatServer:
         except websockets.exceptions.ConnectionClosed:
             await self.disconnectionPending.put(receiveClient)
 
-    async def userAlerts(self, clientSock, dataSend:str):    
-          
+    async def multSend(self, clientSock, receiveClients, dataSend):
+        for client in list(receiveClients):
+            if(client != clientSock):
+                await self.send(client, dataSend)
+
+
+    async def userAlerts(self, clientSock, dataSend:str):           
         await clientSock.send(dataSend)    
 
 
