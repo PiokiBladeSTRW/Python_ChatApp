@@ -23,15 +23,17 @@ class chatClient:
     async def receive(self):
         try:
             async for response in self.clientSock:                  
-                response = json.loads(response)                                          
+                response = json.loads(response)        
+                if(response.get('timestamp')):
+                    response['timestamp'] = time.strftime("%H:%M", time.localtime(float(response['timestamp'])))                              
 
                 if(response['type'] == 'msg'):
                     if(response['sender'] == self.receiver):
-                        print(f"> {response['content']}\n")                         
+                        print(f"[{response['timestamp']}]> {response['content']}\n")                         
                         continue
 
                     if(response['sender'].startswith('[')): #AKA Room Message, and Room messages are only sent to Members
-                        print(f"{response['sender']}: {response['content']}\n")
+                        print(f"[{response['timestamp']}] {response['sender']}: {response['content']}\n")
                         continue
 
                     print(f"< {response['sender']}: {response['content']} >")   # Outsider Message
@@ -158,7 +160,7 @@ class chatClient:
         ->sys: System Message / Commands
         ->hbp: Heartbeat Pings. Letting Server know you are there.
         '''
-        timestamp = time.strftime("%H:%M", time.localtime())
+        timestamp = str(time.time())
 
         data = {"sender": self.clientUsrn, 
                 "receiver": self.receiver, 
@@ -168,6 +170,7 @@ class chatClient:
         
         if(type in ('usr', 'sys', 'hbp')):
             data.pop('receiver')
+            data.pop('timestamp')
 
         return json.dumps(data)
         
