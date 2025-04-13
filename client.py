@@ -4,12 +4,7 @@ class chatClient:
         self.clientUsrn = ''
         self.receiver = ''
         self.pReceiver = ''
-        self.clientSock = None
-
-        registered= bool(int(input("0: Not yet Registered ; 1: Registered Account")))
-
-        if(not registered):
-            self.register()        
+        self.clientSock = None    
 
         asyncio.run(self.connect())
 
@@ -17,8 +12,7 @@ class chatClient:
         async with websockets.connect("ws://localhost:8765") as clientSocket:   
             self.clientSock = clientSocket             
 
-            self.clientUsrn = input("\nENTER USERNAME|PASSWORD: ").strip()
-            await self.login()
+            self.clientUsrn = input("\nENTER USERNAME: ").strip()
 
             await self.send("", "usr")
 
@@ -31,17 +25,17 @@ class chatClient:
     async def receive(self):
         try:
             async for response in self.clientSock:                  
-                response = json.loads(response)             
-
-                print(response['timestamp'], end=' ')                            
+                response = json.loads(response)        
+                if(response.get('timestamp')):
+                    response['timestamp'] = time.strftime("%H:%M", time.localtime(float(response['timestamp'])))                              
 
                 if(response['type'] == 'msg'):
                     if(response['sender'] == self.receiver):
-                        print(f"> {response['content']}\n")                         
+                        print(f"[{response['timestamp']}]> {response['content']}\n")                         
                         continue
 
                     if(response['sender'].startswith('[')): #AKA Room Message, and Room messages are only sent to Members
-                        print(f"{response['sender']}: {response['content']}\n")
+                        print(f"[{response['timestamp']}] {response['sender']}: {response['content']}\n")
                         continue
 
                     print(f"< {response['sender']}: {response['content']} >")   # Outsider Message
@@ -169,51 +163,19 @@ class chatClient:
         ->sys: System Message / Commands
         ->hbp: Heartbeat Pings. Letting Server know you are there.
         '''
+        timestamp = str(time.time())
+
+        data = {"sender": self.clientUsrn, 
+                "receiver": self.receiver, 
+                "content": content, ""
+                "type": type,
+                "timestamp": timestamp}
         
         if(type in ('usr', 'sys', 'hbp')):
-            return json.dumps({"sender": self.clientUsrn, 
-                           "content": content, ""
-                           "type": type,
-                           "timestamp": timestamp})
+            data.pop('receiver')
+            data.pop('timestamp')
 
-        return json.dumps({"sender": self.clientUsrn, 
-                           "receiver": self.receiver, 
-                           "content": content, ""
-                           "type": type,
-                           "timestamp": timestamp})
-    
-    def register(self):
-        with open("auth.json", 'r') as f:
-            data = json.load(f)
-
-        with open("auth.json", 'w') as f:
-            
-            username = input("ENTER USERNAME: ")
-            passw = input("ENTER PASSWORD: ")
-            
-            data[username] = {"passwd": passw}
-            json.dump(data, f, indent=4)
-
-    async def login(self):
-        with open("auth.json", 'r') as auth:
-            data = self.clientUsrn.split('|')
-            username, passwd = data[0], data[1]
-
-            data = json.load(auth)
-
-            try:
-                if(data[username]["passwd"]==passwd):
-                    print('l')
-                    self.clientUsrn = username
-                    return
-                else: 
-                    pass
-            except KeyError:            
-                pass
-
-            print("INVALID")
-            await self.disconnect()
-
+        return json.dumps(data)
         
 #__MAIN__
 import asyncio

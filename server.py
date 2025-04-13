@@ -44,7 +44,7 @@ class chatServer:
                         if(response['content'] == '/e'):
                             self.disconnectionPending+= (clientSock,)
 
-                        elif(response['content'] == '/o'):
+                        elif(response['content'] == '/o'):                            
                             data = list(self.usernames.keys())
                             data.remove(response['sender'])
                             data = '\n'.join(data)
@@ -117,11 +117,12 @@ class chatServer:
 
     async def send(self, receiveClient, dataSend:str):    # Prevents Server Crash in case of Lingering Ghost Sockets
         try:        
-            await receiveClient.send(dataSend)
+            await receiveClient.send(dataSend)            
         except websockets.exceptions.ConnectionClosed:
             self.disconnectionPending+= (receiveClient, )
 
-    async def userAlerts(self, clientSock, dataSend:str):
+    async def userAlerts(self, clientSock, dataSend:str):    
+          
         await clientSock.send(dataSend)    
 
 
@@ -136,7 +137,7 @@ class chatServer:
 
     async def Disconnect(self): 
         while True:
-            await asyncio.sleep(3)
+            await asyncio.sleep(3)            
             if(not self.clientIteration and self.disconnectionPending):
                 for leavingClient in self.disconnectionPending:                    
 
