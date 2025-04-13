@@ -158,16 +158,16 @@ class chatClient:
         ->sys: System Message / Commands
         ->hbp: Heartbeat Pings. Letting Server know you are there.
         '''
+
+        data = {"sender": self.clientUsrn, 
+                "receiver": self.receiver, 
+                "content": content, ""
+                "type": type}
         
         if(type in ('usr', 'sys', 'hbp')):
-            return json.dumps({"sender": self.clientUsrn, 
-                           "content": content, ""
-                           "type": type})
+            data.pop('receiver')
 
-        return json.dumps({"sender": self.clientUsrn, 
-                           "receiver": self.receiver, 
-                           "content": content, ""
-                           "type": type})
+        return json.dumps(data)
         
 #__MAIN__
 import asyncio
