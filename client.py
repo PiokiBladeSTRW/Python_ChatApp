@@ -5,13 +5,21 @@ class chatClient:
         self.receiver = ''
         self.pReceiver = ''
         self.clientSock = None
+
+        registered= bool(int(input("0: Not yet Registered ; 1: Registered Account")))
+
+        if(not registered):
+            self.register()        
+
         asyncio.run(self.connect())
 
     async def connect(self):
         async with websockets.connect("ws://localhost:8765") as clientSocket:   
-            self.clientSock = clientSocket 
+            self.clientSock = clientSocket             
 
-            self.clientUsrn = input("\nENTER USERNAME: ").strip()
+            self.clientUsrn = input("\nENTER USERNAME|PASSWORD: ").strip()
+            await self.login()
+
             await self.send("", "usr")
 
             try:
@@ -173,6 +181,39 @@ class chatClient:
                            "content": content, ""
                            "type": type,
                            "timestamp": timestamp})
+    
+    def register(self):
+        with open("auth.json", 'r') as f:
+            data = json.load(f)
+
+        with open("auth.json", 'w') as f:
+            
+            username = input("ENTER USERNAME: ")
+            passw = input("ENTER PASSWORD: ")
+            
+            data[username] = {"passwd": passw}
+            json.dump(data, f, indent=4)
+
+    async def login(self):
+        with open("auth.json", 'r') as auth:
+            data = self.clientUsrn.split('|')
+            username, passwd = data[0], data[1]
+
+            data = json.load(auth)
+
+            try:
+                if(data[username]["passwd"]==passwd):
+                    print('l')
+                    self.clientUsrn = username
+                    return
+                else: 
+                    pass
+            except KeyError:            
+                pass
+
+            print("INVALID")
+            await self.disconnect()
+
         
 #__MAIN__
 import asyncio
@@ -180,11 +221,12 @@ import websockets
 import json
 import time
 client = chatClient()
+
+
 '''
 Message Format: {"sender": <username>, 
                 "receiver": <username>, 
                 "content": '--', 
                 "type": 'msg/..',
-                "timestamp": "[Hour:Minute]"}
-        
+                "timestamp": "[Hour:Minute]"}        
 '''
