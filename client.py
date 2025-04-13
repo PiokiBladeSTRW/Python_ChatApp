@@ -60,7 +60,7 @@ class chatClient:
 
     async def message(self):
         while True:
-            msg = await asyncio.to_thread(input)            
+            msg = await asyncio.to_thread(input, ">>")            
 
             '''Check for Command
             [If parsed, that implies the command is receied by Server (type:sys)]
