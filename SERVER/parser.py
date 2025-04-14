@@ -1,5 +1,5 @@
 '''Handle DMs'''
-def msg(response:dict, state:object, clientSock:object): 
+def msg(clientSock:object,response:dict, state:object): 
     #Room
     if(response['receiver'].startswith('/r')):
         room = response['receiver'][2::]
@@ -8,10 +8,10 @@ def msg(response:dict, state:object, clientSock:object):
             payload = dumps({'content': "[INVALID ROOM]", 'type':"sys"})
             return ('/s', payload, state)
         
-        if(clientSock not in state.rooms[room]):
+        if(clientSock not in state.rooms[room]):                    
             state.rooms[room].append(clientSock)
 
-        response.pop(response['receiver'])
+        response.pop('receiver')
         response['sender'] = f"[{room}] {response['sender']}"
 
         return (f'/r{room}', dumps(response), state)
@@ -22,21 +22,21 @@ def msg(response:dict, state:object, clientSock:object):
     return (receiver, dumps(response), state)
 
 '''Handle Log In Messages'''
-def usr(response:dict, state:object, clientSock:object): 
+def usr(clientSock:object,response:dict, state:object): 
     state.user_sock[response['sender']] = clientSock
     state.sock_user[clientSock] = response['sender']
 
     return ('/.', dumps(response), state)
 
 '''Handle System Messages'''
-def sys(response:dict, state:object, clientSock:object):  
+def sys(clientSock:object,response:dict, state:object):  
     content = response['content']   
 
     if(content == '/e'):
         return ('*', '/e', state)    #Special as disconnection is handled by async
 
     elif(content == '/o'):    
-        data = list(state.use_sock)
+        data = list(state.user_sock)
         data.remove(response['sender'])
         data = '\n'.join(data)
 
@@ -51,12 +51,12 @@ def sys(response:dict, state:object, clientSock:object):
         data = response['content'][2::]
         state.rooms[data] = [state.user_sock[response['sender']]]
 
-        payload = dumps({'content': f"Room{data} Is LIVE", 'type': "sys"})        
+        payload = dumps({'content': f"Room {data} Is LIVE", 'type': "sys"})        
     
     return ('/s', payload, state)       
 
 '''Handle HeartBeat Pings'''
-def hbp(response:dict, state:object, clientSock:object): 
+def hbp(clientSock:object,response:dict, state:object): 
     return ('*', '/h', state)   #Special to avoid time import
 
 
@@ -64,9 +64,9 @@ def hbp(response:dict, state:object, clientSock:object):
 
 
 '''Parse Response Received by Clients'''
-def parse_response(response:dict, state:object, clientSock:object):
+def parse_response( clientSock:object, response:dict, state:object):
     if(response['type'] in types): 
-        data = types[response['type']](response, state)
+        data = types[response['type']](clientSock, response, state)
         return data    
     else:
         raise Exception("●→INVALID MESSAGE TYPE RECEIVED")

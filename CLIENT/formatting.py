@@ -4,23 +4,23 @@
 
 def format(data:tuple, tags:tuple):   
     if(data[0]): timestamp = time.strftime("%H:%M", time.localtime(float(data[0])))
-
-    data = []
+    
+    msg = []
     wrap = None
 
     for tag in tags:
         match tag:
-            case 't': data.append(timestamp)
-            case 's': data.append(data[1])
-            case 'c': data.append(data[2])
-            case 'bt': data.append(f"[{timestamp}]")
-            case 'cl': data.append(':')
-            case 'a': data.append(">")
+            case 't': msg.append(timestamp)
+            case 's': msg.append(data[1])
+            case 'c': msg.append(data[2])
+            case 'bt': msg.append(f"[{timestamp}]")
+            case 'cl': msg.append(':')
+            case 'a': msg.append(">")
             
             case 'A': wrap = ('<', '>')
             case 'S': wrap = ('[', ']')
 
-    message = ' '.join(data)
+    message = ' '.join(msg)
     if(wrap): message = f"{wrap[0]} {message} {wrap[1]}"
 
     return message

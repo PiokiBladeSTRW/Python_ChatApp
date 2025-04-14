@@ -28,27 +28,29 @@ class chatServer:
 
             async for dataRecv in clientSock:   
                 response = json.loads(dataRecv)
-                destination, payload, self.state = parser.parse_response(response, self.state, clientSock)
+                destination, payload, self.state = parser.parse_response(clientSock, response, self.state)
 
                 if(destination=='*'):
                     match payload:
                         case '/e': await self.disconnectionPending.put(clientSock)
                         case '/h': self.state.timeout[clientSock] = time.time()
                 else:
-                    await self.broadcast(self, clientSock, payload, destination)  
+                    await self.broadcast(clientSock, payload, destination)  
         except websockets.exceptions.ConnectionClosed:
             print("CLOSED")
 
     async def broadcast(self, clientSock, payload:str, destination:str):        
-        receivingClients = broadcaster(clientSock, destination, self.state)
+        receivingClients = broadcaster.parse_destination(clientSock, destination, self.state)
 
-        if(receivingClients==None):
+        if(receivingClients):
+            for client in receivingClients:
+                await self.send(client, payload)
+
+        else:
+            if(destination.startswith('/r') or len(self.state.sock_user)==1): return
+
             await self.send(clientSock, json.dumps({"sender":destination, "content":"/e", "type":"sys"}))
-            return
-        
-        for client in receivingClients:
-            await self.send(client, payload)
-
+                
     async def send(self, receiveClient, payload:str):    # Prevents Server Crash in case of Lingering Ghost Sockets
         try:        
             await receiveClient.send(payload)            
@@ -70,7 +72,7 @@ class chatServer:
             leavingClient = await self.disconnectionPending.get()  
             if(leavingClient):
 
-                payload = json.dumps({"sender":self.clients[leavingClient], "content": "/e", "type":"sys"})                
+                payload = json.dumps({"sender":self.state.sock_user[leavingClient], "content": "/e", "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '.')
 
                 self.state.user_sock.pop(self.state.sock_user.pop(leavingClient))

@@ -3,14 +3,14 @@
 '''Global Broadcasts'''
 def every(clientSock, destination:str, state:object):     
     rC = list(state.sock_user)
-    rC.pop(clientSock)
+    rC.remove(clientSock)
 
     return tuple(rC)
 
 '''Room Broadcasts'''
 def room(clientSock, destination:str, state:object): 
-    rC = state.rooms[destination[2::]]
-    rC.pop(clientSock)
+    rC = list(state.rooms[destination[2::]])
+    rC.remove(clientSock)
 
     return tuple(rC)
 
@@ -28,8 +28,8 @@ def dm(destination:str, state:object):
 
 '''Parse Destination to determine Receivers'''
 def parse_destination(clientSock, destination:str, state:object):
-    if(destination in dest):
-        data = dest[destination](clientSock, destination, state)
+    if(destination[:2] in dest):
+        data = dest[destination[:2]](clientSock, destination, state)
         return data
     else:
         data = dm(destination, state)
