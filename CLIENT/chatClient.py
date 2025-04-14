@@ -37,11 +37,14 @@ class chatClient:
             print("SERVER DOWN!")
             await self.close()
 
+
     async def message(self):
         while True:
             msg = await asyncio.to_thread(input, ">>")
 
             if(commands.is_command(msg)):
+                
+                ''' Payload Format: (content, type)'''
                 action, payload, self.state = commands.parse_command(msg, self.state)
                 
                 match action:
@@ -50,13 +53,13 @@ class chatClient:
                         await self.send(('/e', 'sys'))
                         await self.close()
                     case None: pass
-                    case _: raise Exception("●→ INVALID ACTION RECEIVED")                
+                    case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")
 
-            else:                              
-                if(self.state['receiver']):
-                    await self.send( (msg, 'msg') )
-                else:
-                    print("[!!ERROR: No Destination Chosen]")       
+            elif(self.state['receiver']):                           
+                await self.send( (msg, 'msg') )
+
+            else:
+                print("[!!ERROR: No Destination Chosen]")       
 
     async def send(self, payload):
         try: 
@@ -65,6 +68,7 @@ class chatClient:
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN") 
             await self.close()
+
 
     async def heartbeat(self):
         while True:
@@ -78,6 +82,7 @@ class chatClient:
             return
         
 #__MAIN__
+# Design Note: snakeCase in main classes, seperator_case in module
 import asyncio
 import websockets
 import json
@@ -88,7 +93,6 @@ import interface
 
 client = chatClient()
 
-
 '''
 Message Format: {"sender": <username>, 
                 "receiver": <username>, 
@@ -96,7 +100,3 @@ Message Format: {"sender": <username>,
                 "type": 'msg/..',
                 "timestamp": "[Hour:Minute]"}        
 '''
-
-''' Payload Format: (content, type)'''
-
-'''snakeCase in main classes, seperator_case in module'''

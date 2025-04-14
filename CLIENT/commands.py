@@ -100,6 +100,17 @@ commands = {
 
 '''-------------------------------------'''
 
+'''
+Check for Command
+    /dm <username> <msg>    : Initiates a DM with given Username as Receiver
+    /#                      : Removes Receiver, that is closing a DM
+    /exit                   : Exit                                            [Parsed as /e]
+    /online                 : Online List                                     [Parsed as /o]        
+    /create <room>          : Create a Room                                   [Parsed as /c+<room>]
+    /join <room> <msg>      : Initiates messaging with Room as Receiver        
+    /rooms                  : List of Rooms                                   [Parsed as /r]
+    /b                      : Backtracks Receiver to Swap
+'''
 
 '''
 Return Type: (ACTION, PAYLOAD, STATE)
@@ -110,18 +121,4 @@ STATE  : Updates Class Variables of Clients.
 ACTION ->   'send': Send Payload to server with pending encoding
             'exit': Special Handling Disconnection
             None : Client need do nothing, work is done           
-'''
-
-'''
-Check for Command
-    [If parsed, that implies the command is receied by Server (type:sys)]
-
-    /dm <username> <msg>    : Initiates a DM with given Username as Receiver
-    /#                      : Removes Receiver, that is closing a DM
-    /exit                   : Exit                                            [Parsed as /e]
-    /online                 : Online List                                     [Parsed as /o]        
-    /create <room>          : Create a Room                                   [Parsed as /c+<room>]
-    /join <room> <msg>      : Initiates messaging with Room as Receiver        
-    /rooms                  : List of Rooms                                   [Parsed as /r]
-    /b                      : Backtracks Receiver to Swap
 '''
