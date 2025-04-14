@@ -47,7 +47,7 @@ class chatClient:
                 match action:
                     case 'send': await self.send(payload)
                     case 'exit': 
-                        await self.send('/e', 'sys')
+                        await self.send(('/e', 'sys'))
                         await self.close()
                     case None: pass
                     case _: raise Exception("●→ INVALID ACTION RECEIVED")                
@@ -61,8 +61,8 @@ class chatClient:
             print()             
 
     async def send(self, payload):
-        try:            
-            await self.state['clientSock'].send(utils.encode(payload))
+        try: 
+            await self.state['clientSock'].send(utils.encode(payload, self.state))
 
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN") 
@@ -83,7 +83,6 @@ class chatClient:
 import asyncio
 import websockets
 import json
-import time     #Every Module depends on this
 
 import commands
 import utils

@@ -3,7 +3,7 @@
 '''PAYLOAD: (timestamp, sender, content)'''
 
 def format(payload, tags):   
-    if(payload(0)): timestamp = time.strftime("%H:%M", time.localtime(float(payload(0))))
+    if(payload[0]): timestamp = time.strftime("%H:%M", time.localtime(float(payload[0])))
 
     data = []
     wrap = None
@@ -11,8 +11,8 @@ def format(payload, tags):
     for tag in tags:
         match tag:
             case 't': data.append(timestamp)
-            case 's': data.append(payload(1))
-            case 'c': data.append(payload(2))
+            case 's': data.append(payload[1])
+            case 'c': data.append(payload[2])
             case 'bt': data.append(f"[{timestamp}]")
             case 'cl': data.append(':')
             case 'a': data.append(">")
@@ -25,6 +25,8 @@ def format(payload, tags):
     if(wrap): message = f"{wrap[0]} {message} {wrap[1]}"
 
     return message
+
+import time
 
 '''TAGS:
 

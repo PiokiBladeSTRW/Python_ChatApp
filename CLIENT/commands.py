@@ -1,18 +1,14 @@
 
 '''Handle DMS'''
-def handle_dm(args:str, state:dict): 
-    data = args.split()
-    
-    receiver_change(state, data[0])
-    payload = (data[1::], 'msg')
+def handle_dm(args:str, state:dict):      
+    receiver_change(state, args[0])
+    payload = (args[1::], 'msg')
     return ('send', payload, state)
 
 '''Join a Room'''
 def join_room(args:str, state:dict): 
-    data = args.split()
-
-    receiver_change(state, '/r'+data[0])
-    payload = (data[1::], 'msg')
+    receiver_change(state, '/r'+args[0])
+    payload = (args[1::], 'msg')
     return ('send', payload, state)
 
 '''Reset Receiver'''
@@ -27,20 +23,18 @@ def back_rec(args:str, state:dict):
     
 '''Create a Room'''
 def create_room(args:str, state:dict): 
-    data = args.split()
-
-    receiver_change(state, '/r'+data[0])
+    receiver_change(state, '/r'+args[0])
                 
-    payload = ('/c'+data[0], 'sys')
+    payload = ('/c'+args[0], 'sys')
     return ('send', payload, state)
 
 '''Exit Program'''
 def close(args:str, state:dict): 
-    return ('exit', None, None)
+    return ('exit', None, state)
     
 '''List of every Online Client'''
 def online_list(args:str, state:dict): 
-    payload = ('/o', 'sys')
+    payload = ('/o', 'sys')    
     return ('send', payload, state)
 
 '''List of every Online Room'''    
@@ -84,9 +78,12 @@ def parse_command(input_cmd:str, state:dict):
     else:
         cmd, args = parts[0], parts[1::]        
 
-    if cmd in commands:
-        commands[cmd](args, state)
-
+    if cmd in commands:        
+        data = commands[cmd](args, state)            
+        return data
+    else:
+        print("INVALID COMMAND")
+        return (None, None, None)
 
 '''COMMANDS'''
 commands = {

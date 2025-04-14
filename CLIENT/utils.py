@@ -1,4 +1,4 @@
-def encode(self, payload):
+def encode(payload, state):
     '''
     Types:
     ->msg: Default String Message
@@ -9,8 +9,8 @@ def encode(self, payload):
     
     timestamp = str(time.time())
 
-    data = {"sender": self.state['clientUsrn'], 
-            "receiver": self.state['receiver'], 
+    data = {"sender": state['clientUsrn'], 
+            "receiver": state['receiver'], 
             "content": payload[0], 
             "type": payload[1],
             "timestamp": timestamp}
@@ -20,3 +20,6 @@ def encode(self, payload):
         data.pop('timestamp')
 
     return json.dumps(data)
+
+import time
+import json

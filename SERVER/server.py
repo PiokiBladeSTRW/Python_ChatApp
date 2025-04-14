@@ -5,8 +5,7 @@ class chatServer:
         self.clients= {}                # socket : username
         self.timeout= {}                # socket: last heartbeat        
         self.rooms= {}                  # room name : [sockets]
-        self.disconnectionPending = asyncio.Queue()
-        #self.clientIteration = False
+        self.disconnectionPending = asyncio.Queue()        
 
         asyncio.run(self.start())
 
