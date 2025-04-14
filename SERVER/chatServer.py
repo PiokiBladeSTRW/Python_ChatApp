@@ -35,11 +35,7 @@ class chatServer:
                         case '/e': await self.disconnectionPending.put(clientSock)
                         case '/h': self.state.timeout[clientSock] = time.time()
                 else:
-                    await self.broadcast(self, clientSock, payload, destination)          
-
-
-                   
-
+                    await self.broadcast(self, clientSock, payload, destination)  
         except websockets.exceptions.ConnectionClosed:
             print("CLOSED")
 
@@ -53,19 +49,19 @@ class chatServer:
         for client in receivingClients:
             await self.send(client, payload)
 
-    async def send(self, receiveClient, dataSend:str):    # Prevents Server Crash in case of Lingering Ghost Sockets
+    async def send(self, receiveClient, payload:str):    # Prevents Server Crash in case of Lingering Ghost Sockets
         try:        
-            await receiveClient.send(dataSend)            
+            await receiveClient.send(payload)            
         except websockets.exceptions.ConnectionClosed:
             await self.disconnectionPending.put(receiveClient)
 
+
     async def heartbeats(self):
         while True:            
-            for client in self.timeout:
-                cTime = time.time() - self.timeout[client]                
+            for client in self.state.timeout:
+                cTime = time.time() - self.state.timeout[client]                
                 if(cTime >= 40):                    
                     await self.disconnectionPending.put(client)
-            
             await asyncio.sleep(25)
 
     async def Disconnect(self): 
@@ -74,15 +70,14 @@ class chatServer:
             leavingClient = await self.disconnectionPending.get()  
             if(leavingClient):
 
-                dataSend = json.dumps({"sender":self.clients[leavingClient], "content": "/e", "type":"sys"})
+                payload = json.dumps({"sender":self.clients[leavingClient], "content": "/e", "type":"sys"})                
+                await self.broadcast(leavingClient, payload, '.')
 
-                self.usernames.pop(self.clients.pop(leavingClient))                    
-                self.timeout.pop(leavingClient)
+                self.state.user_sock.pop(self.state.sock_user.pop(leavingClient))
+                self.state.timeout.pop(leavingClient)
 
                 await leavingClient.close()
-
-                await self.broadcast('', dataSend, '.') #Empty clientSock as it doesn't exist in self.client.values()
-
+                
 
 #Run
 import asyncio
