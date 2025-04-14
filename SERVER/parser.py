@@ -33,7 +33,7 @@ def sys(response:dict, state:object, clientSock:object):
     content = response['content']   
 
     if(content == '/e'):
-        return ('*', 'e', state)    #Special as disconnection is handled by async
+        return ('*', '/e', state)    #Special as disconnection is handled by async
 
     elif(content == '/o'):    
         data = list(state.use_sock)
@@ -66,8 +66,8 @@ def hbp(response:dict, state:object, clientSock:object):
 '''Parse Response Received by Clients'''
 def parse_response(response:dict, state:object, clientSock:object):
     if(response['type'] in types): 
-        payload = types[response['type']](response, state)
-        return payload    
+        data = types[response['type']](response, state)
+        return data    
     else:
         raise Exception("●→INVALID MESSAGE TYPE RECEIVED")
 
@@ -86,7 +86,7 @@ from json import dumps
 
 
 '''
-RETURN FORMAT: (RECEIVER, PAYLOAD, STATE)
+RETURN FORMAT: (DESTINATION, PAYLOAD, STATE)
     RECEIVER: 
         '.'     : All Online
         '/r--'  : All in a Room

@@ -27,64 +27,14 @@ class chatServer:
             '''
 
             async for dataRecv in clientSock:   
-                response = json.loads(dataRecv)     
-                          
+                response = json.loads(dataRecv)
+                destination, payload, self.state = parser.parse_response(response, self.state, clientSock)
 
-                match response['type']:
-                    case 'usr':
-                        self.usernames[response['sender']] = clientSock
-                        self.clients[clientSock] = response['sender']
-                        
-                        await self.broadcast(clientSock, dataRecv, '.')
-                    
-                    case 'sys':
-                        if(response['content'] == '/e'):
-                            await self.disconnectionPending.put(clientSock)
-
-                        elif(response['content'] == '/o'):                            
-                            data = list(self.usernames.keys())
-                            data.remove(response['sender'])
-                            data = '\n'.join(data)
-
-                            dataSend = json.dumps({'content': data, 'type':'sys'})
-                            await self.userAlerts(clientSock, dataSend)
-                        
-                        elif(response['content'] == '/r'):
-                            data = '\n'.join(self.rooms.keys())
-
-                            dataSend = json.dumps({'content': data, 'type': 'sys'})
-                            await self.userAlerts(clientSock, dataSend)
-                        
-                        elif(response['content'].startswith('/c')):                            
-                            data = response['content'][2::]
-                            self.rooms[data] = [ self.usernames[response['sender']] ]
-
-                            dataSend = json.dumps({'content': f"Room {data} Is Live", "type":"sys"})
-                            await self.userAlerts(clientSock, dataSend)
-
-                    case 'hbp':
-                        self.timeout[clientSock] = time.time()           
-
-                    case 'msg': 
-                        destinationU = response['receiver']
-                        response.pop('receiver')
-
-                        room = ''
-                        if(destinationU.startswith('/r')):                  # Room Handling      
-                            room= destinationU[2::]                     
-                            if(room not in self.rooms):
-                                dataSend = json.dumps({"content": "[INVALID ROOM]", "type": "sys"})
-                                await self.userAlerts(clientSock, dataSend)
-                                continue
-                            
-                            if(clientSock not in self.rooms[room]):
-                                self.rooms[room].append(clientSock)
-                            
-                            response['sender'] = f"[{room}] {response['sender']}"
-                            destinationU = ''                               #Empty Destination as it's useless
-
-                        dataSend =json.dumps(response)
-                        await self.broadcast(clientSock, dataSend, destinationU, room)    
+                if(destination=='*'):
+                    match payload:
+                        case '/e': await self.disconnectionPending.put(clientSock)
+                        case '/h': self.state.timeout[clientSock] = time.time()
+                   
 
         except websockets.exceptions.ConnectionClosed:
             print("CLOSED")
@@ -151,6 +101,7 @@ import websockets
 import json
 import time
 
+import parser as parser
 from state import serverState
 
 server = chatServer()
