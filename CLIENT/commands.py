@@ -69,23 +69,23 @@ def receiver_change(state, receiver):
 '''-------------------------------------'''
 
 
-'''Match Command to Function'''
-def parse_command(inputCmd:str, state:dict):
-    parts = inputCmd.split()    
-    try:
-        cmd, args = parts[0], parts[1::]
-    except IndexError:
-        cmd, args = parts[0], ''
-
-    if cmd in commands:
-        commands[cmd](args, state)
-
 '''Check if inputted Message is a Command'''
 def is_command(msg:str):
     if(msg.startswith('/')):
         return True
     return False
 
+'''Match Command to Function'''
+def parse_command(input_cmd:str, state:dict):    
+    parts = input_cmd.split()    
+
+    if(len(parts)==1):
+        cmd, args = parts[0], ''
+    else:
+        cmd, args = parts[0], parts[1::]        
+
+    if cmd in commands:
+        commands[cmd](args, state)
 
 
 '''COMMANDS'''

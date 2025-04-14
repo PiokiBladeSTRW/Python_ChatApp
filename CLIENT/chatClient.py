@@ -12,11 +12,11 @@ class chatClient:
 
     async def connect(self):
         async with websockets.connect("ws://localhost:8765") as clientSocket:   
-            self.clientSock = clientSocket             
+            self.state['clientSock'] = clientSocket             
 
-            self.clientUsrn = input("\nENTER USERNAME: ").strip()
+            self.state['clientUsrn'] = input("\nENTER USERNAME: ").strip()
 
-            await self.send("", "usr")
+            await self.send( ("", "usr") )
 
             try:
                 await asyncio.gather(self.message(), self.receive(),self.heartbeat())
@@ -26,79 +26,55 @@ class chatClient:
 
     async def receive(self):
         try:
-            async for response in self.clientSock:                  
-                response = json.loads(response)        
-                if(response.get('timestamp')):
-                    response['timestamp'] = time.strftime("%H:%M", time.localtime(float(response['timestamp'])))                              
+            async for response in self.state['clientSock']:
+                response = json.loads(response)   
 
-                if(response['type'] == 'msg'):
-                    if(response['sender'] == self.receiver):
-                        print(f"[{response['timestamp']}]> {response['content']}\n")                         
-                        continue
-
-                    if(response['sender'].startswith('[')): #AKA Room Message, and Room messages are only sent to Members
-                        print(f"[{response['timestamp']}] {response['sender']}: {response['content']}\n")
-                        continue
-
-                    print(f"< {response['sender']}: {response['content']} >")   # Outsider Message
-
-                elif(response['type'] == 'usr'):
-                    print(f"[{response['sender']} is ONLINE]") 
-                
-                elif(response['type'] == 'sys'):        
-
-                    #If Else to allow System to Manipulate Clients
-                    if(response['content'] == '/e'):
-                        print(f"[{response['sender']} is OFFLINE]")
-                        if(self.receiver == response['sender']): self.receiver = ''
-                    else:
-                        print(f"{{System}}: {response['content']}")
+                self.state = interface.parse_response(response, self.state) 
                 
                 print()
 
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN!")
-            await self.disconnect()
+            await self.close()
 
     async def message(self):
         while True:
             msg = await asyncio.to_thread(input, ">>")
 
             if(commands.is_command(msg)):
-                action, payload, state = commands.parse_command(msg, state)
+                action, payload, self.state = commands.parse_command(msg, self.state)
                 
                 match action:
                     case 'send': await self.send(payload)
-                    case 'exit': await self.disconnect()
+                    case 'exit': 
+                        await self.send('/e', 'sys')
+                        await self.close()
                     case None: pass
                     case _: raise Exception("●→ INVALID ACTION RECEIVED")                
 
             else:                              
-                if(self.receiver):
+                if(self.state['receiver']):
                     await self.send(msg, 'msg')
-
                 else:
-                    print("[!!ERROR: No Destination Chosen]")   
+                    print("[!!ERROR: No Destination Chosen]") 
 
             print()             
 
     async def send(self, payload):
         try:            
-            await self.clientSock.send(utils.encode(payload))
+            await self.state['clientSock'].send(utils.encode(payload))
 
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN") 
-            await self.disconnect()
-
+            await self.close()
 
     async def heartbeat(self):
         while True:
-            await self.send('', 'hbp')
+            await self.send( ('', 'hbp') )
             await asyncio.sleep(20)
     
-    async def disconnect(self):
-        await self.send('/e', 'sys')
-        await self.clientSock.close()
+    async def close(self):        
+        await self.state['clientSock'].close()
         for task in asyncio.all_tasks():
             task.cancel()
             return
@@ -107,10 +83,11 @@ class chatClient:
 import asyncio
 import websockets
 import json
-import time
+import time     #Every Module depends on this
 
 import commands
 import utils
+import interface
 
 client = chatClient()
 
