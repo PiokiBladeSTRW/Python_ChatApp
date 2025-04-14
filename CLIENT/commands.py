@@ -2,13 +2,13 @@
 '''Handle DMS'''
 def handle_dm(args:str, state:dict):      
     receiver_change(state, args[0])
-    payload = (args[1::], 'msg')
+    payload = (' '.join(args[1::]), 'msg')
     return ('send', payload, state)
 
 '''Join a Room'''
 def join_room(args:str, state:dict): 
     receiver_change(state, '/r'+args[0])
-    payload = (args[1::], 'msg')
+    payload = (' '.join(args[1::]), 'msg')
     return ('send', payload, state)
 
 '''Reset Receiver'''
@@ -18,7 +18,7 @@ def reset_rec(args:str, state:dict):
     
 '''Backtrack Receiver'''
 def back_rec(args:str, state:dict): 
-    receiver_change(state['pReceiver'])
+    receiver_change(state, state['pReceiver'])
     return (None, None, state)
     
 '''Create a Room'''
@@ -83,7 +83,7 @@ def parse_command(input_cmd:str, state:dict):
         return data
     else:
         print("INVALID COMMAND")
-        return (None, None, None)
+        return (None, None, state)
 
 '''COMMANDS'''
 commands = {

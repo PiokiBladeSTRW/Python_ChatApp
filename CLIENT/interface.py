@@ -12,7 +12,7 @@ def msg(response:dict, state:dict):
 
     # Incoming Message
     else:
-        print(formatting.format('s', 'cl', 'c', 'A'))
+        print(formatting.format(payload, ('s', 'cl', 'c', 'A')))
 
     return state
 

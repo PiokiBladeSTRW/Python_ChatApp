@@ -27,7 +27,7 @@ class chatClient:
     async def receive(self):
         try:
             async for response in self.state['clientSock']:
-                response = json.loads(response)   
+                response = json.loads(response)                   
 
                 self.state = interface.parse_response(response, self.state) 
                 
@@ -54,11 +54,9 @@ class chatClient:
 
             else:                              
                 if(self.state['receiver']):
-                    await self.send(msg, 'msg')
+                    await self.send( (msg, 'msg') )
                 else:
-                    print("[!!ERROR: No Destination Chosen]") 
-
-            print()             
+                    print("[!!ERROR: No Destination Chosen]")       
 
     async def send(self, payload):
         try: 
