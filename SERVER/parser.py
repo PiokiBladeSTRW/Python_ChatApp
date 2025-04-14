@@ -26,7 +26,7 @@ def usr(response:dict, state:object, clientSock:object):
     state.user_sock[response['sender']] = clientSock
     state.sock_user[clientSock] = response['sender']
 
-    return ('.', dumps(response), state)
+    return ('/.', dumps(response), state)
 
 '''Handle System Messages'''
 def sys(response:dict, state:object, clientSock:object):  
@@ -88,10 +88,10 @@ from json import dumps
 '''
 RETURN FORMAT: (DESTINATION, PAYLOAD, STATE)
     RECEIVER: 
-        '.'     : All Online
-        '/r--'  : All in a Room
-        '<user>': Specific Username
+        '/.'     : All Online
+        '/r--'  : All in a Room        
         '/s'    : User Alert   
+        '<user>': Specific Username
         '*'     : Special Case, Need Handling
         None    : No Sending Data         
 '''

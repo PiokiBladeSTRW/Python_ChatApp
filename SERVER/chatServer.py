@@ -34,41 +34,30 @@ class chatServer:
                     match payload:
                         case '/e': await self.disconnectionPending.put(clientSock)
                         case '/h': self.state.timeout[clientSock] = time.time()
+                else:
+                    await self.broadcast(self, clientSock, payload, destination)          
+
+
                    
 
         except websockets.exceptions.ConnectionClosed:
             print("CLOSED")
 
-    async def broadcast(self, clientSock, dataSend:str, destinationU:str, room= ''):
-        if(destinationU=='.'):
-            await self.multSend(clientSock, self.clients, dataSend)
-            return     
+    async def broadcast(self, clientSock, payload:str, destination:str):        
+        receivingClients = broadcaster(clientSock, destination, self.state)
 
-        elif(room):
-            await self.multSend(clientSock, self.rooms[room], dataSend)
+        if(receivingClients==None):
+            await self.send(clientSock, json.dumps({"sender":destination, "content":"/e", "type":"sys"}))
             return
         
-        elif(destinationU not in self.usernames):
-            await self.userAlerts(clientSock, json.dumps({"sender":destinationU, "content":"/e", "type":"sys"}))
-            return
-
-        await self.send(self.usernames[destinationU], dataSend)
+        for client in receivingClients:
+            await self.send(client, payload)
 
     async def send(self, receiveClient, dataSend:str):    # Prevents Server Crash in case of Lingering Ghost Sockets
         try:        
             await receiveClient.send(dataSend)            
         except websockets.exceptions.ConnectionClosed:
             await self.disconnectionPending.put(receiveClient)
-
-    async def multSend(self, clientSock, receiveClients, dataSend):
-        for client in list(receiveClients):
-            if(client != clientSock):
-                await self.send(client, dataSend)
-
-
-    async def userAlerts(self, clientSock, dataSend:str):           
-        await clientSock.send(dataSend)    
-
 
     async def heartbeats(self):
         while True:            
@@ -101,7 +90,8 @@ import websockets
 import json
 import time
 
-import parser as parser
+import broadcaster
+import parser
 from state import serverState
 
 server = chatServer()
