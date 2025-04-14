@@ -1,44 +1,44 @@
 
 '''Handle DMS'''
-def handle_dm(args:str, state:dict):      
+def handle_dm(args:str, state:object):      
     receiver_change(state, args[0])
     payload = (' '.join(args[1::]), 'msg')
     return ('send', payload, state)
 
 '''Join a Room'''
-def join_room(args:str, state:dict): 
+def join_room(args:str, state:object): 
     receiver_change(state, '/r'+args[0])
     payload = (' '.join(args[1::]), 'msg')
     return ('send', payload, state)
 
 '''Reset Receiver'''
-def reset_rec(args:str, state:dict): 
+def reset_rec(args:str, state:object): 
     receiver_change(state, '')
     return (None, None, state)
     
 '''Backtrack Receiver'''
-def back_rec(args:str, state:dict): 
-    receiver_change(state, state['pReceiver'])
+def back_rec(args:str, state:object): 
+    receiver_change(state, state.pReceiver)
     return (None, None, state)
     
 '''Create a Room'''
-def create_room(args:str, state:dict): 
+def create_room(args:str, state:object): 
     receiver_change(state, '/r'+args[0])
                 
     payload = ('/c'+args[0], 'sys')
     return ('send', payload, state)
 
 '''Exit Program'''
-def close(args:str, state:dict): 
+def close(args:str, state:object): 
     return ('exit', None, state)
     
 '''List of every Online Client'''
-def online_list(args:str, state:dict): 
+def online_list(args:str, state:object): 
     payload = ('/o', 'sys')    
     return ('send', payload, state)
 
 '''List of every Online Room'''    
-def rooms_list(args:str, state:dict): 
+def rooms_list(args:str, state:object): 
     payload = ('/r', 'sys')
     return ('send', payload, state)
 
@@ -48,8 +48,8 @@ def rooms_list(args:str, state:dict):
 
 '''Change Receivers'''
 def receiver_change(state, receiver):
-    state['pReceiver'] = state['receiver']
-    state['receiver'] = receiver
+    state.pReceiver = state.receiver
+    state.receiver = receiver
     
     if(receiver==''): receiver = 'No One'
     
@@ -70,7 +70,7 @@ def is_command(msg:str):
     return False
 
 '''Match Command to Function'''
-def parse_command(input_cmd:str, state:dict):    
+def parse_command(input_cmd:str, state:object):    
     parts = input_cmd.split()    
 
     if(len(parts)==1):

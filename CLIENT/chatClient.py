@@ -1,20 +1,15 @@
 class chatClient:
 
     def __init__(self):
-        self.state= {
-            'clientUsrn' : '',
-            'receiver' : '',
-            'pReceiver' : '', 
-            'clientSock' : None
-            }
-
+        self.state = clientState()
+        print(self.state.clientUsrn, self.state.receiver)
         asyncio.run(self.connect())
 
     async def connect(self):
         async with websockets.connect("ws://localhost:8765") as clientSocket:   
-            self.state['clientSock'] = clientSocket             
+            self.state.clientSock = clientSocket             
 
-            self.state['clientUsrn'] = input("\nENTER USERNAME: ").strip()
+            self.state.clientUsrn = input("\nENTER USERNAME: ").strip()
 
             await self.send( ("", "usr") )
 
@@ -26,7 +21,7 @@ class chatClient:
 
     async def receive(self):
         try:
-            async for response in self.state['clientSock']:
+            async for response in self.state.clientSock:
                 response = json.loads(response)                   
 
                 self.state = interface.parse_response(response, self.state) 
@@ -55,7 +50,7 @@ class chatClient:
                     case None: pass
                     case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")
 
-            elif(self.state['receiver']):                           
+            elif(self.state.receiver):                           
                 await self.send( (msg, 'msg') )
 
             else:
@@ -63,7 +58,7 @@ class chatClient:
 
     async def send(self, payload):
         try: 
-            await self.state['clientSock'].send(utils.encode(payload, self.state))
+            await self.state.clientSock.send(utils.encode(payload, self.state))
 
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN") 
@@ -76,7 +71,7 @@ class chatClient:
             await asyncio.sleep(20)
     
     async def close(self):        
-        await self.state['clientSock'].close()
+        await self.state.clientSock.close()
         for task in asyncio.all_tasks():
             task.cancel()
             return
@@ -90,6 +85,7 @@ import json
 import commands
 import utils
 import interface
+from state import clientState
 
 client = chatClient()
 

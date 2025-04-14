@@ -2,7 +2,7 @@
 ''' This code Manages Display. Any Pieces of Strings can be formatted here'''
 '''PAYLOAD: (timestamp, sender, content)'''
 
-def format(payload, tags):   
+def format(payload:tuple, tags:tuple):   
     if(payload[0]): timestamp = time.strftime("%H:%M", time.localtime(float(payload[0])))
 
     data = []

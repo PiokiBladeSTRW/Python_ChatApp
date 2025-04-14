@@ -1,4 +1,4 @@
-def encode(payload, state):
+def encode(payload:tuple, state:object):
     '''
     Types:
     ->msg: Default String Message
@@ -9,8 +9,8 @@ def encode(payload, state):
     
     timestamp = str(time.time())
 
-    data = {"sender": state['clientUsrn'], 
-            "receiver": state['receiver'], 
+    data = {"sender": state.clientUsrn, 
+            "receiver": state.receiver, 
             "content": payload[0], 
             "type": payload[1],
             "timestamp": timestamp}
