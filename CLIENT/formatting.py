@@ -16,10 +16,9 @@ def format(payload, tags):
             case 'bt': data.append(f"[{timestamp}]")
             case 'cl': data.append(':')
             case 'a': data.append(">")
-            case 'n': data.append("\n")
             
-            case 'A': wrap = ('<', '>\n')
-            case 'S': wrap = ('[', ']\n')
+            case 'A': wrap = ('<', '>')
+            case 'S': wrap = ('[', ']')
 
     message = ' '.join(data)
     if(wrap): message = f"{wrap[0]} {message} {wrap[1]}"

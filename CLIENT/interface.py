@@ -8,7 +8,7 @@ def msg(response:dict, state:dict):
 
     # Room Message
     elif(payload[1].startswith('[')):
-        print(formatting.format(payload, ('bt', 's', 'cl', 'c', 'n')))
+        print(formatting.format(payload, ('bt', 's', 'cl', 'c')))
 
     # Incoming Message
     else:
