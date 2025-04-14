@@ -1,11 +1,8 @@
 class chatServer:
 
-    def __init__(self):        
-        self.usernames = {}             # username : socket
-        self.clients= {}                # socket : username
-        self.timeout= {}                # socket: last heartbeat        
-        self.rooms= {}                  # room name : [sockets]
-        self.disconnectionPending = asyncio.Queue()        
+    def __init__(self): 
+        self.state = serverState() 
+        self.disconnectionPending = asyncio.Queue()
 
         asyncio.run(self.start())
 
@@ -30,7 +27,8 @@ class chatServer:
             '''
 
             async for dataRecv in clientSock:   
-                response: dict = json.loads(dataRecv)               
+                response = json.loads(dataRecv)     
+                          
 
                 match response['type']:
                     case 'usr':
@@ -152,6 +150,9 @@ import asyncio
 import websockets
 import json
 import time
+
+from state import serverState
+
 server = chatServer()
 
 ''' 

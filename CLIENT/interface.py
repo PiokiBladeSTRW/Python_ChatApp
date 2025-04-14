@@ -1,40 +1,40 @@
 '''Handle Default Messages'''
 def msg(response:dict, state:object): 
-    payload = (response['timestamp'], response['sender'], response['content'])
+    data = (response['timestamp'], response['sender'], response['content'])
 
     # Direct Message
-    if(payload[1] == state.receiver): 
-        print(formatting.format(payload, ('bt', 'a', 'c', 'n')))  
+    if(data[1] == state.receiver): 
+        print(formatting.format(data, ('bt', 'a', 'c', 'n')))  
 
     # Room Message
-    elif(payload[1].startswith('[')):
-        print(formatting.format(payload, ('bt', 's', 'cl', 'c')))
+    elif(data[1].startswith('[')):
+        print(formatting.format(data, ('bt', 's', 'cl', 'c')))
 
     # Incoming Message
     else:
-        print(formatting.format(payload, ('s', 'cl', 'c', 'A')))
+        print(formatting.format(data, ('s', 'cl', 'c', 'A')))
 
     return state
 
 '''Handle User Loggings'''
 def usr(response:dict, state:object):
-    payload = ('', response['sender'], "is ONLINE")
-    print(formatting.format(payload, ('s', 'c', 'S')))
+    data = ('', response['sender'], "is ONLINE")
+    print(formatting.format(data, ('s', 'c', 'S')))
 
     return state
 
 '''Handle System Messages'''
 def sys(response:dict, state:object): 
     if(response['content'] == '/e'):
-        payload = ('', response['sender'], 'is OFFLINE')
-        print(formatting.format(payload, ('s', 'c', 'S')))
+        data = ('', response['sender'], 'is OFFLINE')
+        print(formatting.format(data, ('s', 'c', 'S')))
 
         if(state.receiver == response['sender']):
             state.receiver = ''
     
     else:    
-        payload = ('', '{System}', response['content'])
-        print(formatting.format(payload, ('s', 'cl', 'c')))
+        data = ('', '{System}', response['content'])
+        print(formatting.format(data, ('s', 'cl', 'c')))
     
     return state
     
@@ -45,8 +45,10 @@ def sys(response:dict, state:object):
 '''Handle Responses'''
 def parse_response(response:dict, state:object): 
     if(response['type'] in types): 
-        data = types[response['type']](response, state)
-        return data
+        state = types[response['type']](response, state)
+        return state
+    else:
+        raise Exception("●→INVALID MESSAGE TYPE RECEIVED")
     
 
 '''Response Types'''
@@ -57,3 +59,5 @@ types ={
 }
 
 import formatting
+
+''' DATA TYPE: (TIME, SENDER, CONTENT)'''

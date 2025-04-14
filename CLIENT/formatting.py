@@ -1,9 +1,9 @@
 
 ''' This code Manages Display. Any Pieces of Strings can be formatted here'''
-'''PAYLOAD: (timestamp, sender, content)'''
+'''DATA: (timestamp, sender, content)'''
 
-def format(payload:tuple, tags:tuple):   
-    if(payload[0]): timestamp = time.strftime("%H:%M", time.localtime(float(payload[0])))
+def format(data:tuple, tags:tuple):   
+    if(data[0]): timestamp = time.strftime("%H:%M", time.localtime(float(data[0])))
 
     data = []
     wrap = None
@@ -11,8 +11,8 @@ def format(payload:tuple, tags:tuple):
     for tag in tags:
         match tag:
             case 't': data.append(timestamp)
-            case 's': data.append(payload[1])
-            case 'c': data.append(payload[2])
+            case 's': data.append(data[1])
+            case 'c': data.append(data[2])
             case 'bt': data.append(f"[{timestamp}]")
             case 'cl': data.append(':')
             case 'a': data.append(">")
