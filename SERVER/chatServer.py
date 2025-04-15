@@ -22,7 +22,7 @@ class chatServer:
                 response = json.loads(dataRecv)
 
                 '''Payload is json dumped message'''
-                destination, payload, self.state = parser.parse_response(clientSock, response, self.state)
+                destination, payload, self.state = message_handler.parse_response(clientSock, response, self.state)
                 
                 # Handle Special Cases, otherwise broadcast
                 if(destination=='*'):
@@ -37,7 +37,7 @@ class chatServer:
 
 
     async def broadcast(self, clientSock, payload:str, destination:str):
-        receivingClients = broadcaster.parse_destination(clientSock, destination, self.state)
+        receivingClients = data_router.parse_destination(clientSock, destination, self.state)
 
         if(receivingClients):
             for client in receivingClients:
@@ -86,8 +86,8 @@ import websockets
 import json
 import time
 
-import broadcaster
-import parser
-from state import serverState
+import SERVER.data_router as data_router
+import SERVER.message_handler as message_handler
+from SERVER.server_state import serverState
 
 server = chatServer()

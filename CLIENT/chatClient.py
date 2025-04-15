@@ -23,10 +23,10 @@ class chatClient:
         while True:
             msg = await asyncio.to_thread(input, ">>")
 
-            if(commands.is_command(msg)):
+            if(command_handler.is_command(msg)):
                 
                 ''' Payload Format: (content, type)'''
-                action, payload, self.state = commands.parse_command(msg, self.state)
+                action, payload, self.state = command_handler.parse_command(msg, self.state)
                 
                 #Check what to do to Payload
                 match action:
@@ -82,10 +82,10 @@ import asyncio
 import websockets
 import json
 
-import commands
+import CLIENT.command_handler as command_handler
 import utils
 import interface
-from state import clientState
+from CLIENT.session_state import clientState
 
 client = chatClient()
 
