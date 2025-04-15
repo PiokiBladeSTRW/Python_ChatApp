@@ -1,5 +1,7 @@
 # Test Chat App
 
+*[SCROLL TO BOTTOM TO KNOW HOW TO TEST THE APP AND REPORT BUGS]*
+
 A **Chat App** coded for Fun and a Learning Experience, planned to be finalized eventually but a *Proof of Concept* for now.
 
 ## Wanna Contribute?
@@ -65,3 +67,27 @@ void main() {
 | Version | Git|
 | Host |  |
 | Auth |  |
+
+## Testing Tutorial
+
+1. Download the Repository on your Desktop, there are two ways to do so:
+-> On GitHub, press the "Code" button near center of screen and click download Zip then extract
+-> On Powershell/Cmd run `git clone https://github.com/PiokiBladeSTRW/ChatApp.git` 
+
+2. Now you have the code in your local machine, to test it you need to set up VSC:
+
+-> Open VSC, make sure you have installed Python 3.10+ for the code to work
+-> Open the bottom panel (the one with PROBLEMS, OUTPUT, TERMINAL, ..) if not already by using 'View' button
+-> In the bottom panel, go to TERMINAL tab, you'll have a powershell terminal
+-> On the right hand side, right click on powershell and click 'Split Terminal', do this minimum Twice
+
+3. Now you have VSC set up for testing with three terminals, here's how to test:
+
+-> Ensure the command on Powershell is indicating to your current directory (The ChatApp folder), if not do `cd <file location to ChatApp>`
+-> In One Terminal run `python SERVER\chatServer.py`
+-> In Other two Terminal run `python CLIENT\chatClient.py`
+-> Now enter username and you can start Testing
+
+4. On Client Screen, do `/help` for how to USE the Client Menus.
+
+5. Any thing causing code to crash, or any fault or any suggestion should be messaged to me. Appreciate it!

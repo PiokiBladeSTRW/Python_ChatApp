@@ -42,6 +42,10 @@ def rooms_list(args:str, state:object):
     payload = ('/r', 'sys')
     return ('send', payload, state)
 
+'''Display Help'''
+def chat_help(args:str, state:object):
+    import help
+    return (None, None, state)
 
 '''-------------------------------------'''
 
@@ -89,7 +93,8 @@ commands = {
     "/create": create_room,
     "/exit": close,
     "/online": online_list,
-    "/rooms": rooms_list
+    "/rooms": rooms_list,
+    "/help": chat_help,
 }
 
 
