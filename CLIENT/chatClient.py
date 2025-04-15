@@ -1,5 +1,5 @@
 class chatClient:
-
+    '''Initialization'''
     def __init__(self):
         self.state = clientState()
         print(self.state.clientUsrn, self.state.receiver)
@@ -18,6 +18,37 @@ class chatClient:
             except asyncio.exceptions.CancelledError:       # i.e., tasks have been cancelled, program exit
                 pass
 
+    '''Obtain and Send Data'''
+    async def message(self):
+        while True:
+            msg = await asyncio.to_thread(input, ">>")
+
+            if(commands.is_command(msg)):
+                
+                ''' Payload Format: (content, type)'''
+                action, payload, self.state = commands.parse_command(msg, self.state)
+                
+                #Check what to do to Payload
+                match action:
+                    case 'send': await self.send(payload)
+                    case 'exit': 
+                        await self.send(('/e', 'sys'))
+                        await self.close()
+                    case None: pass
+                    case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")
+
+            elif(self.state.receiver):                           
+                await self.send( (msg, 'msg') )
+
+            else:
+                print("[!!ERROR: No Destination Chosen]")       
+
+    async def send(self, payload):  #To avoid Client Crash due to Down Server
+        try: 
+            await self.state.clientSock.send(utils.encode(payload, self.state))
+        except websockets.exceptions.ConnectionClosed:
+            print("SERVER DOWN") 
+            await self.close()
 
     async def receive(self):
         try:
@@ -33,38 +64,7 @@ class chatClient:
             await self.close()
 
 
-    async def message(self):
-        while True:
-            msg = await asyncio.to_thread(input, ">>")
-
-            if(commands.is_command(msg)):
-                
-                ''' Payload Format: (content, type)'''
-                action, payload, self.state = commands.parse_command(msg, self.state)
-                
-                match action:
-                    case 'send': await self.send(payload)
-                    case 'exit': 
-                        await self.send(('/e', 'sys'))
-                        await self.close()
-                    case None: pass
-                    case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")
-
-            elif(self.state.receiver):                           
-                await self.send( (msg, 'msg') )
-
-            else:
-                print("[!!ERROR: No Destination Chosen]")       
-
-    async def send(self, payload):
-        try: 
-            await self.state.clientSock.send(utils.encode(payload, self.state))
-
-        except websockets.exceptions.ConnectionClosed:
-            print("SERVER DOWN") 
-            await self.close()
-
-
+    '''Handle Disconnection'''
     async def heartbeat(self):
         while True:
             await self.send( ('', 'hbp') )

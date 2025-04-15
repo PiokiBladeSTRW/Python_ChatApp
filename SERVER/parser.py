@@ -17,7 +17,6 @@ def msg(clientSock:object,response:dict, state:object):
         return (f'/r{room}', dumps(response), state)
     
     #DM
-
     receiver = response.pop('receiver')
     return (receiver, dumps(response), state)
 

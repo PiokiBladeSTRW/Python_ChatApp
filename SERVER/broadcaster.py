@@ -1,5 +1,3 @@
-''' Handle Broadcasting by making List of Receiving Clients'''
-
 '''Global Broadcasts'''
 def every(clientSock, destination:str, state:object):     
     rC = list(state.sock_user)
@@ -26,6 +24,10 @@ def dm(destination:str, state:object):
     
     return (state.user_sock[destination],)
 
+
+'''-------------------------------------'''
+
+
 '''Parse Destination to determine Receivers'''
 def parse_destination(clientSock, destination:str, state:object):
     if(destination[:2] in dest):
@@ -34,7 +36,6 @@ def parse_destination(clientSock, destination:str, state:object):
     else:
         data = dm(destination, state)
         return data
-
 
 '''Destinations'''
 dest= {

@@ -1,5 +1,5 @@
 class chatServer:
-
+    '''Initialize'''
     def __init__(self): 
         self.state = serverState() 
         self.disconnectionPending = asyncio.Queue()
@@ -15,49 +15,48 @@ class chatServer:
         await asyncio.gather(self.receive(clientSock), self.heartbeats(), self.Disconnect())
 
 
-
+    '''Receive and Broadcast Data'''
     async def receive(self, clientSock):
         try:
-            '''
-            Variables: 
-            dataRecv-> Raw String Data Obtained
-            response-> Decoded String to Dictionary Data
-            data    -> Data for modification purpose
-            dataSent-> Modified Data to send if Required Modification
-            '''
-
             async for dataRecv in clientSock:   
                 response = json.loads(dataRecv)
-                destination, payload, self.state = parser.parse_response(clientSock, response, self.state)
 
+                '''Payload is json dumped message'''
+                destination, payload, self.state = parser.parse_response(clientSock, response, self.state)
+                
+                # Handle Special Cases, otherwise broadcast
                 if(destination=='*'):
                     match payload:
                         case '/e': await self.disconnectionPending.put(clientSock)
                         case '/h': self.state.timeout[clientSock] = time.time()
                 else:
-                    await self.broadcast(clientSock, payload, destination)  
+                    await self.broadcast(clientSock, payload, destination)
+
         except websockets.exceptions.ConnectionClosed:
             print("CLOSED")
 
-    async def broadcast(self, clientSock, payload:str, destination:str):        
+
+    async def broadcast(self, clientSock, payload:str, destination:str):
         receivingClients = broadcaster.parse_destination(clientSock, destination, self.state)
 
         if(receivingClients):
             for client in receivingClients:
-                await self.send(client, payload)
-
+                await self.send(client, payload)                
         else:
+            #If Hollow Room or just one User, to avoid Buggy Rooms and './' Offline messages
             if(destination.startswith('/r') or len(self.state.sock_user)==1): return
 
-            await self.send(clientSock, json.dumps({"sender":destination, "content":"/e", "type":"sys"}))
-                
-    async def send(self, receiveClient, payload:str):    # Prevents Server Crash in case of Lingering Ghost Sockets
+            payload = json.dumps({"sender":destination, "content":"/e", "type":"sys"})
+            await self.send(clientSock, payload)
+       
+    async def send(self, receiveClient, payload:str):   #Prevents Server Crash in case of Lingering Ghost Sockets
         try:        
             await receiveClient.send(payload)            
         except websockets.exceptions.ConnectionClosed:
             await self.disconnectionPending.put(receiveClient)
 
 
+    '''Disconnection Handling'''
     async def heartbeats(self):
         while True:            
             for client in self.state.timeout:
@@ -92,8 +91,3 @@ import parser
 from state import serverState
 
 server = chatServer()
-
-''' 
-Broadcast sends Data to Everyone but Current Client; userAlerts sends only to current Client
-Broadcast tells others about user Actions which the user themselves know and need not be notified 
-'''
