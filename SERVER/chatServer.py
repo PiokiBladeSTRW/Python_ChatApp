@@ -80,9 +80,9 @@ class chatServer:
 
                 self.state.user_sock.pop(self.state.sock_user.pop(leavingClient))
                 self.state.timeout.pop(leavingClient)
-                clientRoom = self.state.sock_room.pop(leavingClient)
 
-                if(clientRoom):
+                if(leavingClient in self.state.sock_room):
+                    clientRoom = self.state.sock_room.pop(leavingClient)
                     self.state.rooms[clientRoom].remove(leavingClient)
 
                 await leavingClient.close()
