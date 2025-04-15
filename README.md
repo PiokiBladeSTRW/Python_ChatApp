@@ -83,6 +83,7 @@ void main() {
 
 3. Now you have VSC set up for testing with three terminals, here's how to test:
 
+-> Firstly install the Libraries, run `pip install asyncio` & `pip install websockets`
 -> Ensure the command on Powershell is indicating to your current directory (The ChatApp folder), if not do `cd <file location to ChatApp>`
 -> In One Terminal run `python SERVER\chatServer.py`
 -> In Other two Terminal run `python CLIENT\chatClient.py`

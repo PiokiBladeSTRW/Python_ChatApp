@@ -60,9 +60,7 @@ class chatServer:
 
     '''Disconnection Handling'''
     async def relog(self, username, clientSock):
-        #In case user tries to Join with same Username after accidental Disconnect. Change msg to a Command later
-
-        #Client Should be Paused till this is Finished
+        #In case user tries to Join with same Username after accidental Disconnect
         await self.send(clientSock, json.dumps({"content": "/r1", "type":"sys"}))
 
         oldClientSock = self.state.user_sock[username]
