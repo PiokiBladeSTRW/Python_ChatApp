@@ -27,7 +27,9 @@ class chatServer:
                 # Handle Special Cases, otherwise broadcast
                 if(destination=='*'):
                     match payload:
-                        case '/e': await self.disconnectionPending.put(clientSock)
+                        case '/e': 
+                            print(">>CALLED EXIT")
+                            await self.disconnectionPending.put(clientSock)
                         case '/h': self.state.timeout[clientSock] = time.time()
                 else:
                     await self.broadcast(clientSock, payload, destination)
@@ -53,6 +55,7 @@ class chatServer:
         try:        
             await receiveClient.send(payload)            
         except websockets.exceptions.ConnectionClosed:
+            print(">>SEND DISCONNECT CALL")
             await self.disconnectionPending.put(receiveClient)
 
 
@@ -61,7 +64,8 @@ class chatServer:
         while True:            
             for client in self.state.timeout:
                 cTime = time.time() - self.state.timeout[client]                
-                if(cTime >= 40):                    
+                if(cTime >= 40):         
+                    print(">>TIMEOUT CALL")           
                     await self.disconnectionPending.put(client)
             await asyncio.sleep(25)
 
@@ -70,12 +74,16 @@ class chatServer:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
             if(leavingClient):
-
+                
                 payload = json.dumps({"sender":self.state.sock_user[leavingClient], "content": "/e", "type":"sys"})                
-                await self.broadcast(leavingClient, payload, '.')
+                await self.broadcast(leavingClient, payload, '/.')
 
                 self.state.user_sock.pop(self.state.sock_user.pop(leavingClient))
                 self.state.timeout.pop(leavingClient)
+                clientRoom = self.state.sock_room.pop(leavingClient)
+
+                if(clientRoom):
+                    self.state.rooms[clientRoom].remove(leavingClient)
 
                 await leavingClient.close()
                 

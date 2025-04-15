@@ -10,6 +10,7 @@ def msg(clientSock:object,response:dict, state:object):
         
         if(clientSock not in state.rooms[room]):                    
             state.rooms[room].append(clientSock)
+            state.sock_room[clientSock] = room
 
         response.pop('receiver')
         response['sender'] = f"[{room}] {response['sender']}"
@@ -49,6 +50,7 @@ def sys(clientSock:object,response:dict, state:object):
     elif(content.startswith('/c')):                            
         data = response['content'][2::]
         state.rooms[data] = [state.user_sock[response['sender']]]
+        state.sock_room[clientSock] = data
 
         payload = dumps({'content': f"Room {data} Is LIVE", 'type': "sys"})        
     

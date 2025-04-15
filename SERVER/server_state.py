@@ -4,3 +4,4 @@ class serverState:
         self.user_sock = {}            # username : socket       
         self.timeout= {}               # socket: last heartbeat        
         self.rooms= {}                 # room name : [sockets]
+        self.sock_room = {}            # socket : room
