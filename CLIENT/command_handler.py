@@ -63,6 +63,7 @@ def receiver_change(state, receiver):
         return
 
     print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
+    
 '''Check if inputted Message is a Command'''
 def is_command(msg:str):
     if(msg.startswith('/')):

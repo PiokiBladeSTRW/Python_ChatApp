@@ -21,7 +21,7 @@ class chatClient:
     '''Obtain and Send Data'''
     async def message(self):
         while True:
-            msg = await asyncio.to_thread(input, ">>")
+            msg = await asyncio.to_thread(input)
 
             if(command_handler.is_command(msg)):
                 
@@ -42,6 +42,8 @@ class chatClient:
 
             else:
                 print("[!!ERROR: No Destination Chosen]")       
+            
+            print()
 
     async def send(self, payload):  #To avoid Client Crash due to Down Server
         try: 
