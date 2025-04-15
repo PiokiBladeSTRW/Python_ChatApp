@@ -82,10 +82,10 @@ import asyncio
 import websockets
 import json
 
-import CLIENT.command_handler as command_handler
+import command_handler
 import utils
 import interface
-from CLIENT.session_state import clientState
+from session_state import clientState
 
 client = chatClient()
 

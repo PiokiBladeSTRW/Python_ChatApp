@@ -86,8 +86,8 @@ import websockets
 import json
 import time
 
-import SERVER.data_router as data_router
-import SERVER.message_handler as message_handler
-from SERVER.server_state import serverState
+import data_router
+import message_handler 
+from server_state import serverState
 
 server = chatServer()
