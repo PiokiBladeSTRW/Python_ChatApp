@@ -27,10 +27,9 @@ class chatServer:
                 # Handle Special Cases, otherwise broadcast
                 if(destination=='*'):
                     match payload:
-                        case '/e': 
-                            print(">>CALLED EXIT")
-                            await self.disconnectionPending.put(clientSock)
+                        case '/e': await self.disconnectionPending.put(clientSock)
                         case '/h': self.state.timeout[clientSock] = time.time()
+                        case '/d': await self.relog(response['sender'], clientSock)
                 else:
                     await self.broadcast(clientSock, payload, destination)
 
@@ -60,6 +59,26 @@ class chatServer:
 
 
     '''Disconnection Handling'''
+    async def relog(self, username, clientSock):
+        #In case user tries to Join with same Username after accidental Disconnect. Change msg to a Command later
+
+        #Client Should be Paused till this is Finished
+        await self.send(clientSock, json.dumps({"content": "/r1", "type":"sys"}))
+
+        oldClientSock = self.state.user_sock[username]
+        await self.disconnectionPending.put(oldClientSock)
+
+        while True:
+            await asyncio.sleep(3)
+            if(oldClientSock not in self.state.sock_user):
+                self.state.user_sock[username] = clientSock
+                self.state.sock_user[clientSock] = username
+                await self.broadcast(clientSock, json.dumps({"sender":username, "type": "usr"}), '/.')
+
+                await self.send(clientSock, json.dumps({"content": "/r2", "type": "sys"}))
+                return
+
+
     async def heartbeats(self):
         while True:            
             for client in self.state.timeout:

@@ -23,6 +23,9 @@ def msg(clientSock:object,response:dict, state:object):
 
 '''Handle Log In Messages'''
 def usr(clientSock:object,response:dict, state:object): 
+    if(response['sender'] in state.user_sock):        
+        return ('*', '/d', state)
+    
     state.user_sock[response['sender']] = clientSock
     state.sock_user[clientSock] = response['sender']
 

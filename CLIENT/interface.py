@@ -31,11 +31,19 @@ def sys(response:dict, state:object):
 
         if(state.receiver == response['sender']):
             state.receiver = ''
+
+        return state
+
+    elif(response['content'] == '/r1'): 
+        data = ('', '{System}', "OLD SESSION LIVE; FORCE CLOSING..")
+
+    elif(response['content'] == '/r2'): 
+        data = ('', '{System}', "SUCCESSFUL RELOG!")
     
     else:    
-        data = ('', '{System}', response['content'])
-        print(formatting.format(data, ('s', 'cl', 'c')))
-    
+        data = ('', '{System}', response['content']) 
+
+    print(formatting.format(data, ('s', 'cl', 'c')))    
     return state
     
 
