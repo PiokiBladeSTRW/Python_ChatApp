@@ -5,3 +5,11 @@ class clientState:
         self.receiver = ''
         self.pReceiver = ''
         self.clientSock = None
+
+        self.msgTypes= {
+            "message": "msg",
+            "online": "usr",
+            "system": "sys",
+            "heartbeat": "hbp",
+            "authentication": "auth"
+        }

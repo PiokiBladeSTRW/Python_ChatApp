@@ -20,6 +20,7 @@ class chatServer:
         try:
             async for dataRecv in clientSock:   
                 response = json.loads(dataRecv)
+                print("\n>>",self.state.user_sock,"\n")
 
                 '''Payload is json dumped message'''
                 destination, payload, self.state = message_handler.parse_response(clientSock, response, self.state)

@@ -23,14 +23,8 @@ def msg(clientSock:object,response:dict, state:object):
     receiver = response.pop('receiver')
     return (receiver, json.dumps(response), state)
 
-'''Handle Log In Messages'''
+'''To Notify Others [is ONLINE]'''
 def usr(clientSock:object,response:dict, state:object): 
-    if(response['sender'] in state.user_sock):        
-        return ('*', '/d', state)
-    
-    state.user_sock[response['sender']] = clientSock
-    state.sock_user[clientSock] = response['sender']
-
     return ('/.', json.dumps(response), state)
 
 '''Handle System Messages'''
@@ -73,7 +67,7 @@ def auth(clientSock:object,response:dict, state:object):
     if(content['username'] in state.user_sock):        
         return ('*', '/d', state)
     
-    return auth.parse_authentication(content, state)
+    return auth.parse_authentication(clientSock, content, state)
 
 
 '''-------------------------------------'''

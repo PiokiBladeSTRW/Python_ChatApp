@@ -3,13 +3,13 @@
 '''Handle DMS'''
 def handle_dm(args:str, state:object):      
     receiver_change(state, args[0])
-    payload = (' '.join(args[1::]), 'msg')
+    payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload, state)
 
 '''Join a Room'''
 def join_room(args:str, state:object): 
     receiver_change(state, '/r'+args[0])
-    payload = (' '.join(args[1::]), 'msg')
+    payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload, state)
 
 '''Reset Receiver'''
@@ -26,7 +26,7 @@ def back_rec(args:str, state:object):
 def create_room(args:str, state:object): 
     receiver_change(state, '/r'+args[0])
                 
-    payload = ('/c'+args[0], 'sys')
+    payload = ('/c'+args[0], state.msgTypes['system'])
     return ('send', payload, state)
 
 '''Exit Program'''
@@ -35,12 +35,12 @@ def close(args:str, state:object):
     
 '''List of every Online Client'''
 def online_list(args:str, state:object): 
-    payload = ('/o', 'sys')    
+    payload = ('/o', state.msgTypes['system'])    
     return ('send', payload, state)
 
 '''List of every Online Room'''    
 def rooms_list(args:str, state:object): 
-    payload = ('/r', 'sys')
+    payload = ('/r', state.msgTypes['system'])
     return ('send', payload, state)
 
 '''Display Help'''

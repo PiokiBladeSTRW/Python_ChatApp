@@ -2,6 +2,7 @@ class chatClient:
     '''Initialization'''
     def __init__(self):
         self.state = clientState()
+        self.heartbeatPing = 20
 
     async def connectStartup(self):
         async with websockets.connect("ws://localhost:8765") as clientSocket:   
@@ -17,13 +18,16 @@ class chatClient:
                 pass
 
     async def login(self):
-        while True:     
-            content = login.begin_process()
-            await self.send((content, 'auth'))
+        while True:  
+            '''AuthContent : {ACTION: <REG/LOG>, USERNAME: <>, PASSWD: <>}'''  
+
+            authContent = login.begin_process()
+            await self.send((authContent, self.state.msgTypes['authentication']))
             response = json.loads(await self.state.clientSock.recv())
             
             if(response['content']==True):
-                self.state.clientUsrn = content['username']
+                self.state.clientUsrn = authContent['username']
+                await self.send(('', 'usr'))
                 return
             
             print(f"{{System}}: {response['content']}")
@@ -33,24 +37,25 @@ class chatClient:
     '''Obtain and Send Data'''
     async def message(self):
         while True:
-            msg = await asyncio.to_thread(input)
+            msgInput = await asyncio.to_thread(input)
 
-            if(command_handler.is_command(msg)):
+            if(command_handler.is_command(msgInput)):
                 
                 ''' Payload Format: (content, type)'''
-                action, payload, self.state = command_handler.parse_command(msg, self.state)
+                action, payload, self.state = command_handler.parse_command(msgInput, self.state)
                 
                 #Check what to do to Payload
                 match action:
                     case 'send': await self.send(payload)
                     case 'exit': 
-                        await self.send(('/e', 'sys'))
+                        await self.send(('/e', self.state.msgTypes['system']))
                         await self.close()
+                    #Remove following two lines later, purely testing purpose
                     case None: pass
                     case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")
 
             elif(self.state.receiver):                           
-                await self.send( (msg, 'msg') )
+                await self.send( (msgInput, self.state.msgTypes['message']) )
 
             else:
                 print("[!!ERROR: No Destination Chosen]")       
@@ -66,8 +71,8 @@ class chatClient:
 
     async def receive(self):
         try:
-            async for response in self.state.clientSock:
-                response = json.loads(response)                   
+            async for dataReceived in self.state.clientSock:
+                response = json.loads(dataReceived)                   
 
                 self.state = interface.parse_response(response, self.state) 
                 
@@ -81,8 +86,8 @@ class chatClient:
     '''Handle Disconnection'''
     async def heartbeat(self):
         while True:
-            await self.send( ('', 'hbp') )
-            await asyncio.sleep(20)
+            await self.send( ('', self.state.msgTypes['heartbeat']) )
+            await asyncio.sleep(self.heartbeatPing)
     
     async def close(self):        
         await self.state.clientSock.close()
@@ -106,6 +111,7 @@ import utils
 import interface
 from session_state import clientState
 
+#To avoid Creating Event Loop within the Class instead of the Class within the Event Loop
 asyncio.run(eventLoop())
 
 '''

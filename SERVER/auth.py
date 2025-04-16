@@ -1,25 +1,39 @@
 '''HANDLE AUTHENTICATION'''
 
 '''Register New User'''
-def reg(content:dict, state:object): 
+def reg(clientSock:object, content:dict, state:object): 
     with open('accounts.json', 'r') as f:
         accounts = json.load(f)
+
+        #Ensure Username Doesn't Exist Already
         if(content['username'] in accounts):
             return ('/s', json.dumps({"content": "USERNAME EXISTS", "type":"auth"}), state)
+        
         accounts[content['username']] = {"passwd": content['passwd']}
     
+    #Store Data
     with open('accounts.json', 'w') as f:
         json.dump(accounts, f)
 
+    #Update Server Data
+    state.user_sock[content['username']] = clientSock
+    state.sock_user[clientSock] = content["username"]
+
+    #Return Confirmation
     return ('/s', json.dumps({"content": True, "type":"auth"}), state)
 
 '''Log in to already made Account'''
-def log(content:dict, state:object):
+def log(clientSock:object, content:dict, state:object):
     with open('accounts.json', 'r') as f:
         accounts = json.load(f)
 
+    #Log In
     if(content['username'] in accounts):
-        if(accounts[content['username']]['passwd'] == content['passwd']):
+         if(accounts[content['username']]['passwd'] == content['passwd']):            
+            #Update Server Data
+            state.user_sock[content['username']] = clientSock
+            state.sock_user[clientSock] = content["username"]
+
             return ('/s', json.dumps({"content": True, "type":"auth"}), state)
         
     return ('/s', json.dumps({"content": False, "type":"auth"}), state)
@@ -29,9 +43,9 @@ def log(content:dict, state:object):
 
 
 '''Decide what to do with current case'''
-def parse_authentication(content:dict, state:object):
+def parse_authentication(clientSock:object, content:dict, state:object):
     match content['action']:
-        case 'reg': return reg(content, state)
-        case 'log': return log(content, state)
+        case 'reg': return reg(clientSock, content, state)
+        case 'log': return log(clientSock, content, state)
 
 import json
