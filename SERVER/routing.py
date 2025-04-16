@@ -20,7 +20,7 @@ def user(clientSock, destination:str, state:object):
     return (clientSock,)
 
 '''DM Broadcasts'''
-def dm(destination:str, state:object): 
+def direct(destination:str, state:object): 
     if(destination not in state.user_sock):
         return None
     
@@ -36,7 +36,7 @@ def parse_destination(clientSock, destination:str, state:object):
         data = dest[destination[:2]](clientSock, destination, state)
         return data
     else:
-        data = dm(destination, state)
+        data = direct(destination, state)
         return data
 
 '''Destinations'''

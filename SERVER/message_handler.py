@@ -1,7 +1,12 @@
 '''Handle Incoming Messages (Bring about Required Changes) and Prepare data for Broadcast to Require Reciepents'''
 
-'''Handle DMs'''
-def msg(clientSock:object,response:dict, state:object): 
+#Header
+import json
+
+import auth
+
+'''Handle Messages [DMs and Rooms]'''
+def handle_messages(clientSock:object,response:dict, state:object): 
     #Room
     if(response['receiver'].startswith('/r')):
         room = response['receiver'][2::]
@@ -24,11 +29,11 @@ def msg(clientSock:object,response:dict, state:object):
     return (receiver, json.dumps(response), state)
 
 '''To Notify Others [is ONLINE]'''
-def usr(clientSock:object,response:dict, state:object): 
+def user_online(clientSock:object,response:dict, state:object): 
     return ('/.', json.dumps(response), state)
 
 '''Handle System Messages'''
-def sys(clientSock:object,response:dict, state:object):  
+def system(clientSock:object,response:dict, state:object):  
     content = response['content']   
 
     if(content == '/e'):
@@ -56,11 +61,11 @@ def sys(clientSock:object,response:dict, state:object):
     return ('/s', payload, state)       
 
 '''Handle HeartBeat Pings'''
-def hbp(clientSock:object,response:dict, state:object): 
+def heartbeats(clientSock:object,response:dict, state:object): 
     return ('*', '/h', state)   #Special to avoid time import
 
 '''Handle AUTHENTICATION'''
-def auth(clientSock:object,response:dict, state:object):
+def authentication(clientSock:object,response:dict, state:object):
     content = response['content']
     
     #Relog
@@ -83,18 +88,12 @@ def parse_response( clientSock:object, response:dict, state:object):
 
 '''Response Types'''
 types ={
-    "msg": msg,
-    "usr": usr,
-    "sys": sys,
-    'hbp': hbp,
-    'auth': auth
+    "msg": handle_messages,
+    "usr": user_online,
+    "sys": system,
+    'hbp': heartbeats,
+    'auth': authentication
 }
-
-import json
-import auth
-
-
-'''-------------------------------------'''
 
 
 '''
@@ -107,5 +106,3 @@ RETURN FORMAT: (DESTINATION, PAYLOAD, STATE)
         '*'     : Special Case, Need Handling
         None    : No Sending Data         
 '''
-
-# Try if(dataSend.get('receiver')): print(dataSend) to ensure there aren't useless packets being transferred

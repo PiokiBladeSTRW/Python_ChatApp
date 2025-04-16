@@ -1,5 +1,8 @@
 '''HANDLE AUTHENTICATION'''
 
+#Header
+import json
+
 '''Register New User'''
 def reg(clientSock:object, content:dict, state:object): 
     with open('accounts.json', 'r') as f:
@@ -47,5 +50,3 @@ def parse_authentication(clientSock:object, content:dict, state:object):
     match content['action']:
         case 'reg': return reg(clientSock, content, state)
         case 'log': return log(clientSock, content, state)
-
-import json

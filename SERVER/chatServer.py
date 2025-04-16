@@ -1,10 +1,22 @@
-class chatServer:
+#Header
+import json
+import time
+import asyncio
+import websockets
+
+import routing
+import message_handler 
+from server_state import ServerState
+
+
+'''Main Class handling Server'''
+class ChatServer:
     '''Initialize'''
     def __init__(self): 
-        self.state = serverState() 
+        self.state = ServerState() 
+        self.timeout = 40
+        self.pignFrequency = 25
         self.disconnectionPending = asyncio.Queue()
-
-        asyncio.run(self.start())
 
     async def start(self):
         async with websockets.serve(self.handleClient, "localhost", 8765):
@@ -16,11 +28,10 @@ class chatServer:
 
 
     '''Receive and Broadcast Data'''
-    async def receive(self, clientSock):
+    async def receive(self, clientSock:object):
         try:
-            async for dataRecv in clientSock:   
-                response = json.loads(dataRecv)
-                print("\n>>",self.state.user_sock,"\n")
+            async for dataReceived in clientSock:   
+                response = json.loads(dataReceived)               
 
                 '''Payload is json dumped message'''
                 destination, payload, self.state = message_handler.parse_response(clientSock, response, self.state)
@@ -33,40 +44,40 @@ class chatServer:
                         case '/d': await self.relog(response['sender'], clientSock)
                 else:
                     await self.broadcast(clientSock, payload, destination)
-
         except websockets.exceptions.ConnectionClosed:
             print("CLOSED")
 
-
-    async def broadcast(self, clientSock, payload:str, destination:str):
+    async def broadcast(self, clientSock:object, payload:str, destination:str):
         receivingClients = routing.parse_destination(clientSock, destination, self.state)
 
         if(receivingClients):
             for client in receivingClients:
-                await self.send(client, payload)                
-        else:
+                await self.send(client, payload)  
+
+        else:            
             #If Hollow Room or just one User, to avoid Buggy Rooms and './' Offline messages
             if(destination.startswith('/r') or len(self.state.sock_user)==1): return
 
             payload = json.dumps({"sender":destination, "content":"/e", "type":"sys"})
             await self.send(clientSock, payload)
        
-    async def send(self, receiveClient, payload:str):   #Prevents Server Crash in case of Lingering Ghost Sockets
+    async def send(self, receiveClient:object, payload:str):   #Prevents Server Crash in case of Lingering Ghost Sockets
         try:        
             await receiveClient.send(payload)            
-        except websockets.exceptions.ConnectionClosed:
-            print(">>SEND DISCONNECT CALL")
+        except websockets.exceptions.ConnectionClosed:            
             await self.disconnectionPending.put(receiveClient)
 
 
     '''Disconnection Handling'''
     async def relog(self, username, clientSock):
-        #In case user tries to Join with same Username after accidental Disconnect
+
+        #So User knows to wait while they Relog
         await self.send(clientSock, json.dumps({"content": "/r1", "type":"sys"}))
 
         oldClientSock = self.state.user_sock[username]
         await self.disconnectionPending.put(oldClientSock)
 
+        #Once Disconnect Finishes
         while True:
             await asyncio.sleep(3)
             if(oldClientSock not in self.state.sock_user):
@@ -77,43 +88,39 @@ class chatServer:
                 await self.send(clientSock, json.dumps({"content": "/r2", "type": "sys"}))
                 return
 
-
     async def heartbeats(self):
         while True:            
             for client in self.state.timeout:
                 cTime = time.time() - self.state.timeout[client]                
-                if(cTime >= 40):         
-                    print(">>TIMEOUT CALL")           
+                if(cTime >= self.timeout):    
                     await self.disconnectionPending.put(client)
-            await asyncio.sleep(25)
+            await asyncio.sleep(self.pignFrequency)
 
     async def Disconnect(self): 
         while True:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
-            if(leavingClient):                
+            if(leavingClient):  
+                
+                #Remove All Reference of Client
                 if(leavingClient in self.state.sock_room):
                     clientRoom = self.state.sock_room.pop(leavingClient)
                     self.state.rooms[clientRoom].remove(leavingClient)
-                
+
+                username = self.state.sock_user.pop(leavingClient)       
+                self.state.user_sock.pop(username)
+                self.state.timeout.pop(leavingClient)
+
+                #Broadcast others that User is Offline                
                 payload = json.dumps({"sender":self.state.sock_user[leavingClient], "content": "/e", "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')
 
-                self.state.user_sock.pop(self.state.sock_user.pop(leavingClient))
-                self.state.timeout.pop(leavingClient)
-
-
                 await leavingClient.close()
-                
 
-#Run
-import asyncio
-import websockets
-import json
-import time
+'''Entry Point to Event Loop'''
+async def eventLoop():
+    server = ChatServer()
+    await server.start()
 
-import routing
-import message_handler 
-from server_state import serverState
-
-server = chatServer()
+#__MAIN__
+asyncio.run(eventLoop())
