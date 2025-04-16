@@ -11,7 +11,7 @@ class chatClient:
 
             # Handle Session Log-in
             while True:     
-                content = auth.begin_process()
+                content = login.begin_process()
                 await self.send((content, 'auth'))
                 response = json.loads(await clientSocket.recv())
                 
@@ -97,7 +97,7 @@ import asyncio
 import websockets
 import json
 
-import auth
+import login
 import command_handler
 import utils
 import interface

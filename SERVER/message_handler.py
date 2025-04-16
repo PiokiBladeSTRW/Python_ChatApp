@@ -72,30 +72,8 @@ def auth(clientSock:object,response:dict, state:object):
     #Relog
     if(content['username'] in state.user_sock):        
         return ('*', '/d', state)
-
-    #Register
-    if(content['action'] == 'reg'):
-        with open('accounts.json', 'r') as f:
-            accounts = json.load(f)
-            accounts[content['username']] = {"passwd": content['passwd']}
-        
-        with open('accounts.json', 'w') as f:
-            json.dump(accounts, f)
-
-        return ('/s', json.dumps({"content": True, "type":"auth"}), state)
     
-    #LogIn
-    elif(content['action'] == 'log'):
-        with open('accounts.json', 'r') as f:
-            accounts = json.load(f)
-
-            if(content['username'] in accounts):
-                if(accounts[content['username']]['passwd'] == content['passwd']):
-                    return ('/s', json.dumps({"content": True, "type":"auth"}), state)
-                
-            return ('/s', json.dumps({"content": False, "type":"auth"}), state)
-    
-    
+    return auth.parse_authentication(content, state)
 
 
 '''-------------------------------------'''
@@ -119,6 +97,7 @@ types ={
 }
 
 import json
+import auth
 
 
 '''-------------------------------------'''
