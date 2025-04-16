@@ -4,6 +4,8 @@
 def reg(content:dict, state:object): 
     with open('accounts.json', 'r') as f:
         accounts = json.load(f)
+        if(content['username'] in accounts):
+            return ('/s', json.dumps({"content": "USERNAME EXISTS", "type":"auth"}), state)
         accounts[content['username']] = {"passwd": content['passwd']}
     
     with open('accounts.json', 'w') as f:

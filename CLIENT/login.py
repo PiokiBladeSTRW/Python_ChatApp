@@ -2,7 +2,13 @@
 
 '''Input Data from User:'''
 def credentials_input(action):
+    legal_char = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890@#"
+
     username = input("ENTER USERNAME: ").strip()
+    if(not all(c in legal_char for c in username)):
+        print("ILLEGAL CHARACTERS")
+        return None
+
     passwd = input("ENTER PASSWORD: ")
     
     content = {"action": action, "username": username, "passwd": passwd}
@@ -20,6 +26,9 @@ def begin_process():
         elif(ch=='1'):
             content = credentials_input('reg')
         else:            
+            continue
+
+        if(content==None):
             continue
 
         return content

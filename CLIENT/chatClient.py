@@ -15,9 +15,10 @@ class chatClient:
                 await self.send((content, 'auth'))
                 response = json.loads(await clientSocket.recv())
                 
-                if(response['content']):
+                if(response['content']==True):
                     self.state.clientUsrn = content['username']
                     break
+                print(f"{{System}}: {response['content']}")
                 continue
 
             
