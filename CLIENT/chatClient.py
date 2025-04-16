@@ -1,7 +1,19 @@
-class chatClient:
+# Header
+import json
+import asyncio
+import websockets
+
+import login
+import command_handler
+import utils
+import interface
+from session_state import ClientState
+
+'''Main Class handling Client'''
+class ChatClient:
     '''Initialization'''
     def __init__(self):
-        self.state = clientState()
+        self.state = ClientState()
         self.heartbeatPing = 20
         self.serverAddress = "ws://localhost:8765"
 
@@ -22,7 +34,7 @@ class chatClient:
         while True:  
             '''AuthContent : {ACTION: <REG/LOG>, USERNAME: <>, PASSWD: <>}'''  
 
-            authContent = login.begin_process()
+            authContent = login.start_auth()
             await self.send((authContent, self.state.msgTypes['authentication']))
             response = json.loads(await self.state.clientSock.recv())
             
@@ -96,29 +108,10 @@ class chatClient:
             task.cancel()
             return
 
+'''Entry Point to Event Loop'''
 async def eventLoop():
-    client = chatClient()
+    client = ChatClient()
     await client.connectStartup()
         
 #__MAIN__
-# Design Note: snakeCase in main classes, seperator_case in module
-import asyncio
-import websockets
-import json
-
-import login
-import command_handler
-import utils
-import interface
-from session_state import clientState
-
-#To avoid Creating Event Loop within the Class instead of the Class within the Event Loop
 asyncio.run(eventLoop())
-
-'''
-Message Format: {"sender": <username>, 
-                "receiver": <username>, 
-                "content": '--', 
-                "type": 'msg/..',
-                "timestamp": "[Hour:Minute]"}        
-'''

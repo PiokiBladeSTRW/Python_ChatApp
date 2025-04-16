@@ -1,8 +1,9 @@
 '''Handle the Entire Log-in Process'''
 
-'''Input Data from User:'''
-def credentials_input(action):
-    legal_char = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890@#"
+legal_char = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890@#"
+
+'''Input Credentials from User:'''
+def credentials_input(action):    
 
     username = input("ENTER USERNAME: ").strip()
     if(not all(c in legal_char for c in username)):
@@ -17,7 +18,7 @@ def credentials_input(action):
 
 
 '''Start the Process by determining New or Old account'''
-def begin_process():
+def start_auth():
     while True:
         ch = input("0: Login to Account\n1: Register an Account\n>")
 
@@ -33,10 +34,11 @@ def begin_process():
 
         return content
 
-'''RETURNS CONTENT
-CONTENT = {
+'''
+RETURN FORMAT:
+        {
         "action": action
         "username": username,
         "passwd": passwd,
-            }
+        }
 '''

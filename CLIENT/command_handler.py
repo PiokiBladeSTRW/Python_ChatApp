@@ -1,5 +1,17 @@
 '''Handle Commands used by Client: Bring Changes and parse message for server if needed'''
 
+'''
+Commands and Actions
+    /dm <username> <msg>    : Initiates a DM with given Username as Receiver
+    /#                      : Removes Receiver, that is closing a DM
+    /exit                   : Exit                                            [Parsed as /e]
+    /online                 : Online List                                     [Parsed as /o]        
+    /create <room>          : Create a Room                                   [Parsed as /c+<room>]
+    /join <room> <msg>      : Initiates messaging with Room as Receiver        
+    /rooms                  : List of Rooms                                   [Parsed as /r]
+    /b                      : Backtracks Receiver to Swap
+'''
+
 '''Handle DMS'''
 def handle_dm(args:str, state:object):      
     receiver_change(state, args[0])
@@ -75,19 +87,21 @@ def is_command(msg:str):
 def parse_command(input_cmd:str, state:object):    
     parts = input_cmd.split()    
 
+    #check if the command has arguments
     if(len(parts)==1):
         cmd, args = parts[0], ''
     else:
         cmd, args = parts[0], parts[1::]        
-
+    
     if cmd in commands:        
         data = commands[cmd](args, state)            
         return data
     else:
         print("INVALID COMMAND")
         return (None, None, state)
+    
 
-'''COMMANDS'''
+'''Convert Command to Function call in One Step'''
 commands = {
     "/dm": handle_dm,
     "/join": join_room,
@@ -100,20 +114,6 @@ commands = {
     "/help": chat_help,
 }
 
-
-'''-------------------------------------'''
-
-'''
-Check for Command
-    /dm <username> <msg>    : Initiates a DM with given Username as Receiver
-    /#                      : Removes Receiver, that is closing a DM
-    /exit                   : Exit                                            [Parsed as /e]
-    /online                 : Online List                                     [Parsed as /o]        
-    /create <room>          : Create a Room                                   [Parsed as /c+<room>]
-    /join <room> <msg>      : Initiates messaging with Room as Receiver        
-    /rooms                  : List of Rooms                                   [Parsed as /r]
-    /b                      : Backtracks Receiver to Swap
-'''
 
 '''
 Return Type: (ACTION, PAYLOAD, STATE)

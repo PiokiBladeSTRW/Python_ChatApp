@@ -1,28 +1,29 @@
-'''IN BETA FILE PURELY FOR TESTERS' SAKE'''
+documentation =  '''
+                    WELCOME TO CHAT APP!
+                    Still in Beta.
 
-print('''WELCOME TO CHAT APP!
-Still in Beta.
+                    To Use the App, you need to use Commands in Client,
+                    Commands are messages that start with '/':
 
-To Use the App, you need to use Commands in Client,
-Commands are messages that start with '/'
+                    List of Commands:
 
-List of Commands:
+                    /help    -> Receive Detailed instructions
 
-/help -> Receive Ugly instructions
+                    /dm <username> <msg> -> Personally Message another Client
 
-/dm <username> <msg> -> Personally Message another Client
+                    /#          -> Stop Texting anyone Specifically
 
-/# -> Stop Texting anyone Specifically
+                    /b          -> Swap between your last and current receiver
 
-/b -> Swap between your last and current receiver
+                    /exit           -> Exit Program
 
-/exit -> Close Program
+                    /online    -> List of Online Clients
 
-/online -> List of Online Clients
+                    /create <room>   -> Create a Room/Group
 
-/create <room> -> Create a Room/Group
+                    /join <room> <msg>   -> Join a Room (The Message is optional)
 
-/join <room> <msg> -> Join a Room (<msg> is optional)
+                    /rooms  Lists Available Live Rooms
+                '''
 
-/rooms -> List of Live Rooms
-''')
+print(documentation)

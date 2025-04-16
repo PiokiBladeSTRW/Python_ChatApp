@@ -1,5 +1,5 @@
 '''Holds Global Variable per session'''
-class clientState:
+class ClientState:
     def __init__(self):
         self.clientUsrn = ''
         self.receiver = ''

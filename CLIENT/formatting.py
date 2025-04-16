@@ -1,33 +1,36 @@
-
 '''Formats Message as required for Different Displays for Different Purposes'''
+
+# Header
+import time
+time_format = "%H:%M"
+
 def format(data:tuple, tags:tuple):   
-    if(data[0]): timestamp = time.strftime("%H:%M", time.localtime(float(data[0])))
+    '''DATA: (timestamp, sender, content)'''
+
+    if(data[0]): timestamp = time.strftime(time_format, time.localtime(float(data[0])))
     
-    msg = []
+    msg_bits = []
     wrap = None
 
     for tag in tags:
         match tag:
-            case 't': msg.append(timestamp)
-            case 's': msg.append(data[1])
-            case 'c': msg.append(data[2])
-            case 'bt': msg.append(f"[{timestamp}]")
-            case 'cl': msg.append(':')
-            case 'a': msg.append(">")
+            case 't': msg_bits.append(timestamp)
+            case 's': msg_bits.append(data[1])
+            case 'c': msg_bits.append(data[2])
+            case 'bt': msg_bits.append(f"[{timestamp}]")
+            case 'cl': msg_bits.append(':')
+            case 'a': msg_bits.append(">")
             
             case 'A': wrap = ('<', '>')
             case 'S': wrap = ('[', ']')
 
-    message = ' '.join(msg)
-    if(wrap): message = f"{wrap[0]} {message} {wrap[1]}"
+    final_msg = ' '.join(msg_bits)
+    if(wrap): final_msg = f"{wrap[0]} {final_msg} {wrap[1]}"
 
-    return message
+    return final_msg
 
-import time
-
-'''DATA: (timestamp, sender, content)'''
-
-'''TAGS:
+'''
+TAGS:
 
 t: TimeStamp
 s: Sender

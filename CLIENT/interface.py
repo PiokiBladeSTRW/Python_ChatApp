@@ -1,7 +1,10 @@
 '''Handle (bring about requried changes) and Display Incoming Data from Server'''
 
+#Header
+import formatting
+
 '''Handle Default Messages'''
-def msg(response:dict, state:object): 
+def incoming_message(response:dict, state:object): 
     data = (response['timestamp'], response['sender'], response['content'])
 
     # Direct Message
@@ -19,14 +22,14 @@ def msg(response:dict, state:object):
     return state
 
 '''Handle User Loggings'''
-def usr(response:dict, state:object):
+def online_user(response:dict, state:object):
     data = ('', response['sender'], "is ONLINE")
     print(formatting.format(data, ('s', 'c', 'S')))
 
     return state
 
 '''Handle System Messages'''
-def sys(response:dict, state:object): 
+def system(response:dict, state:object): 
     if(response['content'] == '/e'):
         data = ('', response['sender'], 'is OFFLINE')
         print(formatting.format(data, ('s', 'c', 'S')))
@@ -63,11 +66,7 @@ def parse_response(response:dict, state:object):
 
 '''Response Types'''
 types ={
-    "msg": msg,
-    "usr": usr,
-    "sys": sys
+    "msg": incoming_message,
+    "usr": online_user,
+    "sys": system
 }
-
-import formatting
-
-''' DATA TYPE: (TIME, SENDER, CONTENT)'''
