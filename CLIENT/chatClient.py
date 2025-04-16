@@ -2,35 +2,33 @@ class chatClient:
     '''Initialization'''
     def __init__(self):
         self.state = clientState()
-        print(self.state.clientUsrn, self.state.receiver)
-        asyncio.run(self.connect())
 
-    async def connect(self):
+    async def connectStartup(self):
         async with websockets.connect("ws://localhost:8765") as clientSocket:   
             self.state.clientSock = clientSocket       
 
             # Handle Session Log-in
-            while True:     
-                content = login.begin_process()
-                await self.send((content, 'auth'))
-                response = json.loads(await clientSocket.recv())
-                
-                if(response['content']==True):
-                    self.state.clientUsrn = content['username']
-                    break
-                print(f"{{System}}: {response['content']}")
-                continue
+            await self.login()
 
-            
-
-            self.state.clientUsrn = input("\nENTER USERNAME: ").strip()
-
-            await self.send( ("", "usr") )
-
+            #Start Client up
             try:
                 await asyncio.gather(self.message(), self.receive(),self.heartbeat())
             except asyncio.exceptions.CancelledError:       # i.e., tasks have been cancelled, program exit
                 pass
+
+    async def login(self):
+        while True:     
+            content = login.begin_process()
+            await self.send((content, 'auth'))
+            response = json.loads(await self.state.clientSock.recv())
+            
+            if(response['content']==True):
+                self.state.clientUsrn = content['username']
+                return
+            
+            print(f"{{System}}: {response['content']}")
+            continue
+
 
     '''Obtain and Send Data'''
     async def message(self):
@@ -91,6 +89,10 @@ class chatClient:
         for task in asyncio.all_tasks():
             task.cancel()
             return
+
+async def eventLoop():
+    client = chatClient()
+    await client.connectStartup()
         
 #__MAIN__
 # Design Note: snakeCase in main classes, seperator_case in module
@@ -104,7 +106,7 @@ import utils
 import interface
 from session_state import clientState
 
-client = chatClient()
+asyncio.run(eventLoop())
 
 '''
 Message Format: {"sender": <username>, 

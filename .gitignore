@@ -1,4 +1,5 @@
 # .gitignore
 __pycache__/
 __trash__/
+__llm__/
 plans.txt
