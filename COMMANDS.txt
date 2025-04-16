@@ -1,0 +1,31 @@
+A Descriptive text file describing all the Commands being broadcasted
+
+>> The lesser the data transfer between Server and Client, the faster it all shall be
+
+CLIENT:
+
+*Commands
+1. /e (Typed: '/exit'): Closes Program and Instructs Server to Remove the Client as it is now offline
+2. /o (Typed: '/online'): Requests Server for a List of Online Members
+3. /r (Typed: '/Rooms'): Requests Server for a List of Online Rooms
+
+The Rest of Client Commands: The command isn't sent to Server, only the payload (message/data) is
+
+*Types
+1. msg: The containing message is to be broadcasted AS IT IS to Receivers
+2. sys: The containing message contains Instructions(commands) to be acted upon by Server
+3. hbp: Empty message, the type itself let's server know Client is alive
+4. auth: The Containg message is a dictionary, containing all Credentials of User for Server to verify and Authorize
+
+
+
+SERVER:
+
+*Commands
+1. /e : To notify users when a client goes offline, Disconnecting Client being the Sender
+2. /r1: To notify users to wait while Server closes their old session                       [User Alert]
+3. /r2: To notify users that process is finished and they have relogged                     [User Alert]
+
+*Types
+1. usr: Broadcasting who logged online
+2. sys: System Message, returns Errors & Instructions [ like commands ]
