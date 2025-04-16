@@ -91,7 +91,10 @@ class chatServer:
         while True:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
-            if(leavingClient):
+            if(leavingClient):                
+                if(leavingClient in self.state.sock_room):
+                    clientRoom = self.state.sock_room.pop(leavingClient)
+                    self.state.rooms[clientRoom].remove(leavingClient)
                 
                 payload = json.dumps({"sender":self.state.sock_user[leavingClient], "content": "/e", "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')
@@ -99,9 +102,6 @@ class chatServer:
                 self.state.user_sock.pop(self.state.sock_user.pop(leavingClient))
                 self.state.timeout.pop(leavingClient)
 
-                if(leavingClient in self.state.sock_room):
-                    clientRoom = self.state.sock_room.pop(leavingClient)
-                    self.state.rooms[clientRoom].remove(leavingClient)
 
                 await leavingClient.close()
                 
