@@ -1,3 +1,5 @@
+'''Chooses the array of clients who'll receive the data to be broadcasted'''
+
 '''Global Broadcasts'''
 def every(clientSock, destination:str, state:object):     
     rC = list(state.sock_user)

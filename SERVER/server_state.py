@@ -1,3 +1,4 @@
+'''Global Variables of the Server'''
 class serverState:
     def __init__(self):
         self.sock_user= {}             # socket : username

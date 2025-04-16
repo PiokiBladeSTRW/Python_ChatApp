@@ -38,7 +38,7 @@ class chatServer:
 
 
     async def broadcast(self, clientSock, payload:str, destination:str):
-        receivingClients = data_router.parse_destination(clientSock, destination, self.state)
+        receivingClients = routing.parse_destination(clientSock, destination, self.state)
 
         if(receivingClients):
             for client in receivingClients:
@@ -111,7 +111,7 @@ import websockets
 import json
 import time
 
-import data_router
+import routing
 import message_handler 
 from server_state import serverState
 

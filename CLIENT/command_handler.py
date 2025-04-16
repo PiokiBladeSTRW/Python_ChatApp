@@ -1,3 +1,4 @@
+'''Handle Commands used by Client: Bring Changes and parse message for server if needed'''
 
 '''Handle DMS'''
 def handle_dm(args:str, state:object):      

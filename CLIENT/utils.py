@@ -1,3 +1,5 @@
+'''Mini Functions grouped together that can be utilized'''
+
 def encode(payload:tuple, state:object):
     '''
     Types:

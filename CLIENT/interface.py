@@ -1,3 +1,5 @@
+'''Handle (bring about requried changes) and Display Incoming Data from Server'''
+
 '''Handle Default Messages'''
 def msg(response:dict, state:object): 
     data = (response['timestamp'], response['sender'], response['content'])

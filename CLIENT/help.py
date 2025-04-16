@@ -1,3 +1,5 @@
+'''IN BETA FILE PURELY FOR TESTERS' SAKE'''
+
 print('''WELCOME TO CHAT APP!
 Still in Beta.
 

@@ -1,3 +1,4 @@
+'''Holds Global Variable per session'''
 class clientState:
     def __init__(self):
         self.clientUsrn = ''

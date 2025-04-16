@@ -1,7 +1,5 @@
 
-''' This code Manages Display. Any Pieces of Strings can be formatted here'''
-'''DATA: (timestamp, sender, content)'''
-
+'''Formats Message as required for Different Displays for Different Purposes'''
 def format(data:tuple, tags:tuple):   
     if(data[0]): timestamp = time.strftime("%H:%M", time.localtime(float(data[0])))
     
@@ -26,6 +24,8 @@ def format(data:tuple, tags:tuple):
     return message
 
 import time
+
+'''DATA: (timestamp, sender, content)'''
 
 '''TAGS:
 

@@ -1,3 +1,5 @@
+'''Handle Incoming Messages (Bring about Required Changes) and Prepare data for Broadcast to Require Reciepents'''
+
 '''Handle DMs'''
 def msg(clientSock:object,response:dict, state:object): 
     #Room
