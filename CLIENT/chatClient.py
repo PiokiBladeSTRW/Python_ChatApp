@@ -3,9 +3,10 @@ class chatClient:
     def __init__(self):
         self.state = clientState()
         self.heartbeatPing = 20
+        self.serverAddress = "ws://localhost:8765"
 
     async def connectStartup(self):
-        async with websockets.connect("ws://localhost:8765") as clientSocket:   
+        async with websockets.connect(self.serverAddress) as clientSocket:   
             self.state.clientSock = clientSocket       
 
             # Handle Session Log-in
