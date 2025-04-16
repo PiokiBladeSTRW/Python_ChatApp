@@ -7,7 +7,20 @@ class chatClient:
 
     async def connect(self):
         async with websockets.connect("ws://localhost:8765") as clientSocket:   
-            self.state.clientSock = clientSocket             
+            self.state.clientSock = clientSocket       
+
+            # Handle Session Log-in
+            while True:     
+                content = auth.begin_process()
+                await self.send((content, 'auth'))
+                response = json.loads(await clientSocket.recv())
+                
+                if(response['content']):
+                    self.state.clientUsrn = content['username']
+                    break
+                continue
+
+            
 
             self.state.clientUsrn = input("\nENTER USERNAME: ").strip()
 
@@ -84,6 +97,7 @@ import asyncio
 import websockets
 import json
 
+import auth
 import command_handler
 import utils
 import interface

@@ -7,6 +7,7 @@ def encode(payload:tuple, state:object):
     ->usr: Entry of Username / Retrieval of '<> IS ONLINE'
     ->sys: System Message / Commands
     ->hbp: Heartbeat Pings. Letting Server know you are there.
+    ->auth: Handles Authentication of User
     '''
     
     timestamp = str(time.time())

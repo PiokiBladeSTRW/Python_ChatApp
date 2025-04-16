@@ -7,7 +7,7 @@ def msg(clientSock:object,response:dict, state:object):
         room = response['receiver'][2::]
 
         if(room not in state.rooms): 
-            payload = dumps({'content': "[INVALID ROOM]", 'type':"sys"})
+            payload = json.dumps({'content': "[INVALID ROOM]", 'type':"sys"})
             return ('/s', payload, state)
         
         if(clientSock not in state.rooms[room]):                    
@@ -17,11 +17,11 @@ def msg(clientSock:object,response:dict, state:object):
         response.pop('receiver')
         response['sender'] = f"[{room}] {response['sender']}"
 
-        return (f'/r{room}', dumps(response), state)
+        return (f'/r{room}', json.dumps(response), state)
     
     #DM
     receiver = response.pop('receiver')
-    return (receiver, dumps(response), state)
+    return (receiver, json.dumps(response), state)
 
 '''Handle Log In Messages'''
 def usr(clientSock:object,response:dict, state:object): 
@@ -31,7 +31,7 @@ def usr(clientSock:object,response:dict, state:object):
     state.user_sock[response['sender']] = clientSock
     state.sock_user[clientSock] = response['sender']
 
-    return ('/.', dumps(response), state)
+    return ('/.', json.dumps(response), state)
 
 '''Handle System Messages'''
 def sys(clientSock:object,response:dict, state:object):  
@@ -45,25 +45,57 @@ def sys(clientSock:object,response:dict, state:object):
         data.remove(response['sender'])
         data = '\n'.join(data)
 
-        payload = dumps({'content': data, 'type': 'sys'})        
+        payload = json.dumps({'content': data, 'type': 'sys'})        
     
     elif(content == '/r'):
         data = '\n'.join(state.rooms.keys())
 
-        payload = dumps({'content': data, 'type': 'sys'})
+        payload = json.dumps({'content': data, 'type': 'sys'})
     
     elif(content.startswith('/c')):                            
         data = response['content'][2::]
         state.rooms[data] = [state.user_sock[response['sender']]]
         state.sock_room[clientSock] = data
 
-        payload = dumps({'content': f"Room {data} Is LIVE", 'type': "sys"})        
+        payload = json.dumps({'content': f"Room {data} Is LIVE", 'type': "sys"})        
     
     return ('/s', payload, state)       
 
 '''Handle HeartBeat Pings'''
 def hbp(clientSock:object,response:dict, state:object): 
     return ('*', '/h', state)   #Special to avoid time import
+
+'''Handle AUTHENTICATION'''
+def auth(clientSock:object,response:dict, state:object):
+    content = response['content']
+    
+    #Relog
+    if(content['username'] in state.user_sock):        
+        return ('*', '/d', state)
+
+    #Register
+    if(content['action'] == 'reg'):
+        with open('accounts.json', 'r') as f:
+            accounts = json.load(f)
+            accounts[content['username']] = {"passwd": content['passwd']}
+        
+        with open('accounts.json', 'w') as f:
+            json.dump(accounts, f)
+
+        return ('/s', json.dumps({"content": True, "type":"auth"}), state)
+    
+    #LogIn
+    elif(content['action'] == 'log'):
+        with open('accounts.json', 'r') as f:
+            accounts = json.load(f)
+
+            if(content['username'] in accounts):
+                if(accounts[content['username']]['passwd'] == content['passwd']):
+                    return ('/s', json.dumps({"content": True, "type":"auth"}), state)
+                
+            return ('/s', json.dumps({"content": False, "type":"auth"}), state)
+    
+    
 
 
 '''-------------------------------------'''
@@ -73,7 +105,7 @@ def hbp(clientSock:object,response:dict, state:object):
 def parse_response( clientSock:object, response:dict, state:object):
     if(response['type'] in types): 
         data = types[response['type']](clientSock, response, state)
-        return data    
+        return data  
     else:
         raise Exception("●→INVALID MESSAGE TYPE RECEIVED")
 
@@ -83,9 +115,10 @@ types ={
     "usr": usr,
     "sys": sys,
     'hbp': hbp,
+    'auth': auth
 }
 
-from json import dumps
+import json
 
 
 '''-------------------------------------'''
