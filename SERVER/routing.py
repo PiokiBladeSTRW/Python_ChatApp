@@ -6,7 +6,6 @@ def every(clientSock, destination:str, state:object):
     if(clientSock in state.sock_user):
         rC.remove(clientSock)
 
-    print("\n->", rC)
     return tuple(rC)
 
 '''Room Broadcasts'''
