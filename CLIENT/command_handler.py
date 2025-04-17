@@ -13,50 +13,59 @@ Commands and Actions
 '''
 
 '''Handle DMS'''
-def handle_dm(args:str, state:object):      
+def handle_dm(args:list, state:object):      
     receiver_change(state, args[0])
     payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload, state)
 
-'''Join a Room'''
-def join_room(args:str, state:object): 
-    receiver_change(state, '/r'+args[0])
-    payload = (' '.join(args[1::]), state.msgTypes['message'])
-    return ('send', payload, state)
+'''Room Related Commands'''
+def room(args:list, state:object): 
+    '''Join a Room'''
+    def join_room(args:list, state:object): 
+        receiver_change(state, '/r'+args[0])
+        payload = (' '.join(args[1::]), state.msgTypes['message'])
+        return ('send', payload, state)    
+        
+    '''Create a Room'''
+    def create_room(args:list, state:object): 
+        receiver_change(state, '/r'+args[0])
+                    
+        payload = ('/c'+args[0], state.msgTypes['system'])
+        return ('send', payload, state)
+    
+    match args[0]:
+        case "join": return join_room(args[1::], state)
+        case "create": return create_room(args[1::], state)
+        case _: print("INVALID COMMAND")
+        
+    return (None, None, state)
 
 '''Reset Receiver'''
-def reset_rec(args:str, state:object): 
+def reset_rec(args:list, state:object): 
     receiver_change(state, '')
     return (None, None, state)
     
 '''Backtrack Receiver'''
-def back_rec(args:str, state:object): 
+def back_rec(args:list, state:object): 
     receiver_change(state, state.pReceiver)
     return (None, None, state)
-    
-'''Create a Room'''
-def create_room(args:str, state:object): 
-    receiver_change(state, '/r'+args[0])
-                
-    payload = ('/c'+args[0], state.msgTypes['system'])
-    return ('send', payload, state)
 
 '''Exit Program'''
-def close(args:str, state:object): 
+def close(args:list, state:object): 
     return ('exit', None, state)
     
 '''List of every Online Client'''
-def online_list(args:str, state:object): 
+def online_list(args:list, state:object): 
     payload = ('/o', state.msgTypes['system'])    
     return ('send', payload, state)
 
 '''List of every Online Room'''    
-def rooms_list(args:str, state:object): 
+def rooms_list(args:list, state:object): 
     payload = ('/r', state.msgTypes['system'])
     return ('send', payload, state)
 
 '''Display Help'''
-def chat_help(args:str, state:object):
+def chat_help(args:list, state:object):
     import help
     return (None, None, state)
 
@@ -94,24 +103,23 @@ def parse_command(input_cmd:str, state:object):
         cmd, args = parts[0], parts[1::]        
     
     if cmd in commands:        
-        data = commands[cmd](args, state)            
+        data = commands[cmd](args, state)
         return data
-    else:
-        print("INVALID COMMAND")
-        return (None, None, state)
+    
+    print("INVALID COMMAND")
+    return (None, None, state)
     
 
 '''Convert Command to Function call in One Step'''
 commands = {
-    "/dm": handle_dm,
-    "/join": join_room,
+    "/dm": handle_dm, 
+    "/room": room,
     "/#": reset_rec,
     "/b": back_rec,
-    "/create": create_room,
-    "/exit": close,
+    "/exit": close,    
     "/online": online_list,
     "/rooms": rooms_list,
-    "/help": chat_help,
+    "/help": chat_help,    
 }
 
 

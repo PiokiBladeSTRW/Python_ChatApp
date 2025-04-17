@@ -66,9 +66,10 @@ def authentication(clientSock:object,response:dict, state:object):
     '''Content Format: {Action: <>, Username: <>, Passwd: <>}'''
     
     #Relog
-    if(content['username'] in state.user_sock):        
+    if(content['username'] in state.user_sock): 
         content['action'] = 'relog'
-    
+
+    #Data is a List    
     data= auth.parse_authentication(clientSock, content, state)
 
     #Relog
@@ -76,11 +77,10 @@ def authentication(clientSock:object,response:dict, state:object):
         return data
     
     #Succesful
-    elif(data[1]['content']== True):
+    elif(data[1]== True):
         return ('*', '/logged', state)
-    
-    data[1] = json.dumps(data[1])    
-    return tuple(data)
+      
+    return data
 
 
 '''-------------------------------------'''

@@ -7,60 +7,60 @@ import secrets
 
 '''Register New User'''
 def reg(clientSock:object, content:dict, state:object): 
-    with open('accounts.json', 'r') as f:
-        accounts = json.load(f)
+    accounts = state.read_json("accounts.json")
 
-        #Ensure Username Doesn't Exist Already
-        if(content['username'] in accounts):
-            return ['/s', {"content": state.codes['er_Exists_username'], "type":"auth"}, state]        
-        
-        salt = secrets.token_hex(16)
-        salted_pass = content['passwd'] + salt
-        passwd = hashlib.sha256(salted_pass.encode()).hexdigest()
-        
-        accounts[content['username']] = {"passwd": passwd, "salt": salt}
+    #Ensure Username Doesn't Exist Already
+    if(content['username'] in accounts):        
+        return ('/s', json.dumps({"content": state.codes['er_Exists_username'], "type":"auth"}), state)      
+
+    #Secure the Data   
+    salt = secrets.token_hex(16)
+    salted_pass = content['passwd'] + salt
+    passwd = hashlib.sha256(salted_pass.encode()).hexdigest()
     
-    #Store Data
-    with open('accounts.json', 'w') as f:
-        json.dump(accounts, f)
+    #Store the Data
+    accounts[content['username']] = {"passwd": passwd, "salt": salt}
+    state.write_json("accounts.json", accounts)
 
     #Update Server Data
     state.user_sock[content['username']] = clientSock
     state.sock_user[clientSock] = content["username"]
 
     #Return Confirmation
-    return ('/s', {"content": True, "type":"auth"}, state)
+    return ('/s', True, state)
 
 '''Log in to already made Account'''
 def log(clientSock:object, content:dict, state:object):
-    with open('accounts.json', 'r') as f:
-        accounts = json.load(f)        
+    accounts = state.read_json("accounts.json") 
 
     #Log In
     if(content['username'] in accounts):
+        #Hash password
         salt = accounts[content['username']]['salt']
         salted_pass = content['passwd'] + salt
         passwd = hashlib.sha256(salted_pass.encode()).hexdigest()
 
-        if(passwd== accounts[content['username']]['passwd']):            
+        #Match Password
+        if(passwd== accounts[content['username']]['passwd']):   
+
             #Update Server Data
             state.user_sock[content['username']] = clientSock
             state.sock_user[clientSock] = content["username"]
 
-            return ('/s', {"content": True, "type":"auth"}, state)
+            return ('/s', True, state)
         
-    return ['/s', {"content": state.codes['er_Invalid_login'], "type":"auth"}, state]
+    return ('/s', json.dumps({"content": state.codes['er_Invalid_login'], "type":"auth"}), state)
+
 
 '''Relog to currently Active Account'''
 def relog(clientSock:object, content:dict, state:object):
-    with open('accounts.json', 'r') as f:
-        accounts = json.load(f)
+    accounts = state.read_json("accounts.json")
     
     username = content['username']
     if(accounts[username]['passwd'] == content['passwd']):
         return ('*', '/relog', state)
 
-    return ['/s', {"content": state.codes['er_Invalid_login'], "type":"auth"}, state]
+    return ('/s', json.dumps({"content": state.codes['er_Invalid_login'], "type":"auth"}), state)
 
 '''-------------------------------------'''
 
