@@ -71,8 +71,11 @@ def authentication(clientSock:object,response:dict, state:object):
     
     data= auth.parse_authentication(clientSock, content, state)
 
+    #Relog
     if(data[0] == '*'):
         return data
+    
+    #Succesful
     elif(data[1]['content']== True):
         return ('*', '/logged', state)
     

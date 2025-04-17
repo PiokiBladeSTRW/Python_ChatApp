@@ -1,5 +1,8 @@
 '''Handle the Entire Log-in Process'''
 
+#Header
+import maskpass
+import hashlib
 legal_char = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890@#"
 
 '''Input Credentials from User:'''
@@ -10,7 +13,9 @@ def credentials_input(action):
         print("ILLEGAL CHARACTERS")
         return None
 
-    passwd = input("ENTER PASSWORD: ")
+    passwd = maskpass.askpass(prompt="ENTER PASSWORD: ", mask='*')
+    passwd = hashlib.sha256(passwd.encode()).hexdigest()
+
     
     content = {"action": action, "username": username, "passwd": passwd}
 

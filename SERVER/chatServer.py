@@ -31,7 +31,8 @@ class ChatServer:
     async def receive(self, clientSock:object):
         try:
             async for dataReceived in clientSock:   
-                response = json.loads(dataReceived)            
+                response = json.loads(dataReceived)   
+                print(response)         
 
                 '''Payload is json dumped message'''
                 destination, payload, self.state = message_handler.parse_response(clientSock, response, self.state)
