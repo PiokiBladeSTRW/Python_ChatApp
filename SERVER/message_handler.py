@@ -28,16 +28,12 @@ def handle_messages(clientSock:object,response:dict, state:object):
     receiver = response.pop('receiver')
     return (receiver, json.dumps(response), state)
 
-'''To Notify Others [is ONLINE]'''
-def user_online(clientSock:object,response:dict, state:object): 
-    return ('/.', json.dumps(response), state)
-
 '''Handle System Messages'''
 def system(clientSock:object,response:dict, state:object):  
     content = response['content']   
 
     if(content == '/e'):
-        return ('*', '/e', state)    #Special as disconnection is handled by async
+        return ('*', '/exit', state)    #Special as disconnection is handled by async
 
     elif(content == '/o'):    
         data = list(state.user_sock)
@@ -62,7 +58,7 @@ def system(clientSock:object,response:dict, state:object):
 
 '''Handle HeartBeat Pings'''
 def heartbeats(clientSock:object,response:dict, state:object): 
-    return ('*', '/h', state)   #Special to avoid time import
+    return ('*', '/hbp', state)   #Special to avoid time import
 
 '''Handle AUTHENTICATION'''
 def authentication(clientSock:object,response:dict, state:object):
@@ -70,9 +66,12 @@ def authentication(clientSock:object,response:dict, state:object):
     
     #Relog
     if(content['username'] in state.user_sock):        
-        return ('*', '/d', state)
+        return ('*', '/relog', state)
     
-    return auth.parse_authentication(clientSock, content, state)
+    data= auth.parse_authentication(clientSock, content, state)
+    if(data[1]['content']== True):
+        return ('*', '/logged', state)
+    return data
 
 
 '''-------------------------------------'''
@@ -89,7 +88,6 @@ def parse_response( clientSock:object, response:dict, state:object):
 '''Response Types'''
 types ={
     "msg": handle_messages,
-    "usr": user_online,
     "sys": system,
     'hbp': heartbeats,
     'auth': authentication

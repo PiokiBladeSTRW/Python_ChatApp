@@ -10,7 +10,7 @@ def reg(clientSock:object, content:dict, state:object):
 
         #Ensure Username Doesn't Exist Already
         if(content['username'] in accounts):
-            return ('/s', json.dumps({"content": "USERNAME EXISTS", "type":"auth"}), state)
+            return ('/s', {"content": "USERNAME EXISTS", "type":"auth"}, state)
         
         accounts[content['username']] = {"passwd": content['passwd']}
     
@@ -23,7 +23,7 @@ def reg(clientSock:object, content:dict, state:object):
     state.sock_user[clientSock] = content["username"]
 
     #Return Confirmation
-    return ('/s', json.dumps({"content": True, "type":"auth"}), state)
+    return ('/s', {"content": True, "type":"auth"}, state)
 
 '''Log in to already made Account'''
 def log(clientSock:object, content:dict, state:object):
@@ -37,9 +37,9 @@ def log(clientSock:object, content:dict, state:object):
             state.user_sock[content['username']] = clientSock
             state.sock_user[clientSock] = content["username"]
 
-            return ('/s', json.dumps({"content": True, "type":"auth"}), state)
+            return ('/s', {"content": True, "type":"auth"}, state)
         
-    return ('/s', json.dumps({"content": False, "type":"auth"}), state)
+    return ('/s', {"content": False, "type":"auth"}, state)
 
 
 '''-------------------------------------'''

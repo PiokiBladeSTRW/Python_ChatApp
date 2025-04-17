@@ -38,9 +38,8 @@ class ChatClient:
             await self.send((authContent, self.state.msgTypes['authentication']))
             response = json.loads(await self.state.clientSock.recv())
             
-            if(response['content']==True):
+            if(response['content']==True and response['type']=='auth'):
                 self.state.clientUsrn = authContent['username']
-                await self.send(('', 'usr'))
                 return
             
             print(f"{{System}}: {response['content']}")

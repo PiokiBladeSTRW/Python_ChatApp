@@ -67,6 +67,6 @@ def parse_response(response:dict, state:object):
 '''Response Types'''
 types ={
     "msg": incoming_message,
-    "usr": online_user,
+    "auth": online_user,
     "sys": system
 }

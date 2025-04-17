@@ -27,5 +27,13 @@ SERVER:
 3. /r2: To notify users that process is finished and they have relogged                     [User Alert]
 
 *Types
-1. usr: Broadcasting who logged online
+#1. usr: Broadcasting who logged online
 2. sys: System Message, returns Errors & Instructions [ like commands ]
+3. auth: Confirmation/Declination of User's attempt to log on; Presence of 'sender' key makes it a [is Online] msg
+
+*Destinations
+1. /. : Every Online Client
+2. /r : Everyone in room
+3. /s : To the user who sent
+4. *  : SPECIAL CASE
+5.    : Username of receiver

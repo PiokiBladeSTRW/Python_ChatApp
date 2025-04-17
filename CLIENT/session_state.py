@@ -7,8 +7,7 @@ class ClientState:
         self.clientSock = None
 
         self.msgTypes= {
-            "message": "msg",
-            "online": "usr",
+            "message": "msg",            
             "system": "sys",
             "heartbeat": "hbp",
             "authentication": "auth"

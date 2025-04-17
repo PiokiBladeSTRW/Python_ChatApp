@@ -39,9 +39,13 @@ class ChatServer:
                 # Handle Special Cases, otherwise broadcast
                 if(destination=='*'):
                     match payload:
-                        case '/e': await self.disconnectionPending.put(clientSock)
-                        case '/h': self.state.timeout[clientSock] = time.time()
-                        case '/d': await self.relog(response['sender'], clientSock)
+                        case '/exit': await self.disconnectionPending.put(clientSock)
+                        case '/hbp': self.state.timeout[clientSock] = time.time()
+                        case '/relog': await self.relog(response['sender'], clientSock)
+                        case '/logged':
+                            username = response['content']['username']
+                            await self.broadcast(clientSock, json.dumps({"content":True, "type": "auth"}), '/s')
+                            await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
                 else:
                     await self.broadcast(clientSock, payload, destination)
         except websockets.exceptions.ConnectionClosed:
@@ -83,7 +87,7 @@ class ChatServer:
             if(oldClientSock not in self.state.sock_user):
                 self.state.user_sock[username] = clientSock
                 self.state.sock_user[clientSock] = username
-                await self.broadcast(clientSock, json.dumps({"sender":username, "type": "usr"}), '/.')
+                await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
 
                 await self.send(clientSock, json.dumps({"content": "/r2", "type": "sys"}))
                 return

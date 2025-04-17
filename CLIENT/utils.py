@@ -15,10 +15,9 @@ def encode(payload:tuple, state:object):
 
     Types:
     ->msg: Default String Message
-    ->usr: Entry of Username / Retrieval of '<> IS ONLINE'
     ->sys: System Message / Commands
     ->hbp: Heartbeat Pings. Letting Server know you are there.
-    ->auth: Handles Authentication of User
+    ->auth: Handles Authentication of User and ONLINE displays 
     '''    
 
     timestamp = str(time.time())
@@ -29,7 +28,7 @@ def encode(payload:tuple, state:object):
             "type": payload[1],
             "timestamp": timestamp}
     
-    if(type in ('usr', 'sys', 'hbp')):
+    if(type in ('auth', 'sys', 'hbp')):
         data.pop('receiver')
         data.pop('timestamp')
 
