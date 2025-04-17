@@ -63,13 +63,17 @@ def heartbeats(clientSock:object,response:dict, state:object):
 '''Handle AUTHENTICATION'''
 def authentication(clientSock:object,response:dict, state:object):
     content = response['content']
+    '''Content Format: {Action: <>, Username: <>, Passwd: <>}'''
     
     #Relog
     if(content['username'] in state.user_sock):        
-        return ('*', '/relog', state)
+        content['action'] = 'relog'
     
     data= auth.parse_authentication(clientSock, content, state)
-    if(data[1]['content']== True):
+
+    if(data[0] == '*'):
+        return data
+    elif(data[1]['content']== True):
         return ('*', '/logged', state)
     
     data[1] = json.dumps(data[1])    

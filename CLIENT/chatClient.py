@@ -38,12 +38,24 @@ class ChatClient:
             await self.send((authContent, self.state.msgTypes['authentication']))
             response = json.loads(await self.state.clientSock.recv())
             
-            if(response['content']==True and response['type']=='auth'):
+            if(response['content']==True and response['type']=='auth'):                
                 self.state.clientUsrn = authContent['username']
                 return
             
             if(response['content'] in self.state.system_codes):
                 response['content'] = self.state.system_codes[response['content']]
+                
+                #Relog
+                if(response['content'] == self.state.system_codes[102]):               
+                    print(f"{{System}}: {response['content']}")
+                    response = json.loads(await self.state.clientSock.recv())
+                    response['content'] = self.state.system_codes[response['content']]
+
+                    if(response['content'] == self.state.system_codes[103]):                        
+                        self.state.clientUsrn = authContent['username']
+                        print(f"{{System}}: {response['content']}")
+                        return
+
             
             print(f"{{System}}: {response['content']}")
             continue

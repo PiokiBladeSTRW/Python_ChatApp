@@ -28,7 +28,7 @@ def encode(payload:tuple, state:object):
             "type": payload[1],
             "timestamp": timestamp}
     
-    if(type in ('auth', 'sys', 'hbp')):
+    if(data['type'] in ('auth', 'sys', 'hbp')):
         data.pop('receiver')
         data.pop('timestamp')
 

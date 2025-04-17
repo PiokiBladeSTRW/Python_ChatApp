@@ -41,6 +41,16 @@ def log(clientSock:object, content:dict, state:object):
         
     return ['/s', {"content": state.codes['er_Invalid_login'], "type":"auth"}, state]
 
+'''Relog to currently Active Account'''
+def relog(clientSock:object, content:dict, state:object):
+    with open('accounts.json', 'r') as f:
+        accounts = json.load(f)
+    
+    username = content['username']
+    if(accounts[username]['passwd'] == content['passwd']):
+        return ('*', '/relog', state)
+
+    return ['/s', {"content": state.codes['er_Invalid_login'], "type":"auth"}, state]
 
 '''-------------------------------------'''
 
@@ -50,3 +60,4 @@ def parse_authentication(clientSock:object, content:dict, state:object):
     match content['action']:
         case 'reg': return reg(clientSock, content, state)
         case 'log': return log(clientSock, content, state)
+        case 'relog': return relog(clientSock, content, state)

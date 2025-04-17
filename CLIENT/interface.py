@@ -29,8 +29,7 @@ def online_user(response:dict, state:object):
     return state
 
 '''Handle System Messages'''
-def system(response:dict, state:object): 
-    
+def system(response:dict, state:object):     
     if(response['content'] in state.system_codes):
 
         if(response['content'] == 101):

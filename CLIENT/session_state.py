@@ -14,8 +14,9 @@ class ClientState:
         }
 
         self.system_codes ={
+            101: "",
             102: "OLD SESSION LIVE; FORCE CLOSING..",
-            202: "SUCCESSFUL RELOG!",
+            103: "SUCCESSFUL RELOG!",
             201 : "Invalid Login Credentials",
             202 : "Username already in Use"
         }
