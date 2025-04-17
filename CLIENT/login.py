@@ -2,7 +2,6 @@
 
 #Header
 import maskpass
-import hashlib
 legal_char = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890@#"
 
 '''Input Credentials from User:'''

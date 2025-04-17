@@ -3,6 +3,7 @@
 #Header
 import json
 import hashlib
+import secrets
 
 '''Register New User'''
 def reg(clientSock:object, content:dict, state:object): 
@@ -11,11 +12,13 @@ def reg(clientSock:object, content:dict, state:object):
 
         #Ensure Username Doesn't Exist Already
         if(content['username'] in accounts):
-            return ['/s', {"content": state.codes['er_Exists_username'], "type":"auth"}, state]
+            return ['/s', {"content": state.codes['er_Exists_username'], "type":"auth"}, state]        
         
-        passwd = hashlib.sha256(content['passwd'].encode()).hexdigest()
+        salt = secrets.token_hex(16)
+        salted_pass = content['passwd'] + salt
+        passwd = hashlib.sha256(salted_pass.encode()).hexdigest()
         
-        accounts[content['username']] = {"passwd": passwd}
+        accounts[content['username']] = {"passwd": passwd, "salt": salt}
     
     #Store Data
     with open('accounts.json', 'w') as f:
@@ -31,12 +34,15 @@ def reg(clientSock:object, content:dict, state:object):
 '''Log in to already made Account'''
 def log(clientSock:object, content:dict, state:object):
     with open('accounts.json', 'r') as f:
-        accounts = json.load(f)
+        accounts = json.load(f)        
 
     #Log In
-    passwd = hashlib.sha256(content['passwd'].encode()).hexdigest()
     if(content['username'] in accounts):
-         if(passwd== accounts[content['username']]['passwd']):            
+        salt = accounts[content['username']]['salt']
+        salted_pass = content['passwd'] + salt
+        passwd = hashlib.sha256(salted_pass.encode()).hexdigest()
+
+        if(passwd== accounts[content['username']]['passwd']):            
             #Update Server Data
             state.user_sock[content['username']] = clientSock
             state.sock_user[clientSock] = content["username"]
