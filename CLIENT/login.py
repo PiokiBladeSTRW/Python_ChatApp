@@ -14,8 +14,6 @@ def credentials_input(action):
         return None
 
     passwd = maskpass.askpass(prompt="ENTER PASSWORD: ", mask='*')
-    passwd = hashlib.sha256(passwd.encode()).hexdigest()
-
     
     content = {"action": action, "username": username, "passwd": passwd}
 

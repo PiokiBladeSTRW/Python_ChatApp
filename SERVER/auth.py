@@ -2,6 +2,7 @@
 
 #Header
 import json
+import hashlib
 
 '''Register New User'''
 def reg(clientSock:object, content:dict, state:object): 
@@ -12,7 +13,9 @@ def reg(clientSock:object, content:dict, state:object):
         if(content['username'] in accounts):
             return ['/s', {"content": state.codes['er_Exists_username'], "type":"auth"}, state]
         
-        accounts[content['username']] = {"passwd": content['passwd']}
+        passwd = hashlib.sha256(content['passwd'].encode()).hexdigest()
+        
+        accounts[content['username']] = {"passwd": passwd}
     
     #Store Data
     with open('accounts.json', 'w') as f:
@@ -31,8 +34,9 @@ def log(clientSock:object, content:dict, state:object):
         accounts = json.load(f)
 
     #Log In
+    passwd = hashlib.sha256(content['passwd'].encode()).hexdigest()
     if(content['username'] in accounts):
-         if(accounts[content['username']]['passwd'] == content['passwd']):            
+         if(passwd== accounts[content['username']]['passwd']):            
             #Update Server Data
             state.user_sock[content['username']] = clientSock
             state.sock_user[clientSock] = content["username"]
