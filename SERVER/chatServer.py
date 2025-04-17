@@ -24,47 +24,49 @@ class ChatServer:
             await asyncio.Future()  #while True: but with 0 CPU usage            
         
     async def handleClient(self, clientSock):
-        await asyncio.gather(self.receive(clientSock), self.heartbeats(), self.Disconnect())
+        try:
+            await asyncio.gather(self.receive(clientSock), self.heartbeats(), self.Disconnect())
+        except websockets.exceptions.ConnectionClosed:
+            print("Closed")
 
 
     '''Receive and Broadcast Data'''
     async def receive(self, clientSock:object):
-        try:
-            async for dataReceived in clientSock:   
-                response = json.loads(dataReceived)          
+        async for dataReceived in clientSock:   
+            response = json.loads(dataReceived)
 
-                '''Payload is json dumped message'''
-                destination, payload, self.state = message_handler.parse_response(clientSock, response, self.state)
-                
-                # Handle Special Cases, otherwise broadcast
-                if(destination=='*'):
-                    match payload:
-                        case '/exit': await self.disconnectionPending.put(clientSock)
-                        case '/hbp': self.state.timeout[clientSock] = time.time()
-                        case '/relog': await self.relog(response['content']['username'], clientSock)
-                        case '/logged':
-                            username = response['content']['username']
-                            await self.broadcast(clientSock, json.dumps({"content":True, "type": "auth"}), '/s')
-                            await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
+            '''Payload is json dumped message'''
+            destination, payload, self.state = message_handler.parse_response(clientSock, response, self.state)
+            
+            # Handle Special Cases, otherwise broadcast
+            if(destination=='*'):
+                match payload:
+                    case '/exit': await self.disconnectionPending.put(clientSock)
+                    case '/hbp': self.state.timeout[clientSock] = time.time()
+                    case '/relog': await self.relog(response['content']['username'], clientSock)
+                    case '/logged':
+                        username = response['content']['username']
+                        await self.broadcast(clientSock, json.dumps({"content":True, "type": "auth"}), '/s')
+                        await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
 
-                else:
-                    await self.broadcast(clientSock, payload, destination)
-        except websockets.exceptions.ConnectionClosed:
-            print("CLOSED")
+            else:
+                await self.broadcast(clientSock, payload, destination)
 
     async def broadcast(self, clientSock:object, payload:str, destination:str):
+        #Obtain list of Receivers
         receivingClients = routing.parse_destination(clientSock, destination, self.state)
 
         if(receivingClients):
             for client in receivingClients:
                 await self.send(client, payload)  
 
-        else:            
-            #If Hollow Room or just one User, to avoid Buggy Rooms and './' Offline messages
+        else:           
+            #If no Receiving Clients but not an Error case
             if(destination.startswith('/r') or destination == '/.'):return
             
             payload = json.dumps({"sender":destination, "content":self.state.codes['user_exit'], "type":"sys"})
             await self.send(clientSock, payload)
+       
        
     async def send(self, receiveClient:object, payload:str):   #Prevents Server Crash in case of Lingering Ghost Sockets
         try:    
