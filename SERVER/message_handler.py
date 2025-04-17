@@ -71,7 +71,9 @@ def authentication(clientSock:object,response:dict, state:object):
     data= auth.parse_authentication(clientSock, content, state)
     if(data[1]['content']== True):
         return ('*', '/logged', state)
-    return data
+    
+    data[1] = json.dumps(data[1])    
+    return tuple(data)
 
 
 '''-------------------------------------'''

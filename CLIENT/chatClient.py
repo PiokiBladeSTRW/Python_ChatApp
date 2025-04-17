@@ -42,6 +42,9 @@ class ChatClient:
                 self.state.clientUsrn = authContent['username']
                 return
             
+            if(response['content'] in self.state.system_codes):
+                response['content'] = self.state.system_codes[response['content']]
+            
             print(f"{{System}}: {response['content']}")
             continue
 

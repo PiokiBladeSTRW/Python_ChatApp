@@ -12,3 +12,10 @@ class ClientState:
             "heartbeat": "hbp",
             "authentication": "auth"
         }
+
+        self.system_codes ={
+            102: "OLD SESSION LIVE; FORCE CLOSING..",
+            202: "SUCCESSFUL RELOG!",
+            201 : "Invalid Login Credentials",
+            202 : "Username already in Use"
+        }

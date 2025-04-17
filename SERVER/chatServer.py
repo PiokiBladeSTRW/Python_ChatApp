@@ -46,6 +46,7 @@ class ChatServer:
                             username = response['content']['username']
                             await self.broadcast(clientSock, json.dumps({"content":True, "type": "auth"}), '/s')
                             await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
+
                 else:
                     await self.broadcast(clientSock, payload, destination)
         except websockets.exceptions.ConnectionClosed:
@@ -62,7 +63,7 @@ class ChatServer:
             #If Hollow Room or just one User, to avoid Buggy Rooms and './' Offline messages
             if(destination.startswith('/r') or len(self.state.sock_user)==1): return
 
-            payload = json.dumps({"sender":destination, "content":"/e", "type":"sys"})
+            payload = json.dumps({"sender":destination, "content":self.state.codes['user_exit'], "type":"sys"})
             await self.send(clientSock, payload)
        
     async def send(self, receiveClient:object, payload:str):   #Prevents Server Crash in case of Lingering Ghost Sockets
@@ -76,7 +77,7 @@ class ChatServer:
     async def relog(self, username, clientSock):
 
         #So User knows to wait while they Relog
-        await self.send(clientSock, json.dumps({"content": "/r1", "type":"sys"}))
+        await self.send(clientSock, json.dumps({"content": self.state.codes['relog_begin'], "type":"sys"}))
 
         oldClientSock = self.state.user_sock[username]
         await self.disconnectionPending.put(oldClientSock)
@@ -89,7 +90,7 @@ class ChatServer:
                 self.state.sock_user[clientSock] = username
                 await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
 
-                await self.send(clientSock, json.dumps({"content": "/r2", "type": "sys"}))
+                await self.send(clientSock, json.dumps({"content": self.state.codes['relog_finish'], "type": "sys"}))
                 return
 
     async def heartbeats(self):
@@ -116,7 +117,7 @@ class ChatServer:
                 self.state.timeout.pop(leavingClient)
 
                 #Broadcast others that User is Offline                
-                payload = json.dumps({"sender":self.state.sock_user[leavingClient], "content": "/e", "type":"sys"})                
+                payload = json.dumps({"sender":self.state.sock_user[leavingClient], "content": self.state.codes['user_exit'], "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')
 
                 await leavingClient.close()

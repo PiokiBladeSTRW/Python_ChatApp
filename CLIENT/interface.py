@@ -30,20 +30,21 @@ def online_user(response:dict, state:object):
 
 '''Handle System Messages'''
 def system(response:dict, state:object): 
-    if(response['content'] == '/e'):
-        data = ('', response['sender'], 'is OFFLINE')
-        print(formatting.format(data, ('s', 'c', 'S')))
+    
+    if(response['content'] in state.system_codes):
 
-        if(state.receiver == response['sender']):
-            state.receiver = ''
+        if(response['content'] == 101):
+            data = ('', response['sender'], 'is OFFLINE')
+            print(formatting.format(data, ('s', 'c', 'S')))
 
-        return state
+            if(state.receiver == response['sender']):
+                state.receiver = ''
 
-    elif(response['content'] == '/r1'): 
-        data = ('', '{System}', "OLD SESSION LIVE; FORCE CLOSING..")
+            return state
 
-    elif(response['content'] == '/r2'): 
-        data = ('', '{System}', "SUCCESSFUL RELOG!")
+        else:
+            data= ('', '{System}', state.system_codes[response['content']])
+
     
     else:    
         data = ('', '{System}', response['content']) 

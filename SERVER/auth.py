@@ -10,7 +10,7 @@ def reg(clientSock:object, content:dict, state:object):
 
         #Ensure Username Doesn't Exist Already
         if(content['username'] in accounts):
-            return ('/s', {"content": "USERNAME EXISTS", "type":"auth"}, state)
+            return ['/s', {"content": state.codes['er_Exists_username'], "type":"auth"}, state]
         
         accounts[content['username']] = {"passwd": content['passwd']}
     
@@ -39,7 +39,7 @@ def log(clientSock:object, content:dict, state:object):
 
             return ('/s', {"content": True, "type":"auth"}, state)
         
-    return ('/s', {"content": False, "type":"auth"}, state)
+    return ['/s', {"content": state.codes['er_Invalid_login'], "type":"auth"}, state]
 
 
 '''-------------------------------------'''

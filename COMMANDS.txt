@@ -27,9 +27,8 @@ SERVER:
 3. /r2: To notify users that process is finished and they have relogged                     [User Alert]
 
 *Types
-#1. usr: Broadcasting who logged online
-2. sys: System Message, returns Errors & Instructions [ like commands ]
-3. auth: Confirmation/Declination of User's attempt to log on; Presence of 'sender' key makes it a [is Online] msg
+1. sys: System Message, returns Errors & Instructions [ like commands ]
+2. auth: Confirmation/Declination of User's attempt to log on; Presence of 'sender' key makes it a [is Online] msg
 
 *Destinations
 1. /. : Every Online Client
@@ -37,3 +36,11 @@ SERVER:
 3. /s : To the user who sent
 4. *  : SPECIAL CASE
 5.    : Username of receiver
+
+CHANGE SERVER COMMANDS TO CODES. If Type:'sys', then match for prompt codes, if not then display message (rare case)
+CODES:
+1. 101 : To notify users when a client goes offline, Disconnecting Client being the Sender
+2. 102 : To notify users to wait while Server closes their old session                       [User Alert]
+3. 103 : To notify users that process is finished and they have relogged                     [User Alert]
+4. 201 : Invalid Credentials for Log In
+5. 202 : Existing Username
