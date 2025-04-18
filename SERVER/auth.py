@@ -52,9 +52,9 @@ def log(clientSock:object, content:dict, state:object):
 
 
 '''Relog to currently Active Account'''
-def relog(clientSock:object, content:dict, state:object):    
-    username = content['username']
-    if(state.accountsFile[username]['passwd'] == content['passwd']):
+def relog(clientSock:object, content:dict, state:object):   
+    user_uuid = state.uuidsFile[content['username']]
+    if(state.accountsFile[user_uuid]['passwd'] == content['passwd']):
         return ('*', '/relog', state)
 
     return ('/s', json.dumps({"content": state.codes['er_Invalid_login'], "type":"sys"}), state)

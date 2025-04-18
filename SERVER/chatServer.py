@@ -46,13 +46,12 @@ class ChatServer:
                 match payload:
                     case '/exit': await self.disconnectionPending.put(clientSock)
                     case '/hbp': self.state.timeout[clientSock] = time.time()
-                    case '/relog': await self.relog(response['content']['username'], clientSock)
+                    case '/relog': await self.relog(self.state.uuidsFile[response['content']['username']], clientSock)
                     case '/logged':
                         username = response['content']['username']
                         user_uuid = self.state.uuidsFile[username]
                         await self.broadcast(clientSock, json.dumps({"content":user_uuid, "type": "auth"}), '/s')
                         await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
-
             else:
                 await self.broadcast(clientSock, payload, destination)
 
@@ -122,12 +121,12 @@ class ChatServer:
                     clientRoom = self.state.sock_room.pop(leavingClient)
                     self.state.rooms[clientRoom].remove(leavingClient)
                  
-                uuid = self.state.sock_uuid.pop(leavingClient)       
+                uuid = self.state.sock_uuid.pop(leavingClient)
                 self.state.uuid_sock.pop(uuid)
 
-                self.state.timeout.pop(leavingClient)
+                self.state.timeout.pop(leavingClient)                
+                username = self.state.uuid_user(uuid)
                 
-                username = self.state.accountsFile[uuid]['username']
                 #Broadcast others that User is Offline                
                 payload = json.dumps({"sender":username, "content": self.state.codes['user_exit'], "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')
@@ -136,8 +135,7 @@ class ChatServer:
 
     '''Handle File I/O'''
     async def fileHandle(self):
-        while True:   
-            print("SAVED")         
+        while True:    
             #Accounts.json
             with open("accounts.json", 'w') as fileHandle:
                 json.dump(self.state.accountsFile, fileHandle)

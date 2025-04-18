@@ -38,7 +38,7 @@ SERVER:
 
 *Destinations
 1. /. : Every Online Client
-2. /r : Everyone in room
+2. /r<Room> : Everyone in room
 3. /s : To the user who sent
 4. *  : SPECIAL CASE
 5.    : Username of receiver

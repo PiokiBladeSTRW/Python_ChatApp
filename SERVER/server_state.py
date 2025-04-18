@@ -30,3 +30,6 @@ class ServerState:
             "er_Exists_username": 202,
             "er_Invalid_room": 203,
         }
+
+    def uuid_user(self, uuid):
+        return self.accountsFile[uuid]['username']

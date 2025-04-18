@@ -22,10 +22,9 @@ def user(clientSock, destination:str, state:object):
 
 '''DM Broadcasts'''
 def direct(destination:str, state:object): 
-    if(destination not in state.uuidsFile):
-        return None
+    if(destination not in state.uuid_sock):
+        return None    
     
-    destination = state.uuidsFile[destination]    
     return (state.uuid_sock[destination],)
 
 

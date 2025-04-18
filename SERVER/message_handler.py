@@ -7,40 +7,42 @@ import auth
 
 '''Handle Messages [DMs and Rooms]'''
 def handle_messages(clientSock:object,response:dict, state:object): 
-    
-    #Room
-    if(response['receiver'].startswith('/r')):
-        room = response['receiver'][2::]
+    def room_handle(room):
 
-        # Invalid Room
-        if(room not in state.rooms): 
+        #Invalid Room
+        if(room not in state.rooms):    
             payload = json.dumps({'content': state.codes['er_Invalid_room'], 'type':"sys"})
-            return ('/s', payload, state)
+            return('/s', payload, state)
         
-        # Not a Member of Room
+        #Not a Member of Room AND not invited [De Morgan's Law]
         if(not (clientSock in state.rooms[room] or clientSock in state.room_invites[room])):
-            payload = json.dumps({'content': state.codes['not_room_member'], "type":"sys"})
+            payload = json.dumps({'content': state.codes['not_room_member'], 'type':"sys"})
             return ('/s', payload, state)
-
         
+        response.pop('receiver') 
+        username = state.uuid_user(response['sender'])
+        response['sender'] = f"[{room}] {username}"
+                
         # If New Member
         if(clientSock in state.room_invites[room]):
             state.room_invites[room].remove(clientSock)
-
             state.rooms[room].append(clientSock)
             state.sock_room[clientSock] = room
-            response['sender'] = f"New Member! {response['sender']} Joined\n[{room}] {response['sender']}"
 
-        else:                    
-            response['sender'] = f"[{room}] {response['sender']}"
-
-        response.pop('receiver')
+            response['sender'] = f"New Member! {username} Joined\n{response['sender']}"
 
         return (f'/r{room}', json.dumps(response), state)
+
+    def dm_handle():
+        response['sender'] = state.uuid_user(response['sender'])
+        receiver = state.uuidsFile[response.pop('receiver')]
+        return (receiver, json.dumps(response), state)
     
-    #DM
-    receiver = state.uuidsFile[response.pop('receiver')]
-    return (receiver, json.dumps(response), state)
+    
+    if(response['receiver'].startswith('/r')):
+       return room_handle(response['receiver'][2::])
+    else:
+        return dm_handle()
 
 '''Handle System Messages'''
 def system(clientSock:object,response:dict, state:object):  
@@ -51,14 +53,12 @@ def system(clientSock:object,response:dict, state:object):
 
     elif(content == '/o'):    
         data = list(state.uuidsFile)
-        data.remove(response['sender'])
+        data.remove(state.uuids_user(response['sender']))
         data = '\n'.join(data)
-
-        payload = json.dumps({'content': data, 'type': 'sys'})        
+        payload = json.dumps({'content': data, 'type': 'sys'})
     
     elif(content == '/r'):
         data = '\n'.join(state.rooms.keys())
-
         payload = json.dumps({'content': data, 'type': 'sys'})
 
     elif(content.startswith('/i')):
@@ -66,31 +66,29 @@ def system(clientSock:object,response:dict, state:object):
         room, username= data[0], data[1]
         uuid= state.uuidsFile[username]
 
-
         if(room not in state.rooms):
             payload = json.dumps({"content": state.code['er_Invalid_room'], "type": "sys"})
 
         elif(uuid not in state.uuid_sock):
             payload = json.dumps({"content": state.codes['user_exit'], "type": "sys"})
         
-        elif(clientSock in state.rooms[room]):
+        elif(state.uuid_sock[uuid] in state.rooms[room] or state.uuid_sock[uuid] in state.room_invites[room]):
             payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
 
         else:        
-            state.room_invites[room].append(clientSock)
-
-            payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})
-            return (username, payload, state)
+            state.room_invites[room].append(state.uuid_sock[uuid])
+            payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
+            return (uuid, payload, state)
         
     
-    elif(content.startswith('/c')):                            
-        data = content[2::]
+    elif(content.startswith('/c')):
+        room = content[2::]
 
-        state.rooms[data] = [clientSock]
-        state.room_invites[data] = []
-        state.sock_room[clientSock] = data        
+        state.rooms[room] = [clientSock]
+        state.room_invites[room] = []
+        state.sock_room[clientSock] = room        
 
-        payload = json.dumps({'content': f"Room {data} Is LIVE", 'type': "sys"})        
+        payload = json.dumps({'content': f"Room {room} Is LIVE", 'type': "sys"})        
     
     return ('/s', payload, state)       
 
@@ -104,8 +102,9 @@ def authentication(clientSock:object,response:dict, state:object):
     '''Content Format: {Action: <>, Username: <>, Passwd: <>}'''
     
     #Relog
-    if(state.uuidsFile[content['username']] in state.uuid_sock): 
-        content['action'] = 'relog'
+    if(content['username'] in state.uuidsFile):
+        if(state.uuidsFile[content['username']] in state.uuid_sock): 
+            content['action'] = 'relog'
 
     #Data is a List    
     data= auth.parse_authentication(clientSock, content, state)
