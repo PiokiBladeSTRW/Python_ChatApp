@@ -31,13 +31,6 @@ class ServerState:
 
         with open(filePath, 'w') as fileHandler:
             json.dump(data_write, fileHandler)
-
-    # '''Function Handling one key JSON data Loading'''
-    # def read_json_key(self, filePath, key): 
-        
-    #     with open(filePath, 'r') as fileHandler:
-    #         fileData= json.load(fileHandler)
-    #         return fileData[key]
     
     '''Function Handling entire JSON load'''
     def read_json(self, filePath):
