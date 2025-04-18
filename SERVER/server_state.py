@@ -8,7 +8,7 @@ class ServerState:
         self.sock_uuid= {}              # socket : uuid
         self.uuid_sock = {}             # uuid : socket       
          
-        self.sock_room = {}             # socket : room     
+        self.sock_rooms = {}             # socket : [rooms]
         self.rooms= {}                  # room name : [sockets]
         self.room_invites = {}          # room name : [invited sockets]
 
@@ -19,6 +19,13 @@ class ServerState:
             
         with open("uuids.json", 'r') as fileHandle:
             self.uuidsFile = json.load(fileHandle)
+
+        with open ("rooms.json", 'r') as fileHandle:
+            self.roomsFile = json.load(fileHandle)
+
+        for room in self.roomsFile:
+            self.rooms[room] = []
+            self.room_invites[room] = []
 
         '''Codes for System Messages. 'er' prefix for Errors'''
         self.codes ={            

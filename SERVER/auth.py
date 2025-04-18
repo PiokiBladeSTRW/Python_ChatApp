@@ -19,12 +19,13 @@ def reg(clientSock:object, content:dict, state:object):
     user_uuid = str(uuid.uuid4())
     
     #Store the Data
-    state.accountsFile[user_uuid] = {"username":content['username'], "passwd": passwd, "salt": salt}
+    state.accountsFile[user_uuid] = {"username":content['username'], "passwd": passwd, "salt": salt, "rooms": []}
     state.uuidsFile[content['username']] = user_uuid
 
     #Update Server Data
     state.uuid_sock[user_uuid] = clientSock
     state.sock_uuid[clientSock] = user_uuid
+    state.sock_rooms[clientSock] = []
 
     #Return Confirmation
     return ('/s', True, state)
@@ -45,6 +46,11 @@ def log(clientSock:object, content:dict, state:object):
             #Update Server Data
             state.uuid_sock[user_uuid] = clientSock
             state.sock_uuid[clientSock] = user_uuid
+            state.sock_rooms[clientSock] = []
+
+            for room in state.accountsFile[user_uuid]['rooms']:
+                state.rooms[room].append(clientSock)                
+                state.sock_rooms[clientSock].append(room)
 
             return ('/s', True, state)
         

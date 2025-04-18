@@ -95,6 +95,11 @@ class ChatServer:
             if(oldClientSock not in self.state.sock_uuid):
                 self.state.uuid_sock[uuid] = clientSock
                 self.state.sock_uuid[clientSock] = uuid
+                self.state.sock_rooms[clientSock] = []
+
+                for room in self.state.accountsFile[uuid]['rooms']:
+                    self.state.rooms[room].append(clientSock)
+                    self.state.sock_rooms[clientSock].append(room)
 
                 username = self.state.accountsFile[uuid]['username']
                 await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
@@ -117,9 +122,11 @@ class ChatServer:
             if(leavingClient):  
                 
                 #Remove All Reference of Client
-                if(leavingClient in self.state.sock_room):
-                    clientRoom = self.state.sock_room.pop(leavingClient)
-                    self.state.rooms[clientRoom].remove(leavingClient)
+                if(leavingClient in self.state.sock_rooms):
+                    for room in self.state.sock_rooms[leavingClient]:
+                        self.state.rooms[room].remove(leavingClient)
+
+                    self.state.sock_rooms.pop(leavingClient)
                  
                 uuid = self.state.sock_uuid.pop(leavingClient)
                 self.state.uuid_sock.pop(uuid)
@@ -142,6 +149,9 @@ class ChatServer:
             
             with open("uuids.json", 'w') as fileHandle:
                 json.dump(self.state.uuidsFile, fileHandle)
+
+            with open("rooms.json", 'w') as fileHandle:
+                json.dump(self.state.roomsFile, fileHandle)
 
             await asyncio.sleep(self.fileIOFrequency)
 

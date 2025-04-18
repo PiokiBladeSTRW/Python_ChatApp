@@ -26,8 +26,12 @@ def handle_messages(clientSock:object,response:dict, state:object):
         # If New Member
         if(clientSock in state.room_invites[room]):
             state.room_invites[room].remove(clientSock)
+
             state.rooms[room].append(clientSock)
-            state.sock_room[clientSock] = room
+            state.sock_rooms[clientSock] = room
+
+            state.roomsFile[room].append(state.sock_uuid[clientSock])
+            state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
 
             response['sender'] = f"New Member! {username} Joined\n{response['sender']}"
 
@@ -45,7 +49,7 @@ def handle_messages(clientSock:object,response:dict, state:object):
         return dm_handle()
 
 '''Handle System Messages'''
-def system(clientSock:object,response:dict, state:object):  
+def system(clientSock:object, response:dict, state:object):  
     content = response['content']   
 
     if(content == '/e'):
@@ -84,9 +88,13 @@ def system(clientSock:object,response:dict, state:object):
     elif(content.startswith('/c')):
         room = content[2::]
 
+        state.room_invites[room] = []        
         state.rooms[room] = [clientSock]
-        state.room_invites[room] = []
-        state.sock_room[clientSock] = room        
+        
+        state.sock_rooms[clientSock].append(room)
+        
+        state.roomsFile[room] = [response['sender']]
+        state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
 
         payload = json.dumps({'content': f"Room {room} Is LIVE", 'type': "sys"})        
     
