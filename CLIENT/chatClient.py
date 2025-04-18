@@ -5,7 +5,6 @@ import websockets
 
 import login
 import command_handler
-import utils
 import interface
 from session_state import ClientState
 
@@ -91,7 +90,7 @@ class ChatClient:
 
     async def send(self, payload):  #To avoid Client Crash due to Down Server
         try: 
-            await self.state.clientSock.send(utils.encode(payload, self.state))
+            await self.state.clientSock.send(self.state.encode(payload))
         except websockets.exceptions.ConnectionClosed:
             print("SERVER DOWN") 
             await self.close()

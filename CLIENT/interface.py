@@ -37,10 +37,10 @@ def system(response:dict, state:object):
             print(formatting.format(data, ('s', 'c', 'S')))
 
             if(state.receiver == response['sender']):
-                state.receiver = ''                
+                state.receiver_change('')                
             return state
         if(response['content'] == 104):
-            state.receiver = ''
+            state.receiver_change('')
 
         data= ('', '{System}', state.system_codes[response['content']])
 

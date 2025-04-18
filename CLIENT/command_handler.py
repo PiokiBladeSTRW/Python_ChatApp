@@ -14,7 +14,7 @@ Commands and Actions
 
 '''Handle DMS'''
 def handle_dm(args:list, state:object):      
-    receiver_change(state, args[0])
+    state.receiver_change(args[0])
     payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload, state)
 
@@ -22,13 +22,13 @@ def handle_dm(args:list, state:object):
 def room(args:list, state:object): 
     '''Join a Room'''
     def join_room(args:list, state:object): 
-        receiver_change(state, '/r'+args[0])
+        state.receiver_change('/r'+args[0])
         payload = (' '.join(args[1::]), state.msgTypes['message'])
         return ('send', payload, state)    
         
     '''Create a Room'''
     def create_room(room_name:str, state:object): 
-        receiver_change(state, '/r'+room_name)
+        state.receiver_change('/r'+room_name)
                     
         payload = ('/c'+room_name, state.msgTypes['system'])
         return ('send', payload, state)
@@ -48,12 +48,12 @@ def room(args:list, state:object):
 
 '''Reset Receiver'''
 def reset_rec(args:list, state:object): 
-    receiver_change(state, '')
+    state.receiver_change('')
     return (None, None, state)
     
 '''Backtrack Receiver'''
 def back_rec(args:list, state:object): 
-    receiver_change(state, state.pReceiver)
+    state.receiver_change(state.pReceiver)
     return (None, None, state)
 
 '''Exit Program'''
@@ -78,20 +78,7 @@ def chat_help(args:list, state:object):
 
 '''-------------------------------------'''
 
-
-'''Change Receivers'''
-def receiver_change(state, receiver):
-    state.pReceiver = state.receiver
-    state.receiver = receiver
-    
-    if(receiver==''): receiver = 'No One'
-    
-    if(receiver.startswith('/r')):
-        print('', "="*25, f"Now Chatting in {receiver[2::]}", "="*25, sep='\n')
-        return
-
-    print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
-    
+ 
 '''Check if inputted Message is a Command'''
 def is_command(msg:str):
     if(msg.startswith('/')):

@@ -1,4 +1,10 @@
 '''Holds Global Variable per session'''
+
+# Header
+import time
+import json
+
+
 class ClientState:
     def __init__(self):
         self.clientUsrn = ''
@@ -22,3 +28,46 @@ class ClientState:
             202 : "Username already in Use",
             203 : "The Room does not Exist"
         }
+
+    '''Encode the data'''
+    def encode(self, payload:tuple):
+        timestamp = str(time.time())
+
+        data = {"sender": self.clientUsrn, 
+                "receiver": self.receiver, 
+                "content": payload[0], 
+                "type": payload[1],
+                "timestamp": timestamp}
+        
+        if(data['type'] in ('auth', 'sys', 'hbp')):
+            data.pop('receiver')
+            data.pop('timestamp')
+
+        '''
+        Message Format: {"sender": <username>, 
+                        "receiver": <username>, 
+                        "content": '--', 
+                        "type": 'msg/..',
+                        "timestamp": "[Hour:Minute]"}     
+
+        Types:
+        ->msg: Default String Message
+        ->sys: System Message / Commands
+        ->hbp: Heartbeat Pings. Letting Server know you are there.
+        ->auth: Handles Authentication of User and ONLINE displays 
+        '''   
+
+        return json.dumps(data)
+    
+    '''Change Receivers'''
+    def receiver_change(self, receiver):
+        self.pReceiver = self.receiver
+        self.receiver = receiver
+        
+        if(receiver==''): receiver = 'No One'
+        
+        if(receiver.startswith('/r')):
+            print('', "="*25, f"Now Chatting in {receiver[2::]}", "="*25, sep='\n')
+            return
+
+        print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
