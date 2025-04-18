@@ -34,7 +34,7 @@ SERVER:
 
 *Types
 1. sys: System Message, returns Errors & Instructions [ like commands ]
-2. auth: Confirmation/Declination of User's attempt to log on; Presence of 'sender' key makes it a [is Online] msg
+2. auth: Confirmation of User's attempt to log on; Presence of 'sender' key makes it a [is Online] msg
 
 *Destinations
 1. /. : Every Online Client

@@ -7,7 +7,7 @@ import json
 
 class ClientState:
     def __init__(self):
-        self.clientUsrn = ''
+        self.clientUUID = ''
         self.receiver = ''
         self.pReceiver = ''
         self.clientSock = None
@@ -33,7 +33,7 @@ class ClientState:
     def encode(self, payload:tuple):
         timestamp = str(time.time())
 
-        data = {"sender": self.clientUsrn, 
+        data = {"sender": self.clientUUID, 
                 "receiver": self.receiver, 
                 "content": payload[0], 
                 "type": payload[1],

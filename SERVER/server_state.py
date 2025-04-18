@@ -14,6 +14,11 @@ class ServerState:
 
         self.timeout= {}                # socket: last heartbeat  
         
+        with open("accounts.json", 'r') as fileHandle:
+            self.accountsFile = json.load(fileHandle)
+            
+        with open("uuids.json", 'r') as fileHandle:
+            self.uuidsFile = json.load(fileHandle)
 
         '''Codes for System Messages. 'er' prefix for Errors'''
         self.codes ={            
@@ -24,16 +29,4 @@ class ServerState:
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
             "er_Invalid_room": 203,
-        }           
-
-    '''Function Handling Json Data Writing'''
-    def write_json(self, filePath, data_write): 
-
-        with open(filePath, 'w') as fileHandler:
-            json.dump(data_write, fileHandler)
-    
-    '''Function Handling entire JSON load'''
-    def read_json(self, filePath):
-
-        with open(filePath, 'r') as fileHandler:
-            return json.load(fileHandler)
+        }

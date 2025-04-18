@@ -15,7 +15,10 @@ class ChatServer:
     def __init__(self): 
         self.state = ServerState() 
         self.timeout = 40
-        self.pignFrequency = 25
+        self.pingFrequency = 25
+
+        #For testing Purpose it's low, increase in future
+        self.fileIOFrequency = 30
         self.disconnectionPending = asyncio.Queue()
 
     async def start(self):
@@ -25,7 +28,7 @@ class ChatServer:
         
     async def handleClient(self, clientSock):
         try:
-            await asyncio.gather(self.receive(clientSock), self.heartbeats(), self.Disconnect())
+            await asyncio.gather(self.receive(clientSock), self.heartbeats(), self.Disconnect(), self.fileHandle())
         except websockets.exceptions.ConnectionClosed:
             print("Closed")
 
@@ -34,6 +37,11 @@ class ChatServer:
     async def receive(self, clientSock:object):
         async for dataReceived in clientSock:   
             response = json.loads(dataReceived)
+            print(response)
+
+            # The user isn't logging in
+            if(response['sender']!=''):
+                response['sender'] = self.state.accountsFile[response['sender']]['username']
 
             '''Payload is json dumped message'''
             destination, payload, self.state = message_handler.parse_response(clientSock, response, self.state)
@@ -46,7 +54,8 @@ class ChatServer:
                     case '/relog': await self.relog(response['content']['username'], clientSock)
                     case '/logged':
                         username = response['content']['username']
-                        await self.broadcast(clientSock, json.dumps({"content":True, "type": "auth"}), '/s')
+                        user_uuid = self.state.uuidsFile[username]
+                        await self.broadcast(clientSock, json.dumps({"content":user_uuid, "type": "auth"}), '/s')
                         await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
 
             else:
@@ -97,13 +106,13 @@ class ChatServer:
                 await self.send(clientSock, json.dumps({"content": self.state.codes['relog_finish'], "type": "sys"}))
                 return
 
-    async def heartbeats(self):
-        while True:            
+    async def heartbeats(self):        
+        while True:    
             for client in self.state.timeout:
                 cTime = time.time() - self.state.timeout[client]                
                 if(cTime >= self.timeout):    
                     await self.disconnectionPending.put(client)
-            await asyncio.sleep(self.pignFrequency)
+            await asyncio.sleep(self.pingFrequency)
 
     async def Disconnect(self): 
         while True:
@@ -126,6 +135,20 @@ class ChatServer:
                 await self.broadcast(leavingClient, payload, '/.')
 
                 await leavingClient.close()
+
+    '''Handle File I/O'''
+    async def fileHandle(self):
+        while True:   
+            print("SAVED")         
+            #Accounts.json
+            with open("accounts.json", 'w') as fileHandle:
+                json.dump(self.state.accountsFile, fileHandle)
+            
+            with open("uuids.json", 'w') as fileHandle:
+                json.dump(self.state.uuidsFile, fileHandle)
+
+            await asyncio.sleep(self.fileIOFrequency)
+
 
 '''Entry Point to Event Loop'''
 async def eventLoop():
