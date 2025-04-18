@@ -39,7 +39,7 @@ def handle_messages(clientSock:object,response:dict, state:object):
         return (f'/r{room}', json.dumps(response), state)
     
     #DM
-    receiver = response.pop('receiver')
+    receiver = state.uuidsFile[response.pop('receiver')]
     return (receiver, json.dumps(response), state)
 
 '''Handle System Messages'''
@@ -50,7 +50,7 @@ def system(clientSock:object,response:dict, state:object):
         return ('*', '/exit', state)    #Special as disconnection is handled by async
 
     elif(content == '/o'):    
-        data = list(state.user_sock)
+        data = list(state.uuidsFile)
         data.remove(response['sender'])
         data = '\n'.join(data)
 
@@ -64,18 +64,20 @@ def system(clientSock:object,response:dict, state:object):
     elif(content.startswith('/i')):
         data= content[2::].split(';')
         room, username= data[0], data[1]
+        uuid= state.uuidsFile[username]
 
 
         if(room not in state.rooms):
             payload = json.dumps({"content": state.code['er_Invalid_room'], "type": "sys"})
 
-        elif(username not in state.user_sock):
+        elif(uuid not in state.uuid_sock):
             payload = json.dumps({"content": state.codes['user_exit'], "type": "sys"})
         
-        elif(username in state.rooms[room]):
+        elif(clientSock in state.rooms[room]):
             payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
+
         else:        
-            state.room_invites[room].append(state.user_sock[username])
+            state.room_invites[room].append(clientSock)
 
             payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})
             return (username, payload, state)
@@ -84,7 +86,7 @@ def system(clientSock:object,response:dict, state:object):
     elif(content.startswith('/c')):                            
         data = content[2::]
 
-        state.rooms[data] = [state.user_sock[response['sender']]]
+        state.rooms[data] = [clientSock]
         state.room_invites[data] = []
         state.sock_room[clientSock] = data        
 
@@ -102,7 +104,7 @@ def authentication(clientSock:object,response:dict, state:object):
     '''Content Format: {Action: <>, Username: <>, Passwd: <>}'''
     
     #Relog
-    if(content['username'] in state.user_sock): 
+    if(state.uuidsFile[content['username']] in state.uuid_sock): 
         content['action'] = 'relog'
 
     #Data is a List    

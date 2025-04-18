@@ -37,11 +37,6 @@ class ChatServer:
     async def receive(self, clientSock:object):
         async for dataReceived in clientSock:   
             response = json.loads(dataReceived)
-            print(response)
-
-            # The user isn't logging in
-            if(response['sender']!=''):
-                response['sender'] = self.state.accountsFile[response['sender']]['username']
 
             '''Payload is json dumped message'''
             destination, payload, self.state = message_handler.parse_response(clientSock, response, self.state)
@@ -86,21 +81,23 @@ class ChatServer:
 
 
     '''Disconnection Handling'''
-    async def relog(self, username, clientSock):
+    async def relog(self, uuid, clientSock):
 
         #So User knows to wait while they Relog
         await self.send(clientSock, json.dumps({"content": self.state.codes['relog_begin'], "type":"sys"}))
 
-        oldClientSock = self.state.user_sock[username]
+        oldClientSock = self.state.uuid_sock[uuid]
         print("\n>>RELOG\n")
         await self.disconnectionPending.put(oldClientSock)
 
         #Once Disconnect Finishes
         while True:
             await asyncio.sleep(3)
-            if(oldClientSock not in self.state.sock_user):
-                self.state.user_sock[username] = clientSock
-                self.state.sock_user[clientSock] = username
+            if(oldClientSock not in self.state.sock_uuid):
+                self.state.uuid_sock[uuid] = clientSock
+                self.state.sock_uuid[clientSock] = uuid
+
+                username = self.state.accountsFile[uuid]['username']
                 await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
 
                 await self.send(clientSock, json.dumps({"content": self.state.codes['relog_finish'], "type": "sys"}))
@@ -125,11 +122,12 @@ class ChatServer:
                     clientRoom = self.state.sock_room.pop(leavingClient)
                     self.state.rooms[clientRoom].remove(leavingClient)
                  
-                username = self.state.sock_user.pop(leavingClient)       
-                self.state.user_sock.pop(username)
+                uuid = self.state.sock_uuid.pop(leavingClient)       
+                self.state.uuid_sock.pop(uuid)
 
                 self.state.timeout.pop(leavingClient)
-
+                
+                username = self.state.accountsFile[uuid]['username']
                 #Broadcast others that User is Offline                
                 payload = json.dumps({"sender":username, "content": self.state.codes['user_exit'], "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')

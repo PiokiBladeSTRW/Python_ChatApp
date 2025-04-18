@@ -5,8 +5,8 @@ import json
 
 class ServerState:
     def __init__(self):
-        self.sock_user= {}              # socket : username
-        self.user_sock = {}             # username : socket       
+        self.sock_uuid= {}              # socket : uuid
+        self.uuid_sock = {}             # uuid : socket       
          
         self.sock_room = {}             # socket : room     
         self.rooms= {}                  # room name : [sockets]

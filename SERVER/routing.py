@@ -2,8 +2,8 @@
 
 '''Global Broadcasts'''
 def every(clientSock, destination:str, state:object):
-    rC = list(state.sock_user)
-    if(clientSock in state.sock_user):
+    rC = list(state.sock_uuid)
+    if(clientSock in state.sock_uuid):
         rC.remove(clientSock)
 
     return tuple(rC)
@@ -22,10 +22,11 @@ def user(clientSock, destination:str, state:object):
 
 '''DM Broadcasts'''
 def direct(destination:str, state:object): 
-    if(destination not in state.user_sock):
+    if(destination not in state.uuidsFile):
         return None
     
-    return (state.user_sock[destination],)
+    destination = state.uuidsFile[destination]    
+    return (state.uuid_sock[destination],)
 
 
 '''-------------------------------------'''
@@ -36,7 +37,7 @@ def parse_destination(clientSock, destination:str, state:object):
     if(destination[:2] in dest):
         data = dest[destination[:2]](clientSock, destination, state)
         return data
-    else:
+    else:        
         data = direct(destination, state)
         return data
 

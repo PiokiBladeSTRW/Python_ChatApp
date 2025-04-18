@@ -23,8 +23,8 @@ def reg(clientSock:object, content:dict, state:object):
     state.uuidsFile[content['username']] = user_uuid
 
     #Update Server Data
-    state.user_sock[content['username']] = clientSock
-    state.sock_user[clientSock] = content["username"]
+    state.uuid_sock[user_uuid] = clientSock
+    state.sock_uuid[clientSock] = user_uuid
 
     #Return Confirmation
     return ('/s', True, state)
@@ -43,8 +43,8 @@ def log(clientSock:object, content:dict, state:object):
         if(passwd== state.accountsFile[user_uuid]['passwd']):   
 
             #Update Server Data
-            state.user_sock[content['username']] = clientSock
-            state.sock_user[clientSock] = content["username"]
+            state.uuid_sock[user_uuid] = clientSock
+            state.sock_uuid[clientSock] = user_uuid
 
             return ('/s', True, state)
         
