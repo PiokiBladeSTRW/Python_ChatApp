@@ -8,6 +8,8 @@ CLIENT:
 1. /e (Typed: '/exit'): Closes Program and Instructs Server to Remove the Client as it is now offline
 2. /o (Typed: '/online'): Requests Server for a List of Online Members
 3. /r (Typed: '/Rooms'): Requests Server for a List of Online Rooms
+4. /c (Type: '/create'): Creates a New Room
+5. /i (Typed: '/room ivnite'): Invites a Client to the Room
 
 The Rest of Client Commands: The command isn't sent to Server, only the payload (message/data) is
 
@@ -21,10 +23,14 @@ The Rest of Client Commands: The command isn't sent to Server, only the payload 
 
 SERVER:
 
-*Commands
-1. /e : To notify users when a client goes offline, Disconnecting Client being the Sender
-2. /r1: To notify users to wait while Server closes their old session                       [User Alert]
-3. /r2: To notify users that process is finished and they have relogged                     [User Alert]
+*CODES (Command Substituent):
+1. 101 : To notify users when a client goes offline, Disconnecting Client being the Sender
+2. 102 : To notify users to wait while Server closes their old session
+3. 103 : To notify users that process is finished and they have relogged
+4. 105 : To notify users that they are NOT a Member of the Room (not invited)
+5. 201 : Invalid Credentials for Log In
+6. 202 : Existing Username
+7. 203 : To notify users that their chosen room is non existent
 
 *Types
 1. sys: System Message, returns Errors & Instructions [ like commands ]
@@ -37,10 +43,16 @@ SERVER:
 4. *  : SPECIAL CASE
 5.    : Username of receiver
 
-CHANGE SERVER COMMANDS TO CODES. If Type:'sys', then match for prompt codes, if not then display message (rare case)
-CODES:
-1. 101 : To notify users when a client goes offline, Disconnecting Client being the Sender
-2. 102 : To notify users to wait while Server closes their old session                       [User Alert]
-3. 103 : To notify users that process is finished and they have relogged                     [User Alert]
-4. 201 : Invalid Credentials for Log In
-5. 202 : Existing Username
+
+REVERSE DICTIONARIES:
+ Reverse of a Dictionary to avoid Dictionary Look ups [Value -> Key]
+
+ 1. user_sock & sock_room
+ 2. rooms & sock_room [Half Reverse]
+
+
+INDEPENDENT CONCEPTS THATMAY BE CONFUSED TOGETHER:
+
+1. Message Types & Receivers: 
+        Type Signify PURPOSE, fully independent of Who Is to Receive it [Receiver & Destination are synonymous]
+        This is why 'msg' is used for both DMs and Rooms, both are just Texts

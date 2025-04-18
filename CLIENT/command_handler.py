@@ -27,15 +27,21 @@ def room(args:list, state:object):
         return ('send', payload, state)    
         
     '''Create a Room'''
-    def create_room(args:list, state:object): 
-        receiver_change(state, '/r'+args[0])
+    def create_room(room_name:str, state:object): 
+        receiver_change(state, '/r'+room_name)
                     
-        payload = ('/c'+args[0], state.msgTypes['system'])
+        payload = ('/c'+room_name, state.msgTypes['system'])
+        return ('send', payload, state)
+    
+    '''Invite user to Room'''
+    def invite_user(args:list, state:object):
+        payload = ('/i'+args[0]+';'+args[1], state.msgTypes['system'])
         return ('send', payload, state)
     
     match args[0]:
         case "join": return join_room(args[1::], state)
-        case "create": return create_room(args[1::], state)
+        case "create": return create_room(args[1], state)
+        case "invite": return invite_user(args[1::], state)
         case _: print("INVALID COMMAND")
         
     return (None, None, state)
