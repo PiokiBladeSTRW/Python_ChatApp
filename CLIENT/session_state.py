@@ -26,7 +26,8 @@ class ClientState:
             104 : "You are not a Member of this Room",
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",
-            203 : "The Room does not Exist"
+            203 : "The Room does not Exist",
+            204 : "You are not an Admin"
         }
 
     '''Encode the data'''

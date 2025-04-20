@@ -43,10 +43,21 @@ def room(args:list, state:object):
         print("INVALID ROOM")
         return (None, None, state)
     
+    def admin_user(username:str, state:object):
+        if(state.receiver.startswith('/r')):
+            room = state.receiver[2::]
+            payload = ('/a'+room+';'+username, state.msgTypes['system'])
+            return ('send', payload, state)
+        
+        print("INVALID ROOM")
+        return (None, None, state)
+    
+    
     match args[0]:
         case "join": return join_room(args[1::], state)
         case "create": return create_room(args[1], state)
         case "invite": return invite_user(args[1], state)
+        case "admin": return admin_user(args[1], state)
         case _: print("INVALID COMMAND")
         
     return (None, None, state)

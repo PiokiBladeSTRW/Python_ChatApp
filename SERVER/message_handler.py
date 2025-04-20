@@ -50,6 +50,19 @@ def handle_messages(clientSock:object,response:dict, state:object):
 
 '''Handle System Messages'''
 def system(clientSock:object, response:dict, state:object):  
+    def common_room_errors(room, username):
+        if(room not in state.room_socks):
+            return json.dumps({"content": state.codes['er_Invalid_room'], "type": "sys"}), None
+
+        if(username not in state.uuidsFile):
+            return json.dumps({"sender": username, "content": state.codes['user_exit'], "type": "sys"}), None
+
+        if(response['sender'] not in state.roomsFile[room]['admins']):
+            return json.dumps({'content': state.codes['er_Not_admin'], "type": "sys"}), None
+        
+        uuid = state.uuidsFile[username]
+        return None, uuid
+
     content = response['content']   
 
     if(content == '/e'):
@@ -68,22 +81,31 @@ def system(clientSock:object, response:dict, state:object):
     elif(content.startswith('/i')):
         data= content[2::].split(';')
         room, username= data[0], data[1]
-        uuid= state.uuidsFile[username]
 
-        if(room not in state.room_socks):
-            payload = json.dumps({"content": state.codes['er_Invalid_room'], "type": "sys"})
-
-        elif(uuid not in state.uuid_sock):
-            payload = json.dumps({"content": state.codes['user_exit'], "type": "sys"})
+        payload, uuid = common_room_errors(room, username)
+        if(payload ==None):
         
-        elif(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.room_invites[room]):
-            payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
+            if(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.room_invites[room]):
+                payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
 
-        else:        
-            state.room_invites[room].append(state.uuid_sock[uuid])
-            payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
-            return (uuid, payload, state)
+            else:        
+                state.room_invites[room].append(state.uuid_sock[uuid])
+                payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
+                return (uuid, payload, state)
         
+    elif(content.startswith('/a')):
+        data= content[2::].split(';')
+        room, username= data[0], data[1]        
+
+        payload, uuid = common_room_errors(room, username)
+        if(payload == None):
+            if(uuid in state.roomsFile[room]['admins']):
+                payload = json.dumps({"content": f"{username} is already an admim", "type": "sys"})
+
+            else:     
+                state.roomsFile[room]['admins'].append(uuid)            
+                payload = json.dumps({"content": f"{room} has made {state.uuid_user(uuid)} an ADMIN", "type":"msg"})            
+                return (f'/r{room}', payload, state)
     
     elif(content.startswith('/c')):
         room = content[2::]
@@ -94,7 +116,9 @@ def system(clientSock:object, response:dict, state:object):
         state.sock_rooms[clientSock].append(room)
         
         state.roomsFile[room] = {'members': [], 'admins': []}
-        state.roomsFile[room]['members'].append([response['sender']])
+        state.roomsFile[room]['members'].append(response['sender'])
+        state.roomsFile[room]['admins'].append(response['sender'])
+
         state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
 
         payload = json.dumps({'content': f"Room {room} Is LIVE", 'type': "sys"})        
