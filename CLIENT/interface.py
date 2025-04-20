@@ -2,6 +2,7 @@
 
 #Header
 import formatting
+import time
 
 '''Handle Default Messages'''
 def incoming_message(response:dict, state:object): 
@@ -56,6 +57,9 @@ def system(response:dict, state:object):
 
 '''Handle Responses'''
 def parse_response(response:dict, state:object): 
+    if(response.get('timestamp')):
+        response['timestamp'] = time.time()
+
     if(response['type'] in types): 
         state = types[response['type']](response, state)
         return state
