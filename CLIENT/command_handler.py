@@ -41,7 +41,7 @@ def room(args:list, state:object):
             return ('send', payload, state)
         
         print("INVALID ROOM")
-        return (None, None, State)
+        return (None, None, state)
     
     match args[0]:
         case "join": return join_room(args[1::], state)
