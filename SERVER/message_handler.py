@@ -10,12 +10,12 @@ def handle_messages(clientSock:object,response:dict, state:object):
     def room_handle(room):
 
         #Invalid Room
-        if(room not in state.rooms):    
+        if(room not in state.room_socks):    
             payload = json.dumps({'content': state.codes['er_Invalid_room'], 'type':"sys"})
             return('/s', payload, state)
         
         #Not a Member of Room AND not invited [De Morgan's Law]
-        if(not (clientSock in state.rooms[room] or clientSock in state.room_invites[room])):
+        if(not (clientSock in state.room_socks[room] or clientSock in state.room_invites[room])):
             payload = json.dumps({'content': state.codes['not_room_member'], 'type':"sys"})
             return ('/s', payload, state)
         
@@ -27,7 +27,7 @@ def handle_messages(clientSock:object,response:dict, state:object):
         if(clientSock in state.room_invites[room]):
             state.room_invites[room].remove(clientSock)
 
-            state.rooms[room].append(clientSock)
+            state.room_socks[room].append(clientSock)
             state.sock_rooms[clientSock] = room
 
             state.roomsFile[room].append(state.sock_uuid[clientSock])
@@ -62,7 +62,7 @@ def system(clientSock:object, response:dict, state:object):
         payload = json.dumps({'content': data, 'type': 'sys'})
     
     elif(content == '/r'):
-        data = '\n'.join(state.rooms.keys())
+        data = '\n'.join(state.room_socks.keys())
         payload = json.dumps({'content': data, 'type': 'sys'})
 
     elif(content.startswith('/i')):
@@ -70,13 +70,13 @@ def system(clientSock:object, response:dict, state:object):
         room, username= data[0], data[1]
         uuid= state.uuidsFile[username]
 
-        if(room not in state.rooms):
+        if(room not in state.room_socks):
             payload = json.dumps({"content": state.code['er_Invalid_room'], "type": "sys"})
 
         elif(uuid not in state.uuid_sock):
             payload = json.dumps({"content": state.codes['user_exit'], "type": "sys"})
         
-        elif(state.uuid_sock[uuid] in state.rooms[room] or state.uuid_sock[uuid] in state.room_invites[room]):
+        elif(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.room_invites[room]):
             payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
 
         else:        
@@ -89,7 +89,7 @@ def system(clientSock:object, response:dict, state:object):
         room = content[2::]
 
         state.room_invites[room] = []        
-        state.rooms[room] = [clientSock]
+        state.room_socks[room] = [clientSock]
         
         state.sock_rooms[clientSock].append(room)
         

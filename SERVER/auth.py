@@ -49,7 +49,7 @@ def log(clientSock:object, content:dict, state:object):
             state.sock_rooms[clientSock] = []
 
             for room in state.accountsFile[user_uuid]['rooms']:
-                state.rooms[room].append(clientSock)                
+                state.room_socks[room].append(clientSock)                
                 state.sock_rooms[clientSock].append(room)
 
             return ('/s', True, state)

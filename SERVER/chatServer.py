@@ -98,7 +98,7 @@ class ChatServer:
                 self.state.sock_rooms[clientSock] = []
 
                 for room in self.state.accountsFile[uuid]['rooms']:
-                    self.state.rooms[room].append(clientSock)
+                    self.state.room_socks[room].append(clientSock)
                     self.state.sock_rooms[clientSock].append(room)
 
                 username = self.state.accountsFile[uuid]['username']
@@ -124,7 +124,7 @@ class ChatServer:
                 #Remove All Reference of Client
                 if(leavingClient in self.state.sock_rooms):
                     for room in self.state.sock_rooms[leavingClient]:
-                        self.state.rooms[room].remove(leavingClient)
+                        self.state.room_socks[room].remove(leavingClient)
 
                     self.state.sock_rooms.pop(leavingClient)
                  

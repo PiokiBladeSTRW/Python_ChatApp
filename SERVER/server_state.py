@@ -9,7 +9,7 @@ class ServerState:
         self.uuid_sock = {}             # uuid : socket       
          
         self.sock_rooms = {}             # socket : [rooms]
-        self.rooms= {}                  # room name : [sockets]
+        self.room_socks= {}                  # room name : [sockets]
         self.room_invites = {}          # room name : [invited sockets]
 
         self.timeout= {}                # socket: last heartbeat  
@@ -24,7 +24,7 @@ class ServerState:
             self.roomsFile = json.load(fileHandle)
 
         for room in self.roomsFile:
-            self.rooms[room] = []
+            self.room_socks[room] = []
             self.room_invites[room] = []
 
         '''Codes for System Messages. 'er' prefix for Errors'''
