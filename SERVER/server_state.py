@@ -8,9 +8,9 @@ class ServerState:
         self.sock_uuid= {}              # socket : uuid
         self.uuid_sock = {}             # uuid : socket       
          
-        self.sock_rooms = {}             # socket : [rooms]
-        self.room_socks= {}                  # room name : [sockets]
-        self.room_invites = {}          # room name : [invited sockets]
+        self.sock_rooms = {}            # socket : [rooms]                  -Auth
+        self.room_socks= {}             # room name : [sockets]             -State
+        self.room_invites = {}          # room name : [invited sockets]     - Volatile
 
         self.timeout= {}                # socket: last heartbeat  
         

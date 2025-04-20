@@ -28,9 +28,10 @@ SERVER:
 2. 102 : To notify users to wait while Server closes their old session
 3. 103 : To notify users that process is finished and they have relogged
 4. 105 : To notify users that they are NOT a Member of the Room (not invited)
-5. 201 : Invalid Credentials for Log In
-6. 202 : Existing Username
-7. 203 : To notify users that their chosen room is non existent
+5. 106 : To notify users that they are NOT an Admin of the Room
+6. 201 : Invalid Credentials for Log In
+7. 202 : Existing Username
+8. 203 : To notify users that their chosen room is non existent
 
 *Types
 1. sys: System Message, returns Errors & Instructions [ like commands ]
