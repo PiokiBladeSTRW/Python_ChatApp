@@ -34,14 +34,19 @@ def room(args:list, state:object):
         return ('send', payload, state)
     
     '''Invite user to Room'''
-    def invite_user(args:list, state:object):
-        payload = ('/i'+args[0]+';'+args[1], state.msgTypes['system'])
-        return ('send', payload, state)
+    def invite_user(username:str, state:object):
+        if(state.receiver.startswith('/r')):
+            room = state.receiver[2::]
+            payload = ('/i'+room+';'+username, state.msgTypes['system'])
+            return ('send', payload, state)
+        
+        print("INVALID ROOM")
+        return (None, None, State)
     
     match args[0]:
         case "join": return join_room(args[1::], state)
         case "create": return create_room(args[1], state)
-        case "invite": return invite_user(args[1::], state)
+        case "invite": return invite_user(args[1], state)
         case _: print("INVALID COMMAND")
         
     return (None, None, state)
@@ -89,11 +94,11 @@ def is_command(msg:str):
 def parse_command(input_cmd:str, state:object):    
     parts = input_cmd.split()    
 
-    #check if the command has arguments
+    #Check if the command has arguments
     if(len(parts)==1):
         cmd, args = parts[0], ''
     else:
-        cmd, args = parts[0], parts[1::]        
+        cmd, args = parts[0], parts[1::]
     
     if cmd in commands:        
         data = commands[cmd](args, state)
