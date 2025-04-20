@@ -5,7 +5,11 @@ import maskpass
 legal_char = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890@#"
 
 '''Input Credentials from User:'''
-def credentials_input(action):    
+def credentials_input(action):
+    def is_invalid_email(email):
+        if('@' not in email):
+            return True
+        return False
 
     username = input("ENTER USERNAME: ").strip()
     if(not all(c in legal_char for c in username)):
@@ -13,8 +17,12 @@ def credentials_input(action):
         return None
 
     passwd = maskpass.askpass(prompt="ENTER PASSWORD: ", mask='*')
+    email = input("ENTER EMAIL: ")
+    if(is_invalid_email(email)): 
+        print("INVALID EMAIL")
+        return None
     
-    content = {"action": action, "username": username, "passwd": passwd}
+    content = {"action": action, "username": username, "passwd": passwd, "email": email}
 
     return content
 

@@ -19,7 +19,12 @@ def reg(clientSock:object, content:dict, state:object):
     user_uuid = str(uuid.uuid4())
     
     #Store the Data
-    state.accountsFile[user_uuid] = {"username":content['username'], "passwd": passwd, "salt": salt, "rooms": []}
+    state.accountsFile[user_uuid] = {"username":content['username'], 
+                                     "passwd": passwd, 
+                                     "email": content['email'],
+                                     "salt": salt, 
+                                     "rooms": []                                     
+                                     }
     state.uuidsFile[content['username']] = user_uuid
 
     #Update Server Data
