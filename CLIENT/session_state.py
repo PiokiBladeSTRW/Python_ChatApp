@@ -4,7 +4,6 @@
 import time
 import json
 
-
 class ClientState:
     def __init__(self):
         self.clientUUID = ''

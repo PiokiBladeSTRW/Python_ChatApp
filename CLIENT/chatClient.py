@@ -2,10 +2,12 @@
 import json
 import asyncio
 import websockets
+#import logging
 
 import login
 import command_handler
 import interface
+#import logging_setup
 from session_state import ClientState
 
 '''Main Class handling Client'''
@@ -13,6 +15,7 @@ class ChatClient:
     '''Initialization'''
     def __init__(self):
         self.state = ClientState()
+        #logger = logging_setup.setup_log()
         self.heartbeatPing = 20
         self.serverAddress = "ws://localhost:8765"
 
