@@ -40,6 +40,7 @@ def system(response:dict, state:object):
             if(state.receiver == response['sender']):
                 state.receiver_change('')                
             return state
+        
         if(response['content'] == 104):
             state.receiver_change('')
 

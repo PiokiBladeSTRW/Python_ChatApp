@@ -108,10 +108,12 @@ class ChatServer:
                 return
 
     async def heartbeats(self):        
-        while True:    
+        while True:
+            cTime = time.time()
             for client in self.state.timeout:
-                cTime = time.time() - self.state.timeout[client]                
-                if(cTime >= self.timeout):    
+                timeElapsed = cTime - self.state.timeout[client]     
+                           
+                if(timeElapsed >= self.timeout):    
                     await self.disconnectionPending.put(client)
             await asyncio.sleep(self.pingFrequency)
 
@@ -121,13 +123,14 @@ class ChatServer:
             leavingClient = await self.disconnectionPending.get()  
             if(leavingClient):  
                 
-                #Remove All Reference of Client
+                #Remove Client from Rooms
                 if(leavingClient in self.state.sock_rooms):
                     for room in self.state.sock_rooms[leavingClient]:
                         self.state.room_socks[room].remove(leavingClient)
 
                     self.state.sock_rooms.pop(leavingClient)
-                 
+                
+                #Room user from Global Variables
                 uuid = self.state.sock_uuid.pop(leavingClient)
                 self.state.uuid_sock.pop(uuid)
 

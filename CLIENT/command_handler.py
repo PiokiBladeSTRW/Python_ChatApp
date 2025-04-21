@@ -20,6 +20,14 @@ def handle_dm(args:list, state:object):
 
 '''Room Related Commands'''
 def room(args:list, state:object): 
+    '''<Obtaining Room Name>'''
+    def obtain_room(state):
+        if(state.receiver.startswith('/r')):
+            return state.receiver[2::]
+        
+        print("Invalid Room")
+        return None
+
     '''Join a Room'''
     def join_room(args:list, state:object): 
         state.receiver_change('/r'+args[0])
@@ -35,32 +43,32 @@ def room(args:list, state:object):
     
     '''Invite user to Room'''
     def invite_user(username:str, state:object):
-        if(state.receiver.startswith('/r')):
-            room = state.receiver[2::]
-            payload = ('/i'+room+';'+username, state.msgTypes['system'])
-            return ('send', payload, state)
-        
-        print("INVALID ROOM")
-        return (None, None, state)
+        room = obtain_room(state)
+        if(room == None): return None
+
+        payload = ('/i'+room+';'+username, state.msgTypes['system'])
+        return ('send', payload, state)
     
+    '''Make user an Admin'''
     def admin_user(username:str, state:object):
-        if(state.receiver.startswith('/r')):
-            room = state.receiver[2::]
-            payload = ('/a'+room+';'+username, state.msgTypes['system'])
-            return ('send', payload, state)
+        room = obtain_room(state)
+        if(room == None): return None
+   
+        payload = ('/a'+room+';'+username, state.msgTypes['system'])
+        return ('send', payload, state)
         
-        print("INVALID ROOM")
-        return (None, None, state)
-    
-    
     match args[0]:
-        case "join": return join_room(args[1::], state)
-        case "create": return create_room(args[1], state)
-        case "invite": return invite_user(args[1], state)
-        case "admin": return admin_user(args[1], state)
+        case "join": data = join_room(args[1::], state)
+        case "create": data = create_room(args[1], state)
+        case "invite": data = invite_user(args[1], state)
+        case "admin": data = admin_user(args[1], state)
         case _: print("INVALID COMMAND")
         
-    return (None, None, state)
+    if(data==None):
+        return (None, None, state)
+    
+    return data
+    
 
 '''Reset Receiver'''
 def reset_rec(args:list, state:object): 

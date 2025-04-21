@@ -2,23 +2,36 @@
 
 #Header
 import json
-
 import auth
+
+er_lst= []
+
+'''Error Handling'''
+def error_handle(condition, error:str,  state: object):
+    '''Key States whether or not the 'Error' is a Code or Not'''
+    if(condition):
+        payload = json.dumps({'content': state.codes[error], 'type': "sys"})
+        return('/s', payload, state)
+    
+    return None
 
 '''Handle Messages [DMs and Rooms]'''
 def handle_messages(clientSock:object,response:dict, state:object): 
     def room_handle(room):
 
         #Invalid Room
-        if(room not in state.room_socks):    
-            payload = json.dumps({'content': state.codes['er_Invalid_room'], 'type':"sys"})
-            return('/s', payload, state)
-        
-        #Not a Member of Room AND not invited [De Morgan's Law]
-        if(not (clientSock in state.room_socks[room] or clientSock in state.room_invites[room])):
-            payload = json.dumps({'content': state.codes['not_room_member'], 'type':"sys"})
-            return ('/s', payload, state)
-        
+        er_lst.append( error_handle(room not in state.room_socks, 'er_Invalid_room',  state) )
+
+        #Not a Member AND not Invited [De Morgan's Law]
+        er_lst.append(error_handle(not(clientSock in state.room_socks[room] or clientSock in state.room_invites[room]),
+                                   'not_room_member', state))
+
+        #If Error caught, return it
+        data = [x for x in er_lst if x != None]
+        if(data): return data[0]
+        er_lst = []
+
+
         response.pop('receiver') 
         username = state.uuid_user(response['sender'])
         response['sender'] = f"[{room}] {username}"
@@ -42,27 +55,28 @@ def handle_messages(clientSock:object,response:dict, state:object):
         receiver = state.uuidsFile[response.pop('receiver')]
         return (receiver, json.dumps(response), state)
     
-    
     if(response['receiver'].startswith('/r')):
        return room_handle(response['receiver'][2::])
-    else:
-        return dm_handle()
+
+    return dm_handle()
 
 '''Handle System Messages'''
 def system(clientSock:object, response:dict, state:object):  
     def common_room_errors(room, username):
-        if(room not in state.room_socks):
-            return json.dumps({"content": state.codes['er_Invalid_room'], "type": "sys"}), None
+        er_lst.append( error_handle(room not in state.room_socks, 'er_Invalid_room', state) )
 
-        if(username not in state.uuidsFile):
-            return json.dumps({"sender": username, "content": state.codes['user_exit'], "type": "sys"}), None
+        er_lst.append( error_handle(username not in state.uuidsFile, 'user_exit', state) )
 
-        if(response['sender'] not in state.roomsFile[room]['admins']):
-            return json.dumps({'content': state.codes['er_Not_admin'], "type": "sys"}), None
+        er_lst.append( error_handle(response['sender'] not in state.roomsFile[room]['admins'], 'er_Not_admin' , state))
+
+        #Errors Caught:
+        data = [x for x in er_lst if x !=None]
+        if(data): return data[0]
         
-        uuid = state.uuidsFile[username]
-        return None, uuid
+        er_lst = []        
+        return None
 
+    #Main Code
     content = response['content']   
 
     if(content == '/e'):
@@ -82,30 +96,34 @@ def system(clientSock:object, response:dict, state:object):
         data= content[2::].split(';')
         room, username= data[0], data[1]
 
-        payload, uuid = common_room_errors(room, username)
-        if(payload ==None):
-        
-            if(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.room_invites[room]):
-                payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
+        data = common_room_errors(room, username)
+        if(data): return data
 
-            else:        
-                state.room_invites[room].append(state.uuid_sock[uuid])
-                payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
-                return (uuid, payload, state)
+        uuid = state.uuidsFile[username]
+
+        if(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.room_invites[room]):
+            payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
+
+        else:        
+            state.room_invites[room].append(state.uuid_sock[uuid])
+            payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
+            return (uuid, payload, state)
         
     elif(content.startswith('/a')):
         data= content[2::].split(';')
         room, username= data[0], data[1]        
 
-        payload, uuid = common_room_errors(room, username)
-        if(payload == None):
-            if(uuid in state.roomsFile[room]['admins']):
-                payload = json.dumps({"content": f"{username} is already an admim", "type": "sys"})
+        data = common_room_errors(room, username)
+        if(data): return data
 
-            else:     
-                state.roomsFile[room]['admins'].append(uuid)            
-                payload = json.dumps({"content": f"{room} has made {state.uuid_user(uuid)} an ADMIN", "type":"msg"})            
-                return (f'/r{room}', payload, state)
+        uuid = state.uuidsFile[username]    
+        if(uuid in state.roomsFile[room]['admins']):
+            payload = json.dumps({"content": f"{username} is already an admim", "type": "sys"})
+
+        else:     
+            state.roomsFile[room]['admins'].append(uuid)            
+            payload = json.dumps({"content": f"{room} has made {state.uuid_user(uuid)} an ADMIN", "type":"msg"})            
+            return (f'/r{room}', payload, state)
     
     elif(content.startswith('/c')):
         room = content[2::]
@@ -135,9 +153,8 @@ def authentication(clientSock:object,response:dict, state:object):
     '''Content Format: {Action: <>, Username: <>, Passwd: <>}'''
     
     #Relog
-    if(content['username'] in state.uuidsFile):
-        if(state.uuidsFile[content['username']] in state.uuid_sock): 
-            content['action'] = 'relog'
+    if(content['username'] in state.uuidsFile and state.uuidsFile[content['username']] in state.uuid_sock):
+        content['action'] = 'relog'
 
     #Data is a List    
     data= auth.parse_authentication(clientSock, content, state)

@@ -38,6 +38,7 @@ def reg(clientSock:object, content:dict, state:object):
 '''Log in to already made Account'''
 def log(clientSock:object, content:dict, state:object):
     if(content['username'] in state.uuidsFile):
+
         #Hash password
         user_uuid = state.uuidsFile[content['username']]
         salt = state.accountsFile[user_uuid]['salt']
@@ -65,6 +66,7 @@ def log(clientSock:object, content:dict, state:object):
 '''Relog to currently Active Account'''
 def relog(clientSock:object, content:dict, state:object):   
     user_uuid = state.uuidsFile[content['username']]
+    
     if(state.accountsFile[user_uuid]['passwd'] == content['passwd']):
         return ('*', '/relog', state)
 
