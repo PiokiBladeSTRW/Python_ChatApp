@@ -1,6 +1,5 @@
-'''Handle Commands used by Client: Bring Changes and parse message for server if needed'''
+'''Handle Commands used by Client: Bring Changes and parse message for server if needed
 
-'''
 Commands and Actions
     /dm <username> <msg>    : Initiates a DM with given Username as Receiver
     /#                      : Removes Receiver, that is closing a DM
@@ -11,91 +10,62 @@ Commands and Actions
     /rooms                  : List of Rooms                                   [Parsed as /r]
     /b                      : Backtracks Receiver to Swap
 '''
+# Header
+import room_cmd
 
 '''Handle DMS'''
-def handle_dm(args:list, state:object):      
+def handle_dm(args:list, state:object) -> tuple:  
+    '''Args[0]= Username, Args[1::]= Message'''    
+
     state.receiver_change(args[0])
     payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload, state)
 
 '''Room Related Commands'''
-def room(args:list, state:object): 
-    '''<Obtaining Room Name>'''
-    def obtain_room(state):
-        if(state.receiver.startswith('/r')):
-            return state.receiver[2::]
-        
-        print("Invalid Room")
-        return None
+def room(args:list, state:object) -> tuple:    
 
-    '''Join a Room'''
-    def join_room(args:list, state:object): 
-        state.receiver_change('/r'+args[0])
-        payload = (' '.join(args[1::]), state.msgTypes['message'])
-        return ('send', payload, state)    
-        
-    '''Create a Room'''
-    def create_room(room_name:str, state:object): 
-        state.receiver_change('/r'+room_name)
-                    
-        payload = ('/c'+room_name, state.msgTypes['system'])
-        return ('send', payload, state)
-    
-    '''Invite user to Room'''
-    def invite_user(username:str, state:object):
-        room = obtain_room(state)
-        if(room == None): return None
-
-        payload = ('/i'+room+';'+username, state.msgTypes['system'])
-        return ('send', payload, state)
-    
-    '''Make user an Admin'''
-    def admin_user(username:str, state:object):
-        room = obtain_room(state)
-        if(room == None): return None
-   
-        payload = ('/a'+room+';'+username, state.msgTypes['system'])
-        return ('send', payload, state)
-        
     match args[0]:
-        case "join": data = join_room(args[1::], state)
-        case "create": data = create_room(args[1], state)
-        case "invite": data = invite_user(args[1], state)
-        case "admin": data = admin_user(args[1], state)
-        case _: print("INVALID COMMAND")
+        case "join": data = room_cmd.join_room(args[1::], state)
+        case "create": data = room_cmd.create_room(args[1], state)
+        case "invite": data = room_cmd.invite_user(args[1], state)
+        case "admin": data = room_cmd.admin_user(args[1], state)
+        case _: 
+            data = None
+            print("INVALID COMMAND")
         
-    if(data==None):
-        return (None, None, state)
-    
+    if (data == None):
+        return (None, None, state)    
     return data
-    
 
-'''Reset Receiver'''
-def reset_rec(args:list, state:object): 
-    state.receiver_change('')
-    return (None, None, state)
-    
-'''Backtrack Receiver'''
-def back_rec(args:list, state:object): 
-    state.receiver_change(state.pReceiver)
-    return (None, None, state)
-
-'''Exit Program'''
-def close(args:list, state:object): 
-    return ('exit', None, state)
     
 '''List of every Online Client'''
-def online_list(args:list, state:object): 
+def online_list(args:list, state:object) -> tuple: 
     payload = ('/o', state.msgTypes['system'])    
     return ('send', payload, state)
 
 '''List of every Online Room'''    
-def rooms_list(args:list, state:object): 
+def rooms_list(args:list, state:object) -> tuple: 
     payload = ('/r', state.msgTypes['system'])
     return ('send', payload, state)
 
+
+'''Exit Program'''
+def close(args:list, state:object) -> tuple: 
+    return ('exit', None, state)
+
+
+'''Reset Receiver'''
+def reset_rec(args:list, state:object) -> tuple: 
+    state.receiver_change('')
+    return (None, None, state)
+    
+'''Backtrack Receiver'''
+def back_rec(args:list, state:object) -> tuple: 
+    state.receiver_change(state.pReceiver)
+    return (None, None, state)
+
 '''Display Help'''
-def chat_help(args:list, state:object):
+def chat_help(args:list, state:object) -> tuple:
     import help
     return (None, None, state)
 
@@ -110,15 +80,17 @@ def is_command(msg:str):
     return False
 
 '''Match Command to Function'''
-def parse_command(input_cmd:str, state:object):    
+def parse_command(input_cmd:str, state:object) -> tuple:    
     parts = input_cmd.split()    
 
-    #Check if the command has arguments
+    # Check if the command has arguments
     if(len(parts)==1):
         cmd, args = parts[0], ''
+    
     else:
         cmd, args = parts[0], parts[1::]
     
+    # Execute Command
     if cmd in commands:        
         data = commands[cmd](args, state)
         return data

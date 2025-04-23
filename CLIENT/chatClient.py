@@ -5,7 +5,7 @@ import websockets
 #import logging
 
 import login
-import command_handler
+import commands.command_handler as command_handler
 import interface
 #import logging_setup
 from session_state import ClientState
@@ -78,7 +78,7 @@ class ChatClient:
 
             if(command_handler.is_command(msgInput)):
                 action, payload, self.state = command_handler.parse_command(msgInput, self.state)
-                '''Action: SEND, EXIT, NONE
+                '''Action: send, exit, None
                   Payload Format: (content, type)'''
                 
                 # Check what to do to Payload
@@ -86,7 +86,8 @@ class ChatClient:
                     case 'send': await self.sendPayload(payload)
                     case 'exit': 
                         await self.sendPayload( ('/e', self.state.msgTypes['system']) )
-                        await self.closeClient()                    
+                        await self.closeClient()      
+                    case None: pass              
                     case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")
 
             elif(self.state.receiver):
@@ -97,7 +98,7 @@ class ChatClient:
             
             print()
 
-    async def receive(self):
+    async def receive(self) -> None:
         try:
             async for dataReceived in self.state.clientSock:
                 response = json.loads(dataReceived)
@@ -109,7 +110,7 @@ class ChatClient:
         except websockets.exceptions.ConnectionClosed:
             await self.closeServer()
             
-    async def sendPayload(self, payload):  #To avoid Client Crash due to Down Server
+    async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
         '''Payload : ( Message, Type )'''
         try: 
             await self.state.clientSock.send(self.state.encode(payload))
@@ -121,18 +122,18 @@ class ChatClient:
     '''------------------------------------------------'''
 
          
-    async def heartbeat(self):
+    async def heartbeat(self) -> None:
         while True:
             await self.sendPayload( ('', self.state.msgTypes['heartbeat']) )
             await asyncio.sleep(self.heartbeatPing)
     
-    async def closeClient(self):        
+    async def closeClient(self) -> None:        
         await self.state.clientSock.close()
         for task in asyncio.all_tasks():
             task.cancel()
             return
 
-    async def closeServer(self):
+    async def closeServer(self) -> None:
         print("SERVER DOWN!")
         await self.closeClient()
         return
