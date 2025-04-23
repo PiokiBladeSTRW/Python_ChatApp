@@ -5,7 +5,7 @@ import asyncio
 import websockets
 
 import routing
-import message_handler 
+import message.message_handler as message_handler
 from server_state import ServerState
 
 '''
