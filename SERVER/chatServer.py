@@ -8,8 +8,17 @@ import routing
 import message_handler 
 from server_state import ServerState
 
-
-'''Main Class handling Server'''
+'''
+The Server Object
+Purpose: The Server. Handles every client's request
+Acitivities:
+    Starting the Server
+    Handling Connection of Clients
+    Handling authentication of Clients
+    Receiving and Broadcasting Clients' Messages
+    Handling Disconenction of Clients
+    Handling File storage
+'''
 class ChatServer:
     '''Initialize'''
     def __init__(self): 
@@ -24,13 +33,19 @@ class ChatServer:
     async def start(self):
         async with websockets.serve(self.handleClient, "localhost", 8765):
             print("SERVER ON")
+
+            asyncio.create_task(self.Disconnect())
+            asyncio.create_task(self.fileHandle())
             await asyncio.Future()  #while True: but with 0 CPU usage            
         
     async def handleClient(self, clientSock):
         try:
-            await asyncio.gather(self.receive(clientSock), self.heartbeats(), self.Disconnect(), self.fileHandle())
+            await asyncio.gather(self.receive(clientSock), self.heartbeats())
         except websockets.exceptions.ConnectionClosed:
-            print("Closed")
+            print("Closed")   
+
+
+    '''------------------------------------------------'''
 
 
     '''Receive and Broadcast Data'''
@@ -52,61 +67,39 @@ class ChatServer:
                         user_uuid = self.state.uuidsFile[username]
                         await self.broadcast(clientSock, json.dumps({"content":user_uuid, "type": "auth"}), '/s')
                         await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
-            else:
-                await self.broadcast(clientSock, payload, destination)
+                continue
+            
+            await self.broadcast(clientSock, payload, destination)
 
     async def broadcast(self, clientSock:object, payload:str, destination:str):
         #Obtain list of Receivers
         receivingClients = routing.parse_destination(clientSock, destination, self.state)
 
+        #Send to receiving clients
         if(receivingClients):
             for client in receivingClients:
                 await self.send(client, payload)  
-
-        else:           
-            #If no Receiving Clients but not an Error case
-            if(destination.startswith('/r') or destination == '/.'):return
-            
-            payload = json.dumps({"sender":destination, "content":self.state.codes['user_exit'], "type":"sys"})
-            await self.send(clientSock, payload)
+            return
+                  
+        #If no Receiving Clients but not an Error case
+        if(destination.startswith('/r') or destination == '/.'):return
+        
+        #If receiving client does not exist
+        payload = json.dumps({"sender":destination, "content":self.state.codes['user_exit'], "type":"sys"})
+        await self.send(clientSock, payload)
        
        
-    async def send(self, receiveClient:object, payload:str):   #Prevents Server Crash in case of Lingering Ghost Sockets
+    async def send(self, receiveClient:object, payload:str):
         try:    
             await receiveClient.send(payload)                      
-        except websockets.exceptions.ConnectionClosed:  
-            print("\n>>SEND\n")          
+        except websockets.exceptions.ConnectionClosed:       
             await self.disconnectionPending.put(receiveClient)
 
 
+    '''------------------------------------------------'''
+
+
     '''Disconnection Handling'''
-    async def relog(self, uuid, clientSock):
-
-        #So User knows to wait while they Relog
-        await self.send(clientSock, json.dumps({"content": self.state.codes['relog_begin'], "type":"sys"}))
-
-        oldClientSock = self.state.uuid_sock[uuid]
-        print("\n>>RELOG\n")
-        await self.disconnectionPending.put(oldClientSock)
-
-        #Once Disconnect Finishes
-        while True:
-            await asyncio.sleep(3)
-            if(oldClientSock not in self.state.sock_uuid):
-                self.state.uuid_sock[uuid] = clientSock
-                self.state.sock_uuid[clientSock] = uuid
-                self.state.sock_rooms[clientSock] = []
-
-                for room in self.state.accountsFile[uuid]['rooms']:
-                    self.state.room_socks[room].append(clientSock)
-                    self.state.sock_rooms[clientSock].append(room)
-
-                username = self.state.accountsFile[uuid]['username']
-                await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
-
-                await self.send(clientSock, json.dumps({"content": self.state.codes['relog_finish'], "type": "sys"}))
-                return
-
     async def heartbeats(self):        
         while True:
             cTime = time.time()
@@ -116,6 +109,33 @@ class ChatServer:
                 if(timeElapsed >= self.timeout):    
                     await self.disconnectionPending.put(client)
             await asyncio.sleep(self.pingFrequency)
+
+    async def relog(self, uuid, clientSock):
+        #So User knows to wait while they Relog
+        await self.send(clientSock, json.dumps({"content": self.state.codes['relog_begin'], "type":"sys"}))
+
+        oldClientSock = self.state.uuid_sock[uuid]        
+        await self.disconnectionPending.put(oldClientSock)
+
+        #Once Disconnect Finishes
+        while oldClientSock not in self.state.sock_uuid:
+            await asyncio.sleep(3)
+
+        #Configure Client's new Socket    
+        self.state.uuid_sock[uuid] = clientSock
+        self.state.sock_uuid[clientSock] = uuid
+        self.state.sock_rooms[clientSock] = []
+
+        for room in self.state.accountsFile[uuid]['rooms']:
+            self.state.room_socks[room].append(clientSock)
+            self.state.sock_rooms[clientSock].append(room)
+
+        # Let user and others know
+        username = self.state.accountsFile[uuid]['username']
+        await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
+
+        await self.send(clientSock, json.dumps({"content": self.state.codes['relog_finish'], "type": "sys"}))
+        return
 
     async def Disconnect(self): 
         while True:
@@ -143,18 +163,19 @@ class ChatServer:
 
                 await leavingClient.close()
 
+
+    '''------------------------------------------------'''
+
+
     '''Handle File I/O'''
     async def fileHandle(self):
-        while True:    
-            #Accounts.json
-            with open("accounts.json", 'w') as fileHandle:
-                json.dump(self.state.accountsFile, fileHandle)
+        while True:   
             
-            with open("uuids.json", 'w') as fileHandle:
-                json.dump(self.state.uuidsFile, fileHandle)
-
-            with open("rooms.json", 'w') as fileHandle:
-                json.dump(self.state.roomsFile, fileHandle)
+            #Open and store data to each file
+            with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
+                json.dump(self.state.accountsFile, accountHandle)         
+                json.dump(self.state.uuidsFile, uuidHandle)
+                json.dump(self.state.roomsFile, roomHandle)
 
             await asyncio.sleep(self.fileIOFrequency)
 
