@@ -30,17 +30,18 @@ class ChatServer:
         self.fileIOFrequency = 30
         self.disconnectionPending = asyncio.Queue()
 
-    async def start(self):
+    async def start(self) -> None:
         async with websockets.serve(self.handleClient, "localhost", 8765):
             print("SERVER ON")
 
             asyncio.create_task(self.Disconnect())
             asyncio.create_task(self.fileHandle())
+            asyncio.create_task(self.heartbeats())
             await asyncio.Future()  #while True: but with 0 CPU usage            
         
-    async def handleClient(self, clientSock):
+    async def handleClient(self, clientSock: websockets.ClientConnection) -> None:
         try:
-            await asyncio.gather(self.receive(clientSock), self.heartbeats())
+            await asyncio.gather(self.receive(clientSock))
         except websockets.exceptions.ConnectionClosed:
             print("Closed")   
 
@@ -49,7 +50,7 @@ class ChatServer:
 
 
     '''Receive and Broadcast Data'''
-    async def receive(self, clientSock:object):
+    async def receive(self, clientSock: websockets.ClientConnection) -> None:
         async for dataReceived in clientSock:   
             response = json.loads(dataReceived)
 
@@ -71,7 +72,7 @@ class ChatServer:
             
             await self.broadcast(clientSock, payload, destination)
 
-    async def broadcast(self, clientSock:object, payload:str, destination:str):
+    async def broadcast(self, clientSock:websockets.ClientConnection, payload:str, destination:str) -> None:
         #Obtain list of Receivers
         receivingClients = routing.parse_destination(clientSock, destination, self.state)
 
@@ -89,7 +90,7 @@ class ChatServer:
         await self.send(clientSock, payload)
        
        
-    async def send(self, receiveClient:object, payload:str):
+    async def send(self, receiveClient:websockets.ClientConnection, payload:str) -> None:
         try:    
             await receiveClient.send(payload)                      
         except websockets.exceptions.ConnectionClosed:       
@@ -100,7 +101,7 @@ class ChatServer:
 
 
     '''Disconnection Handling'''
-    async def heartbeats(self):        
+    async def heartbeats(self) -> None:        
         while True:
             cTime = time.time()
             for client in self.state.timeout:
@@ -110,7 +111,7 @@ class ChatServer:
                     await self.disconnectionPending.put(client)
             await asyncio.sleep(self.pingFrequency)
 
-    async def relog(self, uuid, clientSock):
+    async def relog(self, uuid:str, clientSock: websockets.ClientConnection) -> None:
         #So User knows to wait while they Relog
         await self.send(clientSock, json.dumps({"content": self.state.codes['relog_begin'], "type":"sys"}))
 
@@ -137,7 +138,7 @@ class ChatServer:
         await self.send(clientSock, json.dumps({"content": self.state.codes['relog_finish'], "type": "sys"}))
         return
 
-    async def Disconnect(self): 
+    async def Disconnect(self) -> None: 
         while True:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
@@ -168,7 +169,7 @@ class ChatServer:
 
 
     '''Handle File I/O'''
-    async def fileHandle(self):
+    async def fileHandle(self) -> None:
         while True:   
             
             #Open and store data to each file
