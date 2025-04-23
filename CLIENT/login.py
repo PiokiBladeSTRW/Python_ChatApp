@@ -5,12 +5,13 @@ import maskpass
 legal_char = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890@#"
 
 '''Input Credentials from User:'''
-def credentials_input(action):
+def credentials_input(action: str) -> dict:
+    # Email Validation
     def is_invalid_email(email):
         if('@' not in email):
             return True
-        return False
-
+        return False    
+    
     username = input("ENTER USERNAME: ").strip()
     if(not all(c in legal_char for c in username)):
         print("ILLEGAL CHARACTERS")
@@ -27,20 +28,19 @@ def credentials_input(action):
     return content
 
 
+'''-------------------------------------'''
+
+ 
 '''Start the Process by determining New or Old account'''
-def start_auth():
+def start_auth() -> dict:
     while True:
         ch = input("0: Login to Account\n1: Register an Account\n>")
 
-        if(ch=='0'):
-            content = credentials_input('log')
-        elif(ch=='1'):
-            content = credentials_input('reg')
-        else:            
-            continue
+        if(ch=='0'): content = credentials_input('log')
+        elif(ch=='1'): content = credentials_input('reg')
+        else: continue
 
-        if(content==None):
-            continue
+        if (content == None): continue
 
         return content
     
