@@ -43,6 +43,19 @@ def start_auth():
             continue
 
         return content
+    
+def was_succesful(response:dict) -> bool:
+    #Succesful Log-In
+    if(response['content'] and response['type']=='auth'):         
+        return True
+    
+    return False
+    
+def handle_fail(response:dict, state:object) -> None:
+    if(response['content'] in state.system_codes):     
+        response['content'] = state.system_codes[response['content']]
+    
+    print(f"{{System}}: {response['content']}")
 
 '''
 RETURN FORMAT:
