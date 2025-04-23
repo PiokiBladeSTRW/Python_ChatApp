@@ -8,6 +8,7 @@ import uuid
 
 '''Register New User'''
 def reg(clientSock:object, content:dict, state:object):
+    
     #Ensure Username Doesn't Exist Already
     if(content['username'] in state.uuidsFile):        
         return ('/s', json.dumps({"content": state.codes['er_Exists_username'], "type":"sys"}), state)      
@@ -19,12 +20,13 @@ def reg(clientSock:object, content:dict, state:object):
     user_uuid = str(uuid.uuid4())
     
     #Store the Data
-    state.accountsFile[user_uuid] = {"username":content['username'], 
-                                     "passwd": passwd, 
-                                     "email": content['email'],
-                                     "salt": salt, 
-                                     "rooms": []                                     
-                                     }
+    state.accountsFile[user_uuid] = {
+        "username":content['username'], 
+        "passwd": passwd, 
+        "email": content['email'],
+        "salt": salt, 
+        "rooms": []                                     
+        }
     state.uuidsFile[content['username']] = user_uuid
 
     #Update Server Data
@@ -37,18 +39,16 @@ def reg(clientSock:object, content:dict, state:object):
 
 '''Log in to already made Account'''
 def log(clientSock:object, content:dict, state:object):
-    if(content['username'] in state.uuidsFile):
 
+    if(content['username'] in state.uuidsFile):
         #Hash password
         user_uuid = state.uuidsFile[content['username']]
         salt = state.accountsFile[user_uuid]['salt']
         salted_pass = content['passwd'] + salt
-        passwd = hashlib.sha256(salted_pass.encode()).hexdigest()
-        
+        passwd = hashlib.sha256(salted_pass.encode()).hexdigest()        
 
         #Match Password
         if(passwd== state.accountsFile[user_uuid]['passwd']):   
-
             #Update Server Data
             state.uuid_sock[user_uuid] = clientSock
             state.sock_uuid[clientSock] = user_uuid
@@ -67,6 +67,7 @@ def log(clientSock:object, content:dict, state:object):
 def relog(clientSock:object, content:dict, state:object):   
     user_uuid = state.uuidsFile[content['username']]
     
+    #Check for valid log-in
     if(state.accountsFile[user_uuid]['passwd'] == content['passwd']):
         return ('*', '/relog', state)
 
