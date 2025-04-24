@@ -35,7 +35,7 @@ def reg(clientSock:object, content:dict, state:object) -> tuple:
     state.sock_rooms[clientSock] = []
 
     #Return Confirmation
-    return ('/s', True, state)
+    return True
 
 '''Log in to already made Account'''
 def log(clientSock:object, content:dict, state:object) -> tuple:
@@ -58,7 +58,7 @@ def log(clientSock:object, content:dict, state:object) -> tuple:
                 state.room_socks[room].append(clientSock)                
                 state.sock_rooms[clientSock].append(room)
 
-            return ('/s', True, state)
+            return True
         
     return ('/s', json.dumps({"content": state.codes['er_Invalid_login'], "type":"sys"}), state)
 

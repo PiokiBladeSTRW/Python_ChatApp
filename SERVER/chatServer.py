@@ -5,7 +5,7 @@ import asyncio
 import websockets
 
 import routing
-import message.message_handler as message_handler
+import message.response_handler as response_handler
 from server_state import ServerState
 
 '''
@@ -55,7 +55,7 @@ class ChatServer:
             response = json.loads(dataReceived)
 
             '''Payload is json dumped message'''
-            destination, payload, self.state = message_handler.parse_response(clientSock, response, self.state)
+            destination, payload, self.state = response_handler.parse_response(clientSock, response, self.state)
             
             # Handle Special Cases, otherwise broadcast
             if(destination=='*'):
