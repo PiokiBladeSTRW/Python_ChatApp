@@ -11,7 +11,9 @@ Commands and Actions
     /b                      : Backtracks Receiver to Swap
 '''
 # Header
-import room_cmd
+
+#Imported as such as command_handler is itself a module
+import commands.room_cmd as room_cmd
 
 '''Handle DMS'''
 def handle_dm(args:list, state:object) -> tuple:  

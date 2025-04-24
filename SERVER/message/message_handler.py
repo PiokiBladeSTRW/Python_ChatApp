@@ -3,7 +3,10 @@
 #Header
 import json
 import auth
-import errors
+
+#Import such as message handler itself is a module
+from message.handle_error import message_error_handler
+errors = message_error_handler()
 
 '''Handle Messages [DMs and Rooms]'''
 def handle_messages(clientSock:object,response:dict, state:object) -> tuple: 
@@ -70,9 +73,13 @@ def system(clientSock:object, response:dict, state:object) -> tuple:
     elif(content.startswith('/i')):
         data= content[2::].split(';')
         room, username= data[0], data[1]
+        #Handle non-existent account, for now Offline
+        if(username not in state.uuidsFile):
+            return ('/s', json.dumps({'sender': username, 'content': state.codes['user_exit'], 'type': "sys"}), state)
+        
         uuid = state.uuidsFile[username]
 
-        data = errors.common_room_errors(room, uuid, state)
+        data = errors.common_room_errors(room, uuid, response['sender'], state)
         if(data): return data[0]
 
         #If user is already in room OR already invite
@@ -86,10 +93,13 @@ def system(clientSock:object, response:dict, state:object) -> tuple:
         
     elif(content.startswith('/a')):
         data= content[2::].split(';')
-        room, username= data[0], data[1]   
+        room, username= data[0], data[1] 
+        #Handle non-existent account, for now Offline
+        if(username not in state.uuidsFile):
+            return ('/s', json.dumps({'sender': username, 'content': state.codes['user_exit'], 'type': "sys"}), state)  
         uuid = state.uuidsFile[username]       
 
-        data = errors.common_room_errors(room, uuid, state)
+        data = errors.common_room_errors(room, uuid, response['sender'], state)
         if(data): return data[0]
 
         #If User is already admin

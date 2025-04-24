@@ -22,7 +22,7 @@ Acitivities:
 class ChatServer:
     '''Initialize'''
     def __init__(self): 
-        self.state = ServerState() 
+        self.state = ServerState()         
         self.timeout = 40
         self.pingFrequency = 25
 
