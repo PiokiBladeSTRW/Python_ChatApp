@@ -17,7 +17,6 @@ def room(clientSock, destination:str, state:object):
 
 '''User Alert'''
 def user(clientSock, destination:str, state:object): 
-    #For userAlerts destination is modified in Main
     return (clientSock,)
 
 '''DM Broadcasts'''

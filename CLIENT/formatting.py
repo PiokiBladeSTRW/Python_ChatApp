@@ -4,10 +4,11 @@
 import time
 time_format = "%H:%M"
 
-def format(data:tuple, tags:tuple):   
+def format(data:tuple, tags:tuple) -> str:   
     '''DATA: (timestamp, sender, content)'''
 
-    if(data[0]): timestamp = time.strftime(time_format, time.localtime(float(data[0])))
+    # Make timestamp Readable as originally it is time.time()
+    if(data[0]): timestamp = time.strftime(time_format, time.localtime( float( data[0] ) ))
     
     msg_bits = []
     wrap = None
@@ -24,6 +25,7 @@ def format(data:tuple, tags:tuple):
             case 'A': wrap = ('<', '>')
             case 'S': wrap = ('[', ']')
 
+    # Prepare final message from bits
     final_msg = ' '.join(msg_bits)
     if(wrap): final_msg = f"{wrap[0]} {final_msg} {wrap[1]}"
 

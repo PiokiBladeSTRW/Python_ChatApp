@@ -5,128 +5,149 @@ import websockets
 #import logging
 
 import login
-import command_handler
+import commands.command_handler as command_handler
 import interface
 #import logging_setup
 from session_state import ClientState
 
-'''Main Class handling Client'''
-class ChatClient:
-    '''Initialization'''
+'''
+The Client Object
+Purpose: The primary handler of the Client's Activity
+Acitivities:
+    Handling the Usage of Modules
+    Connecting to Server
+    Logging-In    
+    Receiving and Sending Messages
+    Heartbeats & Elegant Disconnection during Crash
+'''
+class ChatClient:    
     def __init__(self):
         self.state = ClientState()
         #logger = logging_setup.setup_log()
+
         self.heartbeatPing = 20
         self.serverAddress = "ws://localhost:8765"
 
-    async def connectStartup(self):
+    async def connectClient(self) -> None: 
         async with websockets.connect(self.serverAddress) as clientSocket:   
             self.state.clientSock = clientSocket       
 
-            # Handle Session Log-in
-            await self.login()
+            await self.userLogin()
 
-            #Start Client up
-            try:
-                await asyncio.gather(self.message(), self.receive(),self.heartbeat())
-            except asyncio.exceptions.CancelledError:       # i.e., tasks have been cancelled, program exit
-                pass
-
-    async def login(self):
-        while True:  
-            '''AuthContent : {ACTION: <REG/LOG>, USERNAME: <>, PASSWD: <>}'''  
-
-            authContent = login.start_auth()
-
-            await self.send((authContent, self.state.msgTypes['authentication']))
-            response = json.loads(await self.state.clientSock.recv())
+            await asyncio.gather(self.message(), self.receive(),self.heartbeat())
             
-            #Log-In Succesful
-            if(response['content'] and response['type']=='auth'): 
+
+    async def userLogin(self) -> None:
+        # Loop till Succesfully Logged-on to Server
+        while True:  
+            authContent = login.start_auth()
+            '''AuthContent : {
+                ACTION: <REG/LOG>, 
+                USERNAME: <>,
+                PASSWD: <>
+                }'''
+
+            # Validate Credentials From Server
+            await self.sendPayload( (authContent, self.state.msgTypes['authentication']) )
+            response = json.loads(await self.state.clientSock.recv())
+
+            # Check condition of Log-in
+            if(login.was_succesful(response)):
                 self.state.clientUUID = response['content']
                 return
             
-            if(response['content'] in self.state.system_codes):
-                #Relog
-                if(response['content'] == 102):
-                    print(f"{{System}}: {self.state.system_codes[response['content']]}")
-                    response = json.loads(await self.state.clientSock.recv())
+            elif(response['content'] == 102):                
+                print(f"{{System}}: {self.state.system_codes[102]}")                
+                response = json.loads(await self.state.clientSock.recv())
 
-                    print(f"{{System}}: {self.state.system_codes[103]}")
-                    self.state.clientUUID = response['content']
-                    return
-                
-                response['content'] = self.state.system_codes[response['content']]
+                print(f"{{System}}: {self.state.system_codes[103]}")
+                self.state.clientUUID = response['content']
+                return
             
-            print(f"{{System}}: {response['content']}")
-            continue
+            else:
+                login.handle_fail(response)
+                continue
 
 
-    '''Obtain and Send Data'''
-    async def message(self):
+    '''------------------------------------------------'''
+
+
+    async def message(self) -> None:
         while True:
             msgInput = await asyncio.to_thread(input)
 
             if(command_handler.is_command(msgInput)):
-                
-                ''' Payload Format: (content, type)'''
                 action, payload, self.state = command_handler.parse_command(msgInput, self.state)
+                '''Action: send, exit, None
+                  Payload Format: (content, type)'''
                 
-                #Check what to do to Payload
+                # Check what to do to Payload
                 match action:
-                    case 'send': await self.send(payload)
+                    case 'send': await self.sendPayload(payload)
                     case 'exit': 
-                        await self.send(('/e', self.state.msgTypes['system']))
-                        await self.close()
-                    #Remove following two lines later, purely testing purpose
-                    case None: pass
+                        await self.sendPayload( ('/e', self.state.msgTypes['system']) )
+                        await self.closeClient()      
+                    case None: pass              
                     case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")
 
-            elif(self.state.receiver):                           
-                await self.send( (msgInput, self.state.msgTypes['message']) )
+            elif(self.state.receiver):
+                await self.sendPayload( (msgInput, self.state.msgTypes['message']) )
 
             else:
                 print("[!!ERROR: No Destination Chosen]")       
             
             print()
 
-    async def send(self, payload):  #To avoid Client Crash due to Down Server
-        try: 
-            await self.state.clientSock.send(self.state.encode(payload))
-        except websockets.exceptions.ConnectionClosed:
-            print("SERVER DOWN") 
-            await self.close()
-
-    async def receive(self):
+    async def receive(self) -> None:
         try:
             async for dataReceived in self.state.clientSock:
-                response = json.loads(dataReceived)                   
+                response = json.loads(dataReceived)
 
                 self.state = interface.parse_response(response, self.state) 
                 
                 print()
 
         except websockets.exceptions.ConnectionClosed:
-            print("SERVER DOWN!")
-            await self.close()
+            await self.closeServer()
+            
+    async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
+        '''Payload : ( Message, Type )'''
+        try: 
+            await self.state.clientSock.send(self.state.encode(payload))
 
+        except websockets.exceptions.ConnectionClosed:
+            await self.closeServer()
+   
 
-    '''Handle Disconnection'''
-    async def heartbeat(self):
+    '''------------------------------------------------'''
+
+         
+    async def heartbeat(self) -> None:
         while True:
-            await self.send( ('', self.state.msgTypes['heartbeat']) )
+            await self.sendPayload( ('', self.state.msgTypes['heartbeat']) )
             await asyncio.sleep(self.heartbeatPing)
     
-    async def close(self):        
+    async def closeClient(self) -> None:        
         await self.state.clientSock.close()
         for task in asyncio.all_tasks():
             task.cancel()
             return
 
-'''Entry Point to Event Loop'''
+    async def closeServer(self) -> None:
+        print("SERVER DOWN!")
+        await self.closeClient()
+        return
+
+
+
+'''ENTRY POINT FOR CLIENT SETUP'''
 async def eventLoop():
     client = ChatClient()
-    await client.connectStartup()
+
+    try:
+        await client.connectClient()
+    except asyncio.exceptions.CancelledError:       # i.e., tasks have been cancelled, program exit
+        pass
         
 #__MAIN__
 asyncio.run(eventLoop())
