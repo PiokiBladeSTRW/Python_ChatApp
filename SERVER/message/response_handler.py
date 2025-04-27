@@ -48,6 +48,10 @@ def system(clientSock:object, response:dict, state:object) -> tuple:
 
     raise ValueError(f"●→INVALID COMMAND RECEIVED: {command}")
 
+
+'''----------------------------------------------'''
+
+
 '''Parse Response Received by Clients'''
 def parse_response( clientSock:object, response:dict, state:object) -> tuple:
 
@@ -64,7 +68,6 @@ types ={
     "msg": handle_messages,
     "sys": system    
 }
-
 
 '''
 RETURN FORMAT: (DESTINATION, PAYLOAD, STATE)

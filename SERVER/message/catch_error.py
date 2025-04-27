@@ -26,4 +26,4 @@ class CatchError:
 
         return self.parse_error()
     
-    
+''' Mostly multiple_error_handle is used. As singular error handling requires an unnecessary variable in main_module'''

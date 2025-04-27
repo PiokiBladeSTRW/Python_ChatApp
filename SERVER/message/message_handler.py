@@ -4,6 +4,8 @@ from message.catch_error import CatchError
 
 errors = CatchError()
 
+'''----------------------------------------------'''
+
 def new_room_member_setup(room:str, clientSock:object, state:object) -> object:
     #R emove Invite Remove
     state.room_invites[room].remove(clientSock)
@@ -41,6 +43,9 @@ def room_handle(clientSock:object, response:dict, state:object) -> tuple:
         response['sender'] = f"New Member! {username} Joined\n{response['sender']}"
 
     return (f'/r{room}', json.dumps(response), state)
+
+
+'''----------------------------------------------'''
 
 
 def dm_handle(response:dict, state:object) -> tuple:
