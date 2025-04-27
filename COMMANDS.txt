@@ -43,6 +43,7 @@ SERVER:
 205 : To notify users that the room already exists (same name)
 206 : Invited User already in room
 207 : Candidate User already admin
+208 : User Doesn't Exist
 
 
 *Types

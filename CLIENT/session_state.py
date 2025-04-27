@@ -37,7 +37,8 @@ class ClientState:
             "er_Not_room_member": 204,
             "er_Room_exists": 205,
             "er_Member_in_room": 206,
-            "er_Member_is_admin": 207
+            "er_Member_is_admin": 207,
+            "er_Invalid_user": 208,
         }
         
         '''Room Args:
@@ -58,7 +59,8 @@ class ClientState:
             204 : "You are not a Member of this Room",
             205 : "This Room Already Exists",
             206 : "Member already in room",
-            207 : "Member already admin"
+            207 : "Member already admin",
+            208 : "The user doesn't exist"
         }
 
         self.client_codes ={

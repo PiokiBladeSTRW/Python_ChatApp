@@ -40,7 +40,8 @@ class ServerState:
             "er_Not_room_member": 204,
             "er_Room_exists": 205,
             "er_Member_in_room": 206,
-            "er_Member_is_admin": 207
+            "er_Member_is_admin": 207,
+            "er_Invalid_user": 208
         }
 
         self.client_codes ={
