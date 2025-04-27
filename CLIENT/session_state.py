@@ -39,15 +39,18 @@ class ClientState:
             "er_Member_in_room": 206,
             "er_Member_is_admin": 207
         }
-
-        self.system_codes_message={
+        
+        '''Room Args:
+        0: Room Name
+        1: User name'''
+        self.sys_code_msg={
             101 : "",
             102 : "OLD SESSION LIVE; FORCE CLOSING..",
             103 : "SUCCESSFUL RELOG!",           
-            104 : "{0} Joined the Room",
+            104 : "{1} Joined the Room",
             105 : "Room {0} is Live",
             106 : "{0} has sent an invitation",
-            107 : "Made {0} an Admin",
+            107 : "Made {1} an Admin",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            

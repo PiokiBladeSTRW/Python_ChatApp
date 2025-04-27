@@ -57,10 +57,25 @@ def online_user(response:dict, state:object) -> object:
 def system(response:dict, state:object) -> object:       
 
     '''Handle System Code Messages'''
-    if(response['command'] in state.system_codes):
-        
-        # User Exit
-        if(response['content'] == 101):
+    if(response.get('command')):
+        '''
+        Types of System Codes:
+        Special Actions : More action than just display [Can be of Various Types]
+        Argumented      : Has Arguments
+        Default         : Just Display
+        '''
+        print(response['command'])
+        # ARGUMENTED
+        if(response['command'] in (104, 105, 106, 107)):
+            args = response['content']
+            disp_msg = state.sys_code_msg[response['command']].format(args)
+
+            '''As of now there's only Room Commands being Argumented. Hence no extra Ifs'''
+            data = ('', f"[{args[0]}] {{System}}", disp_msg)
+
+        #SPECIAL      
+        if(response.get('content') == 101):
+            # User Exit
             data = ('', response['sender'], 'is OFFLINE')
             print(formatting.format(data, ('s', 'c', 'S')))
 
@@ -69,12 +84,10 @@ def system(response:dict, state:object) -> object:
                 state.receiver_change('')                
             return state
 
-        # Trying to message a room that you are not a member of
-        if(response['content'] == 104):
-            state.receiver_change('')
-        
-        data= ('', '{System}', state.system_codes[response['content']])
-
+        if(response.get('command') == (204,205)):
+            #Receiver Change
+            state.receiver_change('')  
+            data= ('', '{System}', state.sys_code_msg[response['command']])
     else:    
         data = ('', '{System}', response['content']) 
 

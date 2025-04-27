@@ -40,7 +40,7 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
 
     #Not a Member of Room
     if(not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])):         
-        return ('/s', json.dumps({'command': state.system_codes['not_room_member'], 'type': "sys"}), state)
+        return ('/s', json.dumps({'command': state.system_codes['er_Not_room_member'], 'type': "sys"}), state)
 
     state.roomsFile[room]['invites'].remove(clientSock)
     state.room_socks[room].append(clientSock)
@@ -117,6 +117,6 @@ def room_admin(response:dict, state:object) -> tuple:
         return ('/s', payload, state)
  
     state.roomsFile[room]['admins'].append(uuid)            
-    payload = json.dumps({"sender": f'/r{room}',"command": state.system_codes['member_admin'], 
-                          "content": (state.uuid_user(response['sender'])),"type":"msg"})             
+    payload = json.dumps({"command": state.system_codes['member_admin'], 
+                          "content": (room, state.uuid_user(response['sender'])),"type":"sys"})             
     return (f'/r{room}', payload, state)
