@@ -10,8 +10,6 @@ class ServerState:
          
         self.sock_rooms = {}            # socket : [rooms]                  -Auth
         self.room_socks= {}             # room name : [sockets]             -State
-        self.room_invites = {}          # room name : [invited sockets]     - Volatile
-
         self.timeout= {}                # socket: last heartbeat  
         
         with open("accounts.json", 'r') as fileHandle:
@@ -25,7 +23,7 @@ class ServerState:
 
         for room in self.roomsFile:
             self.room_socks[room] = []
-            self.room_invites[room] = []
+            self.roomsFile[room]['invites'] = []
 
         '''Codes for System Messages. 'er' prefix for Errors'''
         self.system_codes ={            
@@ -33,19 +31,20 @@ class ServerState:
             "relog_begin": 102,
             "relog_finish": 103,            
             "not_room_member": 104,
+            "new_room_member": 105,
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
-            "er_Invalid_room": 203,
-            "er_Not_admin": 204
+            "er_Not_admin": 203
         }
 
         self.client_codes ={
             'user_exit': 1,
             'online_list': 2,
             'rooms_list': 3,
-            'room_create': 4,
-            'room_invite': 5,
-            'room_admin' :6
+            'room_join': 4,
+            'room_create': 5,
+            'room_invite': 6,
+            'room_admin' :7
         }
 
 

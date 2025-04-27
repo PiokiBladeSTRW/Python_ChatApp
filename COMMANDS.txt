@@ -31,12 +31,12 @@ SERVER:
 1. 101 : To notify users when a client goes offline, Disconnecting Client being the Sender
 2. 102 : To notify users to wait while Server closes their old session
 3. 103 : To notify users that process is finished and they have relogged
-4. 105 : To notify users that they are NOT a Member of the Room (not invited) 
+4. 104 : To notify users that they are NOT a Member of the Room (not invited) 
+5. 105 : To notify users that a new member has joined the room
 
 1. 201 : Invalid Credentials for Log In
 2. 202 : Existing Username
-3. 203 : To notify users that their chosen room is non existent
-4. 204 : To notify users that they are NOT an Admin of the Room
+3. 203 : To notify users that they are NOT an Admin of the Room
 
 *Types
 1. sys: System Message, returns Errors & Instructions [ like commands ]

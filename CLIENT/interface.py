@@ -5,20 +5,41 @@ import formatting
 import time
 
 '''Handle Default Messages'''
-def incoming_message(response:dict, state:object) -> object: 
-    data = (response['timestamp'], response['sender'], response['content'])
+def incoming_message(response:dict, state:object) -> object:
+    def dms(): 
+        data = (response['timestamp'], response['sender'], response['content'])
 
-    # Direct Message : [Time] > Message
-    if(data[1] == state.receiver): 
-        print(formatting.format(data, ('bt', 'a', 'c')))  
+        # Direct Message : [Time] > Message
+        if(data[1] == state.receiver): 
+            print(formatting.format(data, ('bt', 'a', 'c')))  
+            
+        # Incoming Message : < Sender : Message >
+        else:
+            print(formatting.format(data, ('s', 'cl', 'c', 'A')))
 
-    # Room Message : [TIME] Sender : Message
-    elif(data[1].startswith('[')):
-        print(formatting.format(data, ('bt', 's', 'cl', 'c')))
+    def rooms():
+        room, username =response['sender'][0], response['sender'][1]
 
-    # Incoming Message : < Sender : Message >
+        data = [response['timestamp'], f"[{room}] {username}", response['content']]
+
+        # If New Member Joined
+        if(data[2] == 105):       
+            data[2] == state.system_codes[105]
+            print(formatting.format(data, ('bt', 's', 'c')))
+
+        # Direct Room Broadcast
+        elif(room == state.receiver[2::]):
+            print(formatting.format(data, ('bt', 's', 'cl', 'c')))
+
+        # Incoming Room Broadcast
+        else:
+            print(formatting.format(data, ('s', 'cl', 'c', 'A')))
+
+    # Check whether the message is a DM or Room Message
+    if( type(response['sender']) == tuple):
+        rooms()
     else:
-        print(formatting.format(data, ('s', 'cl', 'c', 'A')))
+        dms()
 
     return state
 
@@ -50,6 +71,10 @@ def system(response:dict, state:object) -> object:
         # Trying to message a room that you are not a member of
         if(response['content'] == 104):
             state.receiver_change('')
+        
+        # If joining a new room [later to be changed to CODE with Argument]
+        if("Invitation" in response['content']):
+            state.clientRoomsFile['rooms'].append(response['sender'])
 
         data= ('', '{System}', state.system_codes[response['content']])
 

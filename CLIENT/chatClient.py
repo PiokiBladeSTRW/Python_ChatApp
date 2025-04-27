@@ -26,6 +26,7 @@ class ChatClient:
         #logger = logging_setup.setup_log()
 
         self.heartbeatPing = 20
+        self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"
 
     async def connectClient(self) -> None: 
@@ -138,6 +139,20 @@ class ChatClient:
         print("SERVER DOWN!")
         await self.closeClient()
         return
+   
+
+    '''------------------------------------------------'''
+
+
+    '''Handle File I/O'''
+    async def fileHandle(self) -> None:
+        while True:   
+            
+            #Open and store data to each file
+            with open("rooms.json", 'w') as roomHandle:
+                json.dump({"rooms": list(self.state.clientRoomsFile)}, roomHandle)
+
+            await asyncio.sleep(self.fileIOFrequency)
 
 
 

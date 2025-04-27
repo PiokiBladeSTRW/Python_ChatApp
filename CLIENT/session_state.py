@@ -11,6 +11,10 @@ class ClientState:
         self.pReceiver = ''
         self.clientSock = None
 
+        with open("rooms.json", 'r') as roomsHandler:
+            data = json.load(roomsHandler)
+            self.clientRoomsFile = data['rooms']
+
         self.msgTypes= {
             "message": "msg",            
             "system": "sys",
@@ -23,19 +27,20 @@ class ClientState:
             102 : "OLD SESSION LIVE; FORCE CLOSING..",
             103 : "SUCCESSFUL RELOG!",            
             104 : "You are not a Member of this Room",
+            105 : "Joined the Room",
             201 : "Invalid Login Credentials",
-            202 : "Username already in Use",
-            203 : "The Room does not Exist",
-            204 : "You are not an Admin"
+            202 : "Username already in Use",            
+            203 : "You are not an Admin"
         }
 
         self.client_codes ={
             'user_exit': 1,
             'online_list': 2,
             'rooms_list': 3,
-            'room_create': 4,
-            'room_invite': 5,
-            'room_admin' :6
+            'room_join': 4,
+            'room_create': 5,
+            'room_invite': 6,
+            'room_admin' : 7
         }
 
     '''Encode the data'''

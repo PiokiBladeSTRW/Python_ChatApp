@@ -74,7 +74,7 @@ def room(args:list, state:object) -> tuple:
     if(len(args)<2): return errors.error_handle("Invalid Arguments!", state)
 
     match args[0]:
-        case "join": data = room_cmd.join_room(args[1::], state)
+        case "join": data = room_cmd.join_room(args[1], state)
         case "create": data = room_cmd.create_room(args[1], state)
         case "invite": data = room_cmd.invite_user(args[1], state)
         case "admin": data = room_cmd.admin_user(args[1], state)
