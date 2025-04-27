@@ -65,7 +65,7 @@ def room_create(clientSock:object, response:dict, state:object) -> tuple:
     state.roomsFile[room]['admins'].append(response['sender'])
     state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
 
-    return ('/s', json.dumps({'command': state.system_codes['room_live'],"content": room, 'type': "sys"}), state)
+    return ('/s', json.dumps({'command': state.system_codes['room_live'],"content": (room,), 'type': "sys"}), state)
 
 
 '''# Invites someone to a room [/room invite]'''
@@ -74,13 +74,13 @@ def room_invite(response:dict, state:object) -> tuple:
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
-        return ('/s', json.dumps({'command': state.system_codes['user_exit'], 'content': username,'type': "sys"}), state)
+        return ('/s', json.dumps({'command': state.system_codes['user_exit'], 'content': (username,),'type': "sys"}), state)
     uuid = state.uuidsFile[username]
 
     #Catch Errors
     possible_errors = {
-        'user_exit': uuid not in state.uuid_sock,
-        'er_Not_admin': response['sender'] not in state.roomsFile[room]['admins']
+        'user_exit': (uuid not in state.uuid_sock, username),
+        'er_Not_admin': (response['sender'] not in state.roomsFile[room]['admins', None])
     }
     data = errors.multiple_error_handle(possible_errors, state)
     if(data): return data[0]
@@ -100,13 +100,13 @@ def room_admin(response:dict, state:object) -> tuple:
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
-        return ('/s', json.dumps({'command': state.system_codes['user_exit'], 'content': username,'type': "sys"}), state)  
+        return ('/s', json.dumps({'command': state.system_codes['user_exit'], 'content': (username,),'type': "sys"}), state)  
     uuid = state.uuidsFile[username]       
 
     #Catch Errors
     possible_errors = {
-        'user_exit': uuid not in state.uuid_sock,
-        'er_Not_admin': response['sender'] not in state.roomsFile[room]['admins']
+        'user_exit': (uuid not in state.uuid_sock, username),
+        'er_Not_admin': (response['sender'] not in state.roomsFile[room]['admins'], None)
     }
     data = errors.multiple_error_handle(possible_errors, state)
     if(data): return data[0]
