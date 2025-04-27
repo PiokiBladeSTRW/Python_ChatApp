@@ -22,7 +22,18 @@ class ClientState:
             "authentication": "auth"
         }
 
-        self.system_codes ={
+        self.system_codes ={            
+            "user_exit": 101,
+            "relog_begin": 102,
+            "relog_finish": 103,            
+            "not_room_member": 104,
+            "new_room_member": 105,
+            "er_Invalid_login": 201,
+            "er_Exists_username": 202,
+            "er_Not_admin": 203
+        }
+
+        self.system_codes_message={
             101 : "",
             102 : "OLD SESSION LIVE; FORCE CLOSING..",
             103 : "SUCCESSFUL RELOG!",            

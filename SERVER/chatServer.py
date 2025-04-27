@@ -87,7 +87,7 @@ class ChatServer:
         if(destination.startswith('/r') or destination == '/.'):return
         
         #If receiving client does not exist
-        payload = json.dumps({"sender":destination, "content":self.state.system_codes['user_exit'], "type":"sys"})
+        payload = json.dumps({"command":self.state.system_codes['user_exit'], "content": destination, "type":"sys"})
         await self.send(clientSock, payload)
        
        
@@ -160,7 +160,7 @@ class ChatServer:
                 username = self.state.uuid_user(uuid)
                 
                 #Broadcast others that User is Offline                
-                payload = json.dumps({"sender":username, "content": self.state.system_codes['user_exit'], "type":"sys"})                
+                payload = json.dumps({"command": self.state.system_codes['user_exit'], "content": username, "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')
 
                 await leavingClient.close()

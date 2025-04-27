@@ -15,11 +15,11 @@ Commands and their Arguments:
 '''----------------------------------------------'''
 
 
-# Lets user close safely [/exit]
+'''# Lets user close safely [/exit]'''
 def user_exit(state:object) -> tuple:
     return ('*', '/exit', state)
 
-# Gives user a list of online members [/online]
+'''# Gives user a list of online members [/online]'''
 def online_list(response:dict, state:object) -> tuple:
     uuid_data = list(state.uuid_sock)
     uuid_data.remove(response['sender'])
@@ -28,45 +28,35 @@ def online_list(response:dict, state:object) -> tuple:
     data = '\n'.join(user_data)    
     return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
 
-# Gives user a list of rooms [/rooms]
+'''# Gives user a list of rooms [/rooms]'''
 def room_list(state:object) -> tuple:
     data = '\n'.join(state.room_socks.keys())
     return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
 
-# Join a Room [/room join]
+'''# Join a Room [/room join]'''
 def room_join(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']   
 
-    #Catch Errors
-    possible_errors = {
-        "not_room_member": not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])
-    }
+    #Not a Member of Room
+    if(not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])):         
+        return ('/s', json.dumps({'content': state.system_codes['not_room_member'], 'type': "sys"}), state)
 
-    data = errors.multiple_error_handle(possible_errors, state)
-    if(data):         
-        return data[0]
+    # Remove Invite Remove
+    state.roomsFile[room]['invites'].remove(clientSock)
 
-    # If New Member
-    if(clientSock in state.roomsFile[room]['invites']):
-        # Remove Invite Remove
-        state.roomsFile[room]['invites'].remove(clientSock)
+    # Dictionary of Room and its Reverse
+    state.room_socks[room].append(clientSock)
+    state.sock_rooms[clientSock] = room
 
-        # Dictionary of Room and its Reverse
-        state.room_socks[room].append(clientSock)
-        state.sock_rooms[clientSock] = room
-
-        # Data Added to Files (Rooms & Accounts)
-        state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
-        state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
-
-        username = state.uuid_user(response['sender'])        
-        response['sender'] =response['sender'] = (room, state.uuid_user(response['sender']))
-        response['content'] = state.system_codes['new_room_member']
-        return (f'/r{room}', json.dumps(response), state)
+    # Data Added to Files (Rooms & Accounts)
+    state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
+    state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
     
-    return ('*', None, state)
-
-# Creates a new room [/room create]
+    response['sender'] = (room, state.uuid_user(response['sender']))
+    response['content'] = state.system_codes['new_room_member']
+    return (f'/r{room}', json.dumps(response), state)
+    
+'''# Creates a new room [/room create]'''
 def room_create(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']
       
@@ -82,13 +72,13 @@ def room_create(clientSock:object, response:dict, state:object) -> tuple:
 
     return ('/s', json.dumps({'content': f"Room {room} Is LIVE", 'type': "sys"}), state)
 
-# Invites someone to a room [/room invite]
+'''# Invites someone to a room [/room invite]'''
 def room_invite(response:dict, state:object) -> tuple:    
     room, username = response['content'][0], response['content'][1]
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
-        return ('/s', json.dumps({'sender': username, 'content': state.system_codes['user_exit'], 'type': "sys"}), state)
+        return ('/s', json.dumps({'command': state.system_codes['user_exit'], 'content': username,'type': "sys"}), state)
     uuid = state.uuidsFile[username]
 
     #Catch Errors
@@ -110,7 +100,7 @@ def room_invite(response:dict, state:object) -> tuple:
     payload = json.dumps({"sender": room, "content": f"{room} has sent an Invitation", "type":"sys"})            
     return (uuid, payload, state)
 
-# Makes someone an Admin of Room [/room admin]
+'''# Makes someone an Admin of Room [/room admin]'''
 def room_admin(response:dict, state:object) -> tuple:    
     room, username = response['content'][0], response['content'][1]
 

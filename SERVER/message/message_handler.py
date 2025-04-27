@@ -25,7 +25,8 @@ def dm_handle(response:dict, state:object) -> tuple:
 
     #Ensure receiving username is valid
     if(state.uuidsFile[response['receiver']] not in state.uuid_sock):
-        return ('/s', json.dumps({"content": state.system_codes['user_exit'], "type":'sys'}))
+        return ('/s', json.dumps({"command": state.system_codes['user_exit'], "content": response['receiver'],
+                                "type":'sys'}))
 
     #Sender: UUID->USERNAME  ; Receiver: USERNAME->UUID
     response['sender'] = state.uuid_user(response['sender'])    
