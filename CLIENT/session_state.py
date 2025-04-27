@@ -92,7 +92,7 @@ class ClientState:
         '''
         Message Format: {"sender": <username>, 
                         "receiver": <username>,
-                        "command" : <command code>,
+                        "command" : <command_code>,
                         "content": '--', 
                         "type": 'msg/..',
                         "timestamp": "[Hour:Minute]"}     

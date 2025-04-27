@@ -56,6 +56,20 @@ SERVER:
 5.    : Username of receiver
 
 
+DATA FIELDS:
+sender ; receiver ; content ; command ; timestamp ; type
+
+Client To Server -> Always Present: Sender, Content, Type 
+                        Receiver (Present for msg, room)
+                        Command (Present for sys)                        
+                        Timestamp (Present for msg, room)
+
+Server To Client -> Always Present: Content, Type
+                        Sender (Present for msg, room)
+                        Receiver (Present for None)
+                        Command (Present for sys)
+                        Timestamp (Present if originally existed)
+
 REVERSE DICTIONARIES:
  Reverse of a Dictionary to avoid Dictionary Look ups [Value -> Key]
 
