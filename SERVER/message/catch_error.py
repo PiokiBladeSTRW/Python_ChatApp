@@ -7,10 +7,10 @@ class CatchError:
         self.error_list = []
 
     '''Error Handling'''
-    def error_handle(self, condition:bool, error:str,  state: object) -> tuple:
+    def error_handle(self, condition:bool, error:str, args:tuple, state: object) -> tuple:
         '''Key States whether or not the 'Error' is a Code or Not'''
         if(condition):
-            payload = json.dumps({'content': state.system_codes[error], 'type': "sys"})
+            payload = json.dumps({'command': state.system_codes[error], 'content':args, 'type': "sys"})
             return('/s', payload, state)
         
         return None
@@ -20,9 +20,9 @@ class CatchError:
         self.error_list = []
         return data
     
-    def multiple_error_handle(self, error_condition:dict[str,bool], state:object) -> tuple:
-        for error in error_condition:
-            self.error_list.append( self.error_handle(error_condition[error], error, state) )
+    def multiple_error_handle(self, possible_errors:dict[str,tuple], state:object) -> tuple:
+        for error in possible_errors:
+            self.error_list.append(self.error_handle(possible_errors[error][0], error, possible_errors[error][1], state))
 
         return self.parse_error()
     

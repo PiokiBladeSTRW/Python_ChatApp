@@ -55,30 +55,45 @@ def online_user(response:dict, state:object) -> object:
 
 '''Handle System Messages'''
 def system(response:dict, state:object) -> object:       
-
+    
     '''Handle System Code Messages'''
-    if(response['content'] in state.system_codes):
-        
-        # User Exit
-        if(response['content'] == 101):
-            data = ('', response['sender'], 'is OFFLINE')
+    if(response.get('command')):
+        '''
+        Types of System Codes:
+        Special Actions : More action than just display [Can be of Various Types]
+        Argumented      : Has Arguments
+        Default         : Just Display
+        '''
+        print(response['command'])
+        # ARGUMENTED
+        if(response['command'] in (104, 105, 106, 107)):
+            args = response['content']
+            print(args)
+            disp_msg = state.sys_code_msg[response['command']].format(*args)
+
+            '''As of now there's only Room Commands being Argumented. Hence no extra Ifs'''
+            data = ('', f"[{args[0]}] {{System}}", disp_msg)
+
+        #SPECIAL      
+        if(response['command'] == 101):
+            # User Exit
+            data = ('', response['content'], 'is OFFLINE')
             print(formatting.format(data, ('s', 'c', 'S')))
 
             # Reset Receiver if exited user was the Receiver
-            if(state.receiver == response['sender']):
+            if(state.receiver == response['content']):
                 state.receiver_change('')                
             return state
 
-        # Trying to message a room that you are not a member of
-        if(response['content'] == 104):
-            state.receiver_change('')
-        
-        data= ('', '{System}', state.system_codes[response['content']])
-
+        if(response['command'] in (204,205)):
+            #Receiver Change
+            state.receiver_change('')  
+            data= ('', '{System}', state.sys_code_msg[response['command']])
     else:    
         data = ('', '{System}', response['content']) 
 
     #  Sender ({System}) : Message
+    print(data)
     print(formatting.format(data, ('s', 'cl', 'c')))    
     return state
     

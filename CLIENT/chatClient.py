@@ -155,7 +155,7 @@ class ChatClient:
             #Open and store data to each file
             with open(f"rooms/{self.clientProfile}.json", 'w') as roomHandle:
                 json.dump({"rooms": list(self.state.clientRoomsFile)}, roomHandle)
-
+            print("SAVED>>")
             await asyncio.sleep(self.fileIOFrequency)
 
 

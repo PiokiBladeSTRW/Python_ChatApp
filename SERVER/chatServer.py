@@ -87,7 +87,7 @@ class ChatServer:
         if(destination.startswith('/r') or destination == '/.'):return
         
         #If receiving client does not exist
-        payload = json.dumps({"sender":destination, "content":self.state.system_codes['user_exit'], "type":"sys"})
+        payload = json.dumps({"command":self.state.system_codes['user_exit'], "content": destination, "type":"sys"})
         await self.send(clientSock, payload)
        
        
@@ -114,7 +114,7 @@ class ChatServer:
 
     async def relog(self, uuid:str, clientSock: websockets.ClientConnection) -> None:
         #So User knows to wait while they Relog
-        await self.send(clientSock, json.dumps({"content": self.state.system_codes['relog_begin'], "type":"sys"}))
+        await self.send(clientSock, json.dumps({"command": self.state.system_codes['relog_begin'], "type":"sys"}))
 
         oldClientSock = self.state.uuid_sock[uuid]        
         await self.disconnectionPending.put(oldClientSock)
@@ -136,7 +136,7 @@ class ChatServer:
         username = self.state.accountsFile[uuid]['username']
         await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
 
-        await self.send(clientSock, json.dumps({"content": self.state.system_codes['relog_finish'], "type": "sys"}))
+        await self.send(clientSock, json.dumps({"command": self.state.system_codes['relog_finish'], "type": "sys"}))
         return
 
     async def Disconnect(self) -> None: 
@@ -160,7 +160,7 @@ class ChatServer:
                 username = self.state.uuid_user(uuid)
                 
                 #Broadcast others that User is Offline                
-                payload = json.dumps({"sender":username, "content": self.state.system_codes['user_exit'], "type":"sys"})                
+                payload = json.dumps({"command": self.state.system_codes['user_exit'], "content": username, "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')
 
                 await leavingClient.close()
@@ -171,8 +171,8 @@ class ChatServer:
 
     '''Handle File I/O'''
     async def fileHandle(self) -> None:
-        while True:   
-            print(self.state.sock_rooms)
+        while True:  
+            
             #Open and store data to each file
             with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
                 json.dump(self.state.accountsFile, accountHandle)         

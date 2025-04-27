@@ -28,12 +28,19 @@ class ServerState:
         self.system_codes ={            
             "user_exit": 101,
             "relog_begin": 102,
-            "relog_finish": 103,            
-            "not_room_member": 104,
-            "new_room_member": 105,
+            "relog_finish": 103,        
+            "new_room_member": 104,
+            "room_live": 105,
+            "room_invite": 106,
+            "member_admin": 107,
+
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
-            "er_Not_admin": 203
+            "er_Not_admin": 203,
+            "er_Not_room_member": 204,
+            "er_Room_exists": 205,
+            "er_Member_in_room": 206,
+            "er_Member_is_admin": 207
         }
 
         self.client_codes ={
