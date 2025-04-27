@@ -44,18 +44,18 @@ class ClientState:
             101 : "",
             102 : "OLD SESSION LIVE; FORCE CLOSING..",
             103 : "SUCCESSFUL RELOG!",           
-            104 : "Joined the Room",
-            105 : "Room is Live (args)",
-            106 : "Room ivnited (args)",
-            107 : "Made Member Admin (args)",
+            104 : "{0} Joined the Room",
+            105 : "Room {0} is Live",
+            106 : "{0} has sent an invitation",
+            107 : "Made {0} an Admin",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
             203 : "You are not an Admin",
             204 : "You are not a Member of this Room",
             205 : "This Room Already Exists",
-            206 : "Member in room ",
-            207 : "Member already admin "
+            206 : "Member already in room",
+            207 : "Member already admin"
         }
 
         self.client_codes ={

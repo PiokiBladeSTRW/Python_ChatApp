@@ -41,19 +41,15 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
     if(not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])):         
         return ('/s', json.dumps({'command': state.system_codes['not_room_member'], 'type': "sys"}), state)
 
-    # Remove Invite Remove
     state.roomsFile[room]['invites'].remove(clientSock)
-
-    # Dictionary of Room and its Reverse
     state.room_socks[room].append(clientSock)
     state.sock_rooms[clientSock] = room
-
-    # Data Added to Files (Rooms & Accounts)
     state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
     state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
-    
-    return (f'/r{room}', json.dumps({"command": state.system_codes['new_room_member'], "content":(room, 
-                                     state.uuid_user(response['sender'])), "type":"sys"}), state)
+
+    payload = {"command": state.system_codes['new_room_member'], "content":(room, state.uuid_user(response['sender'])), 
+               "type":"sys"}
+    return (f'/r{room}', json.dumps(payload) , state)
     
 '''# Creates a new room [/room create]'''
 def room_create(clientSock:object, response:dict, state:object) -> tuple:
@@ -62,17 +58,15 @@ def room_create(clientSock:object, response:dict, state:object) -> tuple:
     if(room in state.roomsFile): return ('/s', json.dumps({"command": state.system_codes['er_Room_exists'],
                                          "type":"sys"}), state)
 
-    state.room_socks[room] = [clientSock]
-    
-    state.sock_rooms[clientSock].append(room)
-    
+    state.room_socks[room] = [clientSock]    
+    state.sock_rooms[clientSock].append(room)    
     state.roomsFile[room] = {'members': [], 'admins': [], 'invites': []}
     state.roomsFile[room]['members'].append(response['sender'])
     state.roomsFile[room]['admins'].append(response['sender'])
-
     state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
 
     return ('/s', json.dumps({'command': state.system_codes['room_live'],"content": room, 'type': "sys"}), state)
+
 
 '''# Invites someone to a room [/room invite]'''
 def room_invite(response:dict, state:object) -> tuple:    
@@ -97,8 +91,6 @@ def room_invite(response:dict, state:object) -> tuple:
         return ('/s', payload, state)
          
     state.roomsFile[room]['invites'].append(state.uuid_sock[uuid])
-
-    #To be made into a Parameter code command
     payload = json.dumps({"command": state.system_codes['room_invite'], "content":room, "type":"sys"})            
     return (uuid, payload, state)
 
@@ -119,12 +111,12 @@ def room_admin(response:dict, state:object) -> tuple:
     data = errors.multiple_error_handle(possible_errors, state)
     if(data): return data[0]
 
-    #If User is already admin
+    # If User is already admin
     if(uuid in state.roomsFile[room]['admins']):
         payload = json.dumps({"command": state.system_codes['er_Member_is_admin'], "type": "sys"})
         return ('/s', payload, state)
  
     state.roomsFile[room]['admins'].append(uuid)            
     payload = json.dumps({"sender": f'/r{room}',"command": state.system_codes['member_admin'], 
-                          "content": (state.uuid_user(response['sender'])),"type":"msg"})            
+                          "content": (state.uuid_user(response['sender'])),"type":"msg"})             
     return (f'/r{room}', payload, state)

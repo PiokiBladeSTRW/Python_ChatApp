@@ -57,7 +57,7 @@ def online_user(response:dict, state:object) -> object:
 def system(response:dict, state:object) -> object:       
 
     '''Handle System Code Messages'''
-    if(response['content'] in state.system_codes):
+    if(response['command'] in state.system_codes):
         
         # User Exit
         if(response['content'] == 101):
