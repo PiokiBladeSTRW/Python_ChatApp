@@ -171,8 +171,8 @@ class ChatServer:
 
     '''Handle File I/O'''
     async def fileHandle(self) -> None:
-        while True:   
-            print(self.state.sock_rooms)
+        while True:  
+            
             #Open and store data to each file
             with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
                 json.dump(self.state.accountsFile, accountHandle)         

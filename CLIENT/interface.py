@@ -55,7 +55,7 @@ def online_user(response:dict, state:object) -> object:
 
 '''Handle System Messages'''
 def system(response:dict, state:object) -> object:       
-
+    
     '''Handle System Code Messages'''
     if(response.get('command')):
         '''
@@ -68,23 +68,24 @@ def system(response:dict, state:object) -> object:
         # ARGUMENTED
         if(response['command'] in (104, 105, 106, 107)):
             args = response['content']
-            disp_msg = state.sys_code_msg[response['command']].format(args)
+            print(args)
+            disp_msg = state.sys_code_msg[response['command']].format(*args)
 
             '''As of now there's only Room Commands being Argumented. Hence no extra Ifs'''
             data = ('', f"[{args[0]}] {{System}}", disp_msg)
 
         #SPECIAL      
-        if(response.get('content') == 101):
+        if(response['command'] == 101):
             # User Exit
-            data = ('', response['sender'], 'is OFFLINE')
+            data = ('', response['content'], 'is OFFLINE')
             print(formatting.format(data, ('s', 'c', 'S')))
 
             # Reset Receiver if exited user was the Receiver
-            if(state.receiver == response['sender']):
+            if(state.receiver == response['content']):
                 state.receiver_change('')                
             return state
 
-        if(response.get('command') == (204,205)):
+        if(response['command'] in (204,205)):
             #Receiver Change
             state.receiver_change('')  
             data= ('', '{System}', state.sys_code_msg[response['command']])
@@ -92,6 +93,7 @@ def system(response:dict, state:object) -> object:
         data = ('', '{System}', response['content']) 
 
     #  Sender ({System}) : Message
+    print(data)
     print(formatting.format(data, ('s', 'cl', 'c')))    
     return state
     
