@@ -34,8 +34,7 @@ class ServerState:
             "new_room_member": 105,
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
-            "er_Invalid_room": 203,
-            "er_Not_admin": 204
+            "er_Not_admin": 203
         }
 
         self.client_codes ={

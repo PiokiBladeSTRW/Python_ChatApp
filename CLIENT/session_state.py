@@ -29,9 +29,8 @@ class ClientState:
             104 : "You are not a Member of this Room",
             105 : "Joined the Room",
             201 : "Invalid Login Credentials",
-            202 : "Username already in Use",
-            203 : "The Room does not Exist",
-            204 : "You are not an Admin"
+            202 : "Username already in Use",            
+            203 : "You are not an Admin"
         }
 
         self.client_codes ={

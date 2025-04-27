@@ -36,8 +36,7 @@ SERVER:
 
 1. 201 : Invalid Credentials for Log In
 2. 202 : Existing Username
-3. 203 : To notify users that their chosen room is non existent
-4. 204 : To notify users that they are NOT an Admin of the Room
+3. 203 : To notify users that they are NOT an Admin of the Room
 
 *Types
 1. sys: System Message, returns Errors & Instructions [ like commands ]
