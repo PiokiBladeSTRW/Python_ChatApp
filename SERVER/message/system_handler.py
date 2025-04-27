@@ -39,7 +39,7 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
 
     #Not a Member of Room
     if(not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])):         
-        return ('/s', json.dumps({'content': state.system_codes['not_room_member'], 'type': "sys"}), state)
+        return ('/s', json.dumps({'command': state.system_codes['not_room_member'], 'type': "sys"}), state)
 
     # Remove Invite Remove
     state.roomsFile[room]['invites'].remove(clientSock)
@@ -53,7 +53,7 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
     state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
     
     response['sender'] = (room, state.uuid_user(response['sender']))
-    response['content'] = state.system_codes['new_room_member']
+    response['command'] = state.system_codes['new_room_member']
     return (f'/r{room}', json.dumps(response), state)
     
 '''# Creates a new room [/room create]'''
@@ -106,7 +106,7 @@ def room_admin(response:dict, state:object) -> tuple:
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
-        return ('/s', json.dumps({'sender': username, 'content': state.system_codes['user_exit'], 'type': "sys"}), state)  
+        return ('/s', json.dumps({'command': state.system_codes['user_exit'], 'content': username,'type': "sys"}), state)  
     uuid = state.uuidsFile[username]       
 
     #Catch Errors

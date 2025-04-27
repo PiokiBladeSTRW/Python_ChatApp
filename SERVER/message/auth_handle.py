@@ -11,7 +11,7 @@ def reg(clientSock:object, content:dict, state:object) -> tuple:
     
     #Ensure Username Doesn't Exist Already
     if(content['username'] in state.uuidsFile):        
-        return ('/s', json.dumps({"content": state.system_codes['er_Exists_username'], "type":"sys"}), state)      
+        return ('/s', json.dumps({"command": state.system_codes['er_Exists_username'], "type":"sys"}), state)      
 
     #Secure the Data   
     salt = secrets.token_hex(16)
@@ -60,7 +60,7 @@ def log(clientSock:object, content:dict, state:object) -> tuple:
 
             return True
         
-    return ('/s', json.dumps({"content": state.system_codes['er_Invalid_login'], "type":"sys"}), state)
+    return ('/s', json.dumps({"command": state.system_codes['er_Invalid_login'], "type":"sys"}), state)
 
 
 '''Relog to currently Active Account'''
@@ -71,7 +71,7 @@ def relog(clientSock:object, content:dict, state:object) -> tuple:
     if(state.accountsFile[user_uuid]['passwd'] == content['passwd']):
         return ('*', '/relog', state)
 
-    return ('/s', json.dumps({"content": state.system_codes['er_Invalid_login'], "type":"sys"}), state)
+    return ('/s', json.dumps({"command": state.system_codes['er_Invalid_login'], "type":"sys"}), state)
 
 '''-------------------------------------'''
 

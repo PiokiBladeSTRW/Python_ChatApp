@@ -10,7 +10,7 @@ class CatchError:
     def error_handle(self, condition:bool, error:str,  state: object) -> tuple:
         '''Key States whether or not the 'Error' is a Code or Not'''
         if(condition):
-            payload = json.dumps({'content': state.system_codes[error], 'type': "sys"})
+            payload = json.dumps({'command': state.system_codes[error], 'type': "sys"})
             return('/s', payload, state)
         
         return None

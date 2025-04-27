@@ -114,7 +114,7 @@ class ChatServer:
 
     async def relog(self, uuid:str, clientSock: websockets.ClientConnection) -> None:
         #So User knows to wait while they Relog
-        await self.send(clientSock, json.dumps({"content": self.state.system_codes['relog_begin'], "type":"sys"}))
+        await self.send(clientSock, json.dumps({"command": self.state.system_codes['relog_begin'], "type":"sys"}))
 
         oldClientSock = self.state.uuid_sock[uuid]        
         await self.disconnectionPending.put(oldClientSock)
@@ -136,7 +136,7 @@ class ChatServer:
         username = self.state.accountsFile[uuid]['username']
         await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
 
-        await self.send(clientSock, json.dumps({"content": self.state.system_codes['relog_finish'], "type": "sys"}))
+        await self.send(clientSock, json.dumps({"command": self.state.system_codes['relog_finish'], "type": "sys"}))
         return
 
     async def Disconnect(self) -> None: 
