@@ -2,6 +2,7 @@
 import json
 import asyncio
 import websockets
+import argparse
 #import logging
 
 import login
@@ -21,8 +22,8 @@ Acitivities:
     Heartbeats & Elegant Disconnection during Crash
 '''
 class ChatClient:    
-    def __init__(self):
-        self.state = ClientState()
+    def __init__(self, clientName):
+        self.state = ClientState(clientName)
         #logger = logging_setup.setup_log()
 
         self.heartbeatPing = 20
@@ -158,7 +159,11 @@ class ChatClient:
 
 '''ENTRY POINT FOR CLIENT SETUP'''
 async def eventLoop():
-    client = ChatClient()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--profile', type=str, required=True)
+    args = parser.parse_args()
+
+    client = ChatClient(args.profile)
 
     try:
         await client.connectClient()
