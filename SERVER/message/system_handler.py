@@ -68,11 +68,11 @@ def room_invite(response:dict, state:object) -> tuple:
     #If user is already in room OR already invite
     if(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.room_invites[room]):
         payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
-
-    else:        
-        state.room_invites[room].append(state.uuid_sock[uuid])
-        payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
-        return (uuid, payload, state)
+        return ('/s', payload, state)
+         
+    state.room_invites[room].append(state.uuid_sock[uuid])
+    payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
+    return (uuid, payload, state)
 
 # Makes someone an Admin of Room [/room admin]
 def room_admin(response:dict, state:object) -> tuple:
@@ -95,8 +95,8 @@ def room_admin(response:dict, state:object) -> tuple:
     #If User is already admin
     if(uuid in state.roomsFile[room]['admins']):
         payload = json.dumps({"content": f"{username} is already an admim", "type": "sys"})
-
-    else:     
-        state.roomsFile[room]['admins'].append(uuid)            
-        payload = json.dumps({"content": f"{room} has made {state.uuid_user(uuid)} an ADMIN", "type":"msg"})            
-        return (f'/r{room}', payload, state)
+        return ('/s', payload, state)
+ 
+    state.roomsFile[room]['admins'].append(uuid)            
+    payload = json.dumps({"content": f"{room} has made {state.uuid_user(uuid)} an ADMIN", "type":"msg"})            
+    return (f'/r{room}', payload, state)
