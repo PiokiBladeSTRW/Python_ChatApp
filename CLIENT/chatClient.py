@@ -113,7 +113,7 @@ class ChatClient:
                 
                 print()
 
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosedError:
             await self.closeServer()
             
     async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
@@ -121,7 +121,7 @@ class ChatClient:
         try: 
             await self.state.clientSock.send(self.state.encode(payload))
 
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosedError:
             await self.closeServer()
    
 
@@ -170,7 +170,8 @@ async def eventLoop():
 
     try:
         await client.connectClient()
-    except asyncio.exceptions.CancelledError:       # i.e., tasks have been cancelled, program exit
+    # i.e., tasks have been cancelled, program exit
+    except (asyncio.CancelledError, ConnectionRefusedError, asyncio.TimeoutError):
         pass
         
 #__MAIN__
