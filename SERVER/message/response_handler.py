@@ -32,8 +32,9 @@ def handle_messages(clientSock:object, response:dict, state:object) -> tuple:
     if(response['receiver'].startswith('/r')):
         return message_handle.room_handle(clientSock, response, state)    
     else:
-        return message_handle.dm_handle(response, state)
-    
+        return message_handle.dm_handle(response, state) 
+
+'''Handle system messages, that is, commands'''
 def system(clientSock:object, response:dict, state:object) -> tuple: 
     # Obtain Command
     command = response['command']

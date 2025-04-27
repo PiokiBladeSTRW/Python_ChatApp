@@ -12,9 +12,11 @@ Commands and their Arguments:
 5: Room Invite -> (Room Name, Username)
 6: Room Admin -> (Room Name, Username)'''
 
+# Lets user close safely [/exit]
 def user_exit(state:object) -> tuple:
     return ('*', '/exit', state)
 
+# Gives user a list of online members [/online]
 def online_list(response:dict, state:object) -> tuple:
     uuid_data = list(state.uuid_sock)
     uuid_data.remove(response['sender'])
@@ -23,10 +25,12 @@ def online_list(response:dict, state:object) -> tuple:
     data = '\n'.join(user_data)    
     return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
 
+# Gives user a list of rooms [/rooms]
 def room_list(state:object) -> tuple:
     data = '\n'.join(state.room_socks.keys())
     return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
 
+# Creates a new room [/room create]
 def create_room(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']
 
@@ -43,6 +47,7 @@ def create_room(clientSock:object, response:dict, state:object) -> tuple:
 
     return ('/s', json.dumps({'content': f"Room {room} Is LIVE", 'type': "sys"}), state)
 
+# Invites someone to a room [/room invite]
 def room_invite(response:dict, state:object) -> tuple:
     room, username = response['content'][0], response['content'][1]
 
@@ -68,7 +73,8 @@ def room_invite(response:dict, state:object) -> tuple:
         state.room_invites[room].append(state.uuid_sock[uuid])
         payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
         return (uuid, payload, state)
-    
+
+# Makes someone an Admin of Room [/room admin]
 def room_admin(response:dict, state:object) -> tuple:
     room, username = response['content'][0], response['content'][1] 
 
