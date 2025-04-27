@@ -70,7 +70,7 @@ def parse_response(response:dict, state:object) -> object:
         state = types[response['type']](response, state)
         return state
     else:
-        raise Exception("●→INVALID MESSAGE TYPE RECEIVED")
+        raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")
     
 
 '''Response Types'''
