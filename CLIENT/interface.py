@@ -66,6 +66,10 @@ def system(response:dict, state:object) -> object:
 
 '''Handle Responses'''
 def parse_response(response:dict, state:object) -> object: 
+
+    # For future purpose of Storing in DB
+    if(not response.get('timestamp')): response['timestamp'] = time.time()
+
     if(response['type'] in types): 
         state = types[response['type']](response, state)
         return state
