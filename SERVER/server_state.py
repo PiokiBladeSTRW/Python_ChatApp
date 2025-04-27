@@ -43,9 +43,10 @@ class ServerState:
             'user_exit': 1,
             'online_list': 2,
             'rooms_list': 3,
-            'room_create': 4,
-            'room_invite': 5,
-            'room_admin' :6
+            'room_join': 4,
+            'room_create': 5,
+            'room_invite': 6,
+            'room_admin' :7
         }
 
 

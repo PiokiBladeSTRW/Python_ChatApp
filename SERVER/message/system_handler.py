@@ -12,6 +12,9 @@ Commands and their Arguments:
 5: Room Invite -> (Room Name, Username)
 6: Room Admin -> (Room Name, Username)'''
 
+'''----------------------------------------------'''
+
+
 # Lets user close safely [/exit]
 def user_exit(state:object) -> tuple:
     return ('*', '/exit', state)
@@ -29,6 +32,37 @@ def online_list(response:dict, state:object) -> tuple:
 def room_list(state:object) -> tuple:
     data = '\n'.join(state.room_socks.keys())
     return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
+
+# Join a Room [/room join]
+def room_join(clientSock:object, response:dict, state:object) -> tuple:
+    room = response['content']   
+
+    #Catch Errors
+    possible_errors = {
+        "er_Invalid_room": room not in state.room_socks,
+        "not_room_member": not(clientSock in state.room_socks[room] or clientSock in state.room_invites[room])
+    }
+
+    data = errors.multiple_error_handle(possible_errors, state)
+    if(data): return data[0]
+
+    # If New Member
+    if(clientSock in state.room_invites[room]):
+        # Remove Invite Remove
+        state.room_invites[room].remove(clientSock)
+
+        # Dictionary of Room and its Reverse
+        state.room_socks[room].append(clientSock)
+        state.sock_rooms[clientSock] = room
+
+        # Data Added to Files (Rooms & Accounts)
+        state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
+        state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
+
+        username = state.uuid_user(response['sender'])
+        response.pop('receiver') 
+        response['sender'] = f"New Member! {username} Joined\n{response['sender']}"
+        return (f'/r{room}', json.dumps(response), state)
 
 # Creates a new room [/room create]
 def room_create(clientSock:object, response:dict, state:object) -> tuple:
