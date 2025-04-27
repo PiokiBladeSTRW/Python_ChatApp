@@ -25,23 +25,37 @@ class ClientState:
         self.system_codes ={            
             "user_exit": 101,
             "relog_begin": 102,
-            "relog_finish": 103,            
-            "not_room_member": 104,
-            "new_room_member": 105,
+            "relog_finish": 103,        
+            "new_room_member": 104,
+            "room_live": 105,
+            "room_invite": 106,
+            "member_admin": 107,
+
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
-            "er_Not_admin": 203
+            "er_Not_admin": 203,
+            "er_Not_room_member": 204,
+            "er_Room_exists": 205,
+            "er_Member_in_room": 206,
+            "er_Member_is_admin": 207
         }
 
         self.system_codes_message={
             101 : "",
             102 : "OLD SESSION LIVE; FORCE CLOSING..",
-            103 : "SUCCESSFUL RELOG!",            
-            104 : "You are not a Member of this Room",
-            105 : "Joined the Room",
+            103 : "SUCCESSFUL RELOG!",           
+            104 : "Joined the Room",
+            105 : "Room is Live (args)",
+            106 : "Room ivnited (args)",
+            107 : "Made Member Admin (args)",
+
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
-            203 : "You are not an Admin"
+            203 : "You are not an Admin",
+            204 : "You are not a Member of this Room",
+            205 : "This Room Already Exists",
+            206 : "Member in room ",
+            207 : "Member already admin "
         }
 
         self.client_codes ={

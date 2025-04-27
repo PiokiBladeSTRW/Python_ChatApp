@@ -52,14 +52,16 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
     state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
     state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
     
-    response['sender'] = (room, state.uuid_user(response['sender']))
-    response['command'] = state.system_codes['new_room_member']
-    return (f'/r{room}', json.dumps(response), state)
+    return (f'/r{room}', json.dumps({"command": state.system_codes['new_room_member'], "content":(room, 
+                                     state.uuid_user(response['sender'])), "type":"sys"}), state)
     
 '''# Creates a new room [/room create]'''
 def room_create(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']
-      
+    
+    if(room in state.roomsFile): return ('/s', json.dumps({"command": state.system_codes['er_Room_exists'],
+                                         "type":"sys"}), state)
+
     state.room_socks[room] = [clientSock]
     
     state.sock_rooms[clientSock].append(room)
@@ -70,7 +72,7 @@ def room_create(clientSock:object, response:dict, state:object) -> tuple:
 
     state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
 
-    return ('/s', json.dumps({'content': f"Room {room} Is LIVE", 'type': "sys"}), state)
+    return ('/s', json.dumps({'command': state.system_codes['room_live'],"content": room, 'type': "sys"}), state)
 
 '''# Invites someone to a room [/room invite]'''
 def room_invite(response:dict, state:object) -> tuple:    
@@ -91,13 +93,13 @@ def room_invite(response:dict, state:object) -> tuple:
 
     #If user is already in room OR already invite
     if(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.roomsFile[room]['invites']):
-        payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
+        payload = json.dumps({"command": state.system_codes['er_Member_in_room'], "type":"sys"})
         return ('/s', payload, state)
          
     state.roomsFile[room]['invites'].append(state.uuid_sock[uuid])
 
     #To be made into a Parameter code command
-    payload = json.dumps({"sender": room, "content": f"{room} has sent an Invitation", "type":"sys"})            
+    payload = json.dumps({"command": state.system_codes['room_invite'], "content":room, "type":"sys"})            
     return (uuid, payload, state)
 
 '''# Makes someone an Admin of Room [/room admin]'''
@@ -119,9 +121,10 @@ def room_admin(response:dict, state:object) -> tuple:
 
     #If User is already admin
     if(uuid in state.roomsFile[room]['admins']):
-        payload = json.dumps({"content": f"{username} is already an admim", "type": "sys"})
+        payload = json.dumps({"command": state.system_codes['er_Member_is_admin'], "type": "sys"})
         return ('/s', payload, state)
  
     state.roomsFile[room]['admins'].append(uuid)            
-    payload = json.dumps({"content": f"{room} has made {state.uuid_user(uuid)} an ADMIN", "type":"msg"})            
+    payload = json.dumps({"sender": f'/r{room}',"command": state.system_codes['member_admin'], 
+                          "content": (state.uuid_user(response['sender'])),"type":"msg"})            
     return (f'/r{room}', payload, state)
