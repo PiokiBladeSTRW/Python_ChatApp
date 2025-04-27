@@ -31,6 +31,8 @@ class ServerState:
             "relog_finish": 103,        
             "new_room_member": 104,
             "room_live": 105,
+            "room_invite": 106,
+            "member_admin": 107,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
