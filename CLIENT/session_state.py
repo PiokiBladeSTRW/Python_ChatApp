@@ -82,7 +82,7 @@ class ClientState:
             }
         
         # Additional Data Entries
-        if(data['type'] in ('msg', 'room')):
+        if(data['type'] in ('msg')):
             data['receiver'] = self.receiver
             data['timestamp'] = str(time.time())
         
@@ -104,7 +104,6 @@ class ClientState:
         ->sys: System Message / Commands
         ->hbp: Heartbeat Pings. Letting Server know you are there.
         ->auth: Handles Authentication of User and ONLINE displays 
-        ->room: Handles messages to rooms
         '''   
 
         return json.dumps(data)
