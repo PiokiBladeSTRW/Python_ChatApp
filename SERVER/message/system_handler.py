@@ -33,6 +33,7 @@ def room_list(state:object) -> tuple:
     data = '\n'.join(state.room_socks.keys())
     return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
 
+
 '''# Join a Room [/room join]'''
 def room_join(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']   
@@ -46,10 +47,9 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
     state.sock_rooms[clientSock] = room
     state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
     state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
-
-    payload = {"command": state.system_codes['new_room_member'], "content":(room, state.uuid_user(response['sender'])), 
-               "type":"sys"}
-    return (f'/r{room}', json.dumps(payload) , state)
+ 
+    return (f'/r{room}', json.dumps({"command": state.system_codes['new_room_member'], "content":(room, 
+                                     state.uuid_user(response['sender'])), "type":"sys"}), state)
     
 '''# Creates a new room [/room create]'''
 def room_create(clientSock:object, response:dict, state:object) -> tuple:
