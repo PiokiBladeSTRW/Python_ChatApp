@@ -11,9 +11,11 @@ Commands and Actions
     /b                      : Backtracks Receiver to Swap
 '''
 # Header
-
-#Imported as such as command_handler is itself a module
 import commands.room_cmd as room_cmd
+
+
+'''========================== type: msg'''
+
 
 '''Handle DMS'''
 def handle_dm(args:list, state:object) -> tuple:  
@@ -23,23 +25,9 @@ def handle_dm(args:list, state:object) -> tuple:
     payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload, state)
 
-'''Room Related Commands'''
-def room(args:list, state:object) -> tuple:    
+'''========================== type : sys'''
+   
 
-    match args[0]:
-        case "join": data = room_cmd.join_room(args[1::], state)
-        case "create": data = room_cmd.create_room(args[1], state)
-        case "invite": data = room_cmd.invite_user(args[1], state)
-        case "admin": data = room_cmd.admin_user(args[1], state)
-        case _: 
-            data = None
-            print("INVALID COMMAND")
-        
-    if (data == None):
-        return (None, None, state)    
-    return data
-
-    
 '''List of every Online Client'''
 def online_list(args:list, state:object) -> tuple: 
     payload = ((state.client_codes['online_list'], ''), state.msgTypes['system'])    
@@ -50,10 +38,12 @@ def rooms_list(args:list, state:object) -> tuple:
     payload = ((state.client_codes['rooms_list'], ''), state.msgTypes['system'])
     return ('send', payload, state)
 
-
 '''Exit Program'''
 def close(args:list, state:object) -> tuple: 
     return ('exit', None, state)
+
+
+'''========================== type : none'''
 
 
 '''Reset Receiver'''
@@ -70,6 +60,26 @@ def back_rec(args:list, state:object) -> tuple:
 def chat_help(args:list, state:object) -> tuple:
     import help
     return (None, None, state)
+
+
+'''========================== type : depends'''
+
+
+'''Room Related Commands'''
+def room(args:list, state:object) -> tuple:    
+
+    match args[0]:
+        case "join": data = room_cmd.join_room(args[1::], state)
+        case "create": data = room_cmd.create_room(args[1], state)
+        case "invite": data = room_cmd.invite_user(args[1], state)
+        case "admin": data = room_cmd.admin_user(args[1], state)
+        case _: 
+            data = None
+            print("INVALID COMMAND")
+        
+    if (data == None):
+        return (None, None, state)    
+    return data
 
 
 '''-------------------------------------'''
@@ -103,14 +113,17 @@ def parse_command(input_cmd:str, state:object) -> tuple:
 
 '''Convert Command to Function call in One Step'''
 commands = {
-    "/dm": handle_dm, 
-    "/room": room,
-    "/#": reset_rec,
-    "/b": back_rec,
-    "/exit": close,    
+    "/dm": handle_dm,
+
     "/online": online_list,
-    "/rooms": rooms_list,
-    "/help": chat_help,    
+    "/rooms": rooms_list,  
+    "/exit": close,  
+
+    "/#": reset_rec,
+    "/b": back_rec,      
+    "/help": chat_help, 
+
+    "/room": room,
 }
 
 
