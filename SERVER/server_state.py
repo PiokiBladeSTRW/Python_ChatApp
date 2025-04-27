@@ -10,8 +10,6 @@ class ServerState:
          
         self.sock_rooms = {}            # socket : [rooms]                  -Auth
         self.room_socks= {}             # room name : [sockets]             -State
-        self.room_invites = {}          # room name : [invited sockets]     - Volatile
-
         self.timeout= {}                # socket: last heartbeat  
         
         with open("accounts.json", 'r') as fileHandle:
@@ -25,7 +23,7 @@ class ServerState:
 
         for room in self.roomsFile:
             self.room_socks[room] = []
-            self.room_invites[room] = []
+            self.roomsFile[room]['invites'] = []
 
         '''Codes for System Messages. 'er' prefix for Errors'''
         self.system_codes ={            

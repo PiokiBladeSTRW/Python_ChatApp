@@ -40,16 +40,16 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
     #Catch Errors
     possible_errors = {
         "er_Invalid_room": room not in state.room_socks,
-        "not_room_member": not(clientSock in state.room_socks[room] or clientSock in state.room_invites[room])
+        "not_room_member": not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])
     }
 
     data = errors.multiple_error_handle(possible_errors, state)
     if(data): return data[0]
 
     # If New Member
-    if(clientSock in state.room_invites[room]):
+    if(clientSock in state.roomsFile[room]['invites']):
         # Remove Invite Remove
-        state.room_invites[room].remove(clientSock)
+        state.roomsFile[room]['invites'].remove(clientSock)
 
         # Dictionary of Room and its Reverse
         state.room_socks[room].append(clientSock)
@@ -69,12 +69,12 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
 def room_create(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']
 
-    state.room_invites[room] = []        
+    state.roomsFile[room]['invites'] = []        
     state.room_socks[room] = [clientSock]
     
     state.sock_rooms[clientSock].append(room)
     
-    state.roomsFile[room] = {'members': [], 'admins': []}
+    state.roomsFile[room] = {'members': [], 'admins': [], 'invites': []}
     state.roomsFile[room]['members'].append(response['sender'])
     state.roomsFile[room]['admins'].append(response['sender'])
 
@@ -102,11 +102,11 @@ def room_invite(response:dict, state:object) -> tuple:
     if(data): return data[0]
 
     #If user is already in room OR already invite
-    if(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.room_invites[room]):
+    if(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.roomsFile[room]['invites']):
         payload = json.dumps({"content": f"{username} already in {room}", "type":"sys"})
         return ('/s', payload, state)
          
-    state.room_invites[room].append(state.uuid_sock[uuid])
+    state.roomsFile[room]['invites'].append(state.uuid_sock[uuid])
     payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
     return (uuid, payload, state)
 
