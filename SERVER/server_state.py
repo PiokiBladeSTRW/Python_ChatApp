@@ -33,6 +33,7 @@ class ServerState:
             "relog_begin": 102,
             "relog_finish": 103,            
             "not_room_member": 104,
+            "new_room_member": 105,
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
             "er_Invalid_room": 203,

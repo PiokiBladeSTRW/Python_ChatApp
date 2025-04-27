@@ -61,7 +61,8 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
 
         username = state.uuid_user(response['sender'])
         response.pop('receiver') 
-        response['sender'] = f"New Member! {username} Joined\n{response['sender']}"
+        response['sender'] =response['sender'] = (room, state.uuid_user(response['sender']))
+        response['content'] = state.system_codes['new_room_member']
         return (f'/r{room}', json.dumps(response), state)
 
 # Creates a new room [/room create]

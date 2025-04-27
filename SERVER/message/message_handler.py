@@ -16,7 +16,7 @@ def room_handle(clientSock:object, response:dict, state:object) -> tuple:
     if(data): return data[0]
 
     response.pop('receiver')
-    response['sender'] = f"[{room}] {state.uuid_user(response['sender'])}"
+    response['sender'] = (room, state.uuid_user(response['sender']))
     return (f'/r{room}', json.dumps(response), state)
 
 '''----------------------------------------------'''

@@ -23,6 +23,7 @@ class ClientState:
             102 : "OLD SESSION LIVE; FORCE CLOSING..",
             103 : "SUCCESSFUL RELOG!",            
             104 : "You are not a Member of this Room",
+            105 : "Joined the Room",
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",
             203 : "The Room does not Exist",
