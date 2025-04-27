@@ -12,6 +12,7 @@ Commands and Actions
 '''
 # Header
 import commands.room_cmd as room_cmd
+import commands.error_handle as errors
 
 
 '''========================== type: msg'''
@@ -19,8 +20,10 @@ import commands.room_cmd as room_cmd
 
 '''Handle DMS'''
 def handle_dm(args:list, state:object) -> tuple:  
-    '''Args[0]= Username, Args[1::]= Message'''    
 
+    if(len(args)<2): return errors.error_handle("Invalid Arguments!", state)
+
+    '''Args[0]= Username, Args[1::]= Message''' 
     state.receiver_change(args[0])
     payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload, state)
@@ -66,19 +69,17 @@ def chat_help(args:list, state:object) -> tuple:
 
 
 '''Room Related Commands'''
-def room(args:list, state:object) -> tuple:    
+def room(args:list, state:object) -> tuple: 
+
+    if(len(args)<2): return errors.error_handle("Invalid Arguments!", state)
 
     match args[0]:
         case "join": data = room_cmd.join_room(args[1::], state)
         case "create": data = room_cmd.create_room(args[1], state)
         case "invite": data = room_cmd.invite_user(args[1], state)
         case "admin": data = room_cmd.admin_user(args[1], state)
-        case _: 
-            data = None
-            print("INVALID COMMAND")
-        
-    if (data == None):
-        return (None, None, state)    
+        case _: return errors.error_handle("Invalid Command!", state)
+  
     return data
 
 
@@ -107,8 +108,7 @@ def parse_command(input_cmd:str, state:object) -> tuple:
         data = commands[cmd](args, state)
         return data
     
-    print("INVALID COMMAND")
-    return (None, None, state)
+    return errors.error_handle("Invalid Command!", state)
     
 
 '''Convert Command to Function call in One Step'''
