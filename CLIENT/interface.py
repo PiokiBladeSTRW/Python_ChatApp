@@ -60,7 +60,10 @@ def system(response:dict, state:object) -> object:
     if(response.get('command')):
 
         # ARGUMENTED
-        if(response['command'] in (104, 105, 106, 107)):
+        argument_codes = (state.system_codes['new_room_member'], state.system_codes['room_live'],
+                          state.system_codes['room_invite'], state.system_codes['member_admin'])
+        
+        if(response['command'] in argument_codes):
             args = response['content']            
             disp_msg = state.sys_code_msg[response['command']].format(*args)
 
@@ -68,7 +71,7 @@ def system(response:dict, state:object) -> object:
             data = ('', f"[{args[0]}] {{System}}", disp_msg)
 
         #SPECIAL      
-        if(response['command'] == 101):
+        if(response['command'] == state.system_codes['user_exit']):
             # User Exit
             data = ('', response['content'], state.sys_code_msg[response['command']])
             print(formatting.format(data, ('s', 'c', 'S')))
@@ -78,7 +81,7 @@ def system(response:dict, state:object) -> object:
                 state.receiver_change('')                
             return state
 
-        if(response['command'] in (204,205)):
+        if(response['command'] in (state.system_codes['er_Not_room_member'], state.system_codes['er_Room_exists'])):
             #Receiver Change
             state.receiver_change('')  
             data= ('', '{System}', state.sys_code_msg[response['command']])
