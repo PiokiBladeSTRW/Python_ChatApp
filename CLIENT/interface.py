@@ -73,8 +73,8 @@ def system(response:dict, state:object) -> object:
             state.receiver_change('')
         
         # If joining a new room [later to be changed to CODE with Argument]
-        if("Invitation" in response['content']):
-            state.clientRoomsFile['rooms'].append(response['sender'])
+        elif("Invitation" in response['content']):
+            state.clientRoomsFile.append(response['sender'])
 
         data= ('', '{System}', state.system_codes[response['content']])
 

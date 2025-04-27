@@ -67,8 +67,7 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
 # Creates a new room [/room create]
 def room_create(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']
-
-    state.roomsFile[room]['invites'] = []        
+      
     state.room_socks[room] = [clientSock]
     
     state.sock_rooms[clientSock].append(room)

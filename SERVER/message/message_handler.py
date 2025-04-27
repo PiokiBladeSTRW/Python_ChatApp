@@ -24,7 +24,7 @@ def room_handle(clientSock:object, response:dict, state:object) -> tuple:
 def dm_handle(response:dict, state:object) -> tuple:
 
     #Ensure receiving username is valid
-    if(state.uuid_user(response['receiver']) not in state.uuid_sock):
+    if(state.uuidsFile[response['receiver']] not in state.uuid_sock):
         return ('/s', json.dumps({"content": state.system_codes['user_exit'], "type":'sys'}))
 
     #Sender: UUID->USERNAME  ; Receiver: USERNAME->UUID

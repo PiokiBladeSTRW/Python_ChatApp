@@ -10,7 +10,7 @@ import commands.error_handle as errors
 
 '''Join a Room'''
 def join_room(room_name:str, state:object) -> tuple:
-    if(room_name in state.clientRoomsFile['rooms']): return errors.error_handle("Already in Room", state)
+    if(room_name in state.clientRoomsFile): return errors.error_handle("Already in Room", state)
 
     state.receiver_change('/r'+room_name)
     payload = ((state.client_codes['room_join'], room_name), state.msgTypes['system'])
@@ -18,7 +18,7 @@ def join_room(room_name:str, state:object) -> tuple:
 
 '''Create a Room'''
 def create_room(room_name:str, state:object) -> tuple: 
-    if(room_name in state.clientRoomsFile['rooms']): return errors.error_handle("Room Already Exists", state)
+    if(room_name in state.clientRoomsFile): return errors.error_handle("Room Already Exists", state)
 
     state.receiver_change('/r'+room_name)                
     payload = ((state.client_codes['room_create'], room_name), state.msgTypes['system'])

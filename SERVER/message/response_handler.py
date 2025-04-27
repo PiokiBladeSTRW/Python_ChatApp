@@ -57,7 +57,7 @@ def system(clientSock:object, response:dict, state:object) -> tuple:
 def parse_response( clientSock:object, response:dict, state:object) -> tuple:
 
     if(response['type'] in types): 
-        data = types[response['type']](clientSock, response, state)
+        data = types[response['type']](clientSock, response, state)        
         return data  
     else:
         raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")
