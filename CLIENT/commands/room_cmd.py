@@ -12,7 +12,11 @@ def obtain_room(receiver) -> bool:
     print("Invalid Room")
     return False
 
+
 '''----------------------------------------------'''
+
+'''========================== type : msg'''
+
 
 '''Join a Room'''
 def join_room(args:list, state:object) -> tuple: 
@@ -21,7 +25,11 @@ def join_room(args:list, state:object) -> tuple:
     state.receiver_change('/r'+args[0])
     payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload, state)    
-    
+
+
+'''========================== type : sys'''
+   
+
 '''Create a Room'''
 def create_room(room_name:str, state:object) -> tuple: 
     state.receiver_change('/r'+room_name)
