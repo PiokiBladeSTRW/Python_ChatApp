@@ -71,6 +71,10 @@ def system(response:dict, state:object) -> object:
         # Trying to message a room that you are not a member of
         if(response['content'] == 104):
             state.receiver_change('')
+        
+        # If joining a new room [later to be changed to CODE with Argument]
+        if("Invitation" in response['content']):
+            state.clientRoomsFile['rooms'].append(response['sender'])
 
         data= ('', '{System}', state.system_codes[response['content']])
 

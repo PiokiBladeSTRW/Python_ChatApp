@@ -11,6 +11,10 @@ class ClientState:
         self.pReceiver = ''
         self.clientSock = None
 
+        with open("rooms.json", 'r') as roomsHandler:
+            data = json.load(roomsHandler)
+            self.clientRoomsFile = data
+
         self.msgTypes= {
             "message": "msg",            
             "system": "sys",

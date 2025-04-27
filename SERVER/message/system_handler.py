@@ -107,7 +107,9 @@ def room_invite(response:dict, state:object) -> tuple:
         return ('/s', payload, state)
          
     state.roomsFile[room]['invites'].append(state.uuid_sock[uuid])
-    payload = json.dumps({"content": f"{room} has sent an Invitation", "type":"sys"})            
+
+    #To be made into a Parameter code command
+    payload = json.dumps({"sender": room, "content": f"{room} has sent an Invitation", "type":"sys"})            
     return (uuid, payload, state)
 
 # Makes someone an Admin of Room [/room admin]
