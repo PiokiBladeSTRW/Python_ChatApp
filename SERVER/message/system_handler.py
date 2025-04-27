@@ -31,7 +31,7 @@ def room_list(state:object) -> tuple:
     return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
 
 # Creates a new room [/room create]
-def create_room(clientSock:object, response:dict, state:object) -> tuple:
+def room_create(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']
 
     state.room_invites[room] = []        
