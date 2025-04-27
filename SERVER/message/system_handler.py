@@ -39,7 +39,6 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
 
     #Catch Errors
     possible_errors = {
-        "er_Invalid_room": room not in state.room_socks,
         "not_room_member": not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])
     }
 
@@ -94,7 +93,6 @@ def room_invite(response:dict, state:object) -> tuple:
 
     #Catch Errors
     possible_errors = {
-        'er_Invalid_room': room not in state.room_socks,
         'user_exit': uuid not in state.uuid_sock,
         'er_Not_admin': response['sender'] not in state.roomsFile[room]['admins']
     }
@@ -124,7 +122,6 @@ def room_admin(response:dict, state:object) -> tuple:
 
     #Catch Errors
     possible_errors = {
-        'er_Invalid_room': room not in state.room_socks,
         'user_exit': uuid not in state.uuid_sock,
         'er_Not_admin': response['sender'] not in state.roomsFile[room]['admins']
     }

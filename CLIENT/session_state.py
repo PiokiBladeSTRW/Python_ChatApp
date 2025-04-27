@@ -13,7 +13,7 @@ class ClientState:
 
         with open("rooms.json", 'r') as roomsHandler:
             data = json.load(roomsHandler)
-            self.clientRoomsFile = data
+            self.clientRoomsFile = data['rooms']
 
         self.msgTypes= {
             "message": "msg",            
