@@ -3,6 +3,14 @@ import json
 from message.catch_error import CatchError
 
 errors = CatchError()
+'''
+Commands and their Arguments:
+1: Exit -> None
+2: Online List -> None
+3: Rooms List -> None
+4: Create Room -> Room_Name
+5: Room Invite -> (Room Name, Username)
+6: Room Admin -> (Room Name, Username)'''
 
 def user_exit(state:object) -> tuple:
     return ('*', '/exit', state)
@@ -20,7 +28,7 @@ def room_list(state:object) -> tuple:
     return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
 
 def create_room(clientSock:object, response:dict, state:object) -> tuple:
-    room = response['content'][2::]
+    room = response['content']
 
     state.room_invites[room] = []        
     state.room_socks[room] = [clientSock]
@@ -36,12 +44,11 @@ def create_room(clientSock:object, response:dict, state:object) -> tuple:
     return ('/s', json.dumps({'content': f"Room {room} Is LIVE", 'type': "sys"}), state)
 
 def room_invite(response:dict, state:object) -> tuple:
-    data= response['content'][2::].split(';')
-    room, username= data[0], data[1]
+    room, username = response['content'][0], response['content'][1]
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
-        return ('/s', json.dumps({'sender': username, 'content': state.codes['user_exit'], 'type': "sys"}), state)
+        return ('/s', json.dumps({'sender': username, 'content': state.system_codes['user_exit'], 'type': "sys"}), state)
     uuid = state.uuidsFile[username]
 
     #Catch Errors
@@ -63,12 +70,11 @@ def room_invite(response:dict, state:object) -> tuple:
         return (uuid, payload, state)
     
 def room_admin(response:dict, state:object) -> tuple:
-    data= response['content'][2::].split(';')
-    room, username= data[0], data[1] 
+    room, username = response['content'][0], response['content'][1] 
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
-        return ('/s', json.dumps({'sender': username, 'content': state.codes['user_exit'], 'type': "sys"}), state)  
+        return ('/s', json.dumps({'sender': username, 'content': state.system_codes['user_exit'], 'type': "sys"}), state)  
     uuid = state.uuidsFile[username]       
 
     #Catch Errors

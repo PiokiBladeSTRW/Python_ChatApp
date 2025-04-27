@@ -36,15 +36,16 @@ def handle_messages(clientSock:object, response:dict, state:object) -> tuple:
     
 def system(clientSock:object, response:dict, state:object) -> tuple: 
     # Obtain Command
-    content = response['content']
+    command = response['command']
 
-    match content[:2]:
-        case '/e': return system_handler.user_exit(state)
-        case '/o': return system_handler.online_list(response, state)
-        case '/r': return system_handler.room_list(state)
-        case '/c': return system_handler.create_room(clientSock, response, state)
-        case '/i': return system_handler.room_invite(response, state)
-        case '/a': return system_handler.room_admin(response, state)
+    if (command == state.client_codes['user_exit']):    return system_handler.user_exit(state)
+    if (command == state.client_codes['online_list']):  return system_handler.online_list(response, state)
+    if (command == state.client_codes['rooms_list']):   return system_handler.room_list(state)
+    if (command == state.client_codes['room_create']):  return system_handler.create_room(clientSock, response, state)
+    if (command == state.client_codes['room_invite']):  return system_handler.room_invite(response, state)
+    if (command == state.client_codes['room_admin']):   return system_handler.room_admin(response, state)
+
+    raise Exception("●→INVALID COMMAND RECEIVED")
 
 '''Parse Response Received by Clients'''
 def parse_response( clientSock:object, response:dict, state:object) -> tuple:

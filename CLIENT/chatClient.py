@@ -85,7 +85,8 @@ class ChatClient:
                 match action:
                     case 'send': await self.sendPayload(payload)
                     case 'exit': 
-                        await self.sendPayload( ('/e', self.state.msgTypes['system']) )
+                        await self.sendPayload(
+                            ( (self.state.client_codes['user_exit'], ''), self.state.msgTypes['system']))
                         await self.closeClient()      
                     case None: pass              
                     case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")

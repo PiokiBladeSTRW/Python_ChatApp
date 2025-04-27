@@ -29,12 +29,21 @@ class ClientState:
             204 : "You are not an Admin"
         }
 
+        self.client_codes ={
+            'user_exit': 1,
+            'online_list': 2,
+            'rooms_list': 3,
+            'room_create': 4,
+            'room_invite': 5,
+            'room_admin' :6
+        }
+
     '''Encode the data'''
     def encode(self, payload:tuple):
         timestamp = str(time.time())
 
         data = {"sender": self.clientUUID, 
-                "receiver": self.receiver, 
+                "receiver": self.receiver,                 
                 "content": payload[0], 
                 "type": payload[1],
                 "timestamp": timestamp}
@@ -42,10 +51,15 @@ class ClientState:
         if(data['type'] in ('auth', 'sys', 'hbp')):
             data.pop('receiver')
             data.pop('timestamp')
+        
+        if(data['type'] == 'sys'):
+            data["command"] = payload[0][0]
+            data["content"] = payload[0][1]
 
         '''
         Message Format: {"sender": <username>, 
-                        "receiver": <username>, 
+                        "receiver": <username>,
+                        "command" : <command code>,
                         "content": '--', 
                         "type": 'msg/..',
                         "timestamp": "[Hour:Minute]"}     

@@ -86,7 +86,7 @@ class ChatServer:
         if(destination.startswith('/r') or destination == '/.'):return
         
         #If receiving client does not exist
-        payload = json.dumps({"sender":destination, "content":self.state.codes['user_exit'], "type":"sys"})
+        payload = json.dumps({"sender":destination, "content":self.state.system_codes['user_exit'], "type":"sys"})
         await self.send(clientSock, payload)
        
        
@@ -113,7 +113,7 @@ class ChatServer:
 
     async def relog(self, uuid:str, clientSock: websockets.ClientConnection) -> None:
         #So User knows to wait while they Relog
-        await self.send(clientSock, json.dumps({"content": self.state.codes['relog_begin'], "type":"sys"}))
+        await self.send(clientSock, json.dumps({"content": self.state.system_codes['relog_begin'], "type":"sys"}))
 
         oldClientSock = self.state.uuid_sock[uuid]        
         await self.disconnectionPending.put(oldClientSock)
@@ -135,7 +135,7 @@ class ChatServer:
         username = self.state.accountsFile[uuid]['username']
         await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
 
-        await self.send(clientSock, json.dumps({"content": self.state.codes['relog_finish'], "type": "sys"}))
+        await self.send(clientSock, json.dumps({"content": self.state.system_codes['relog_finish'], "type": "sys"}))
         return
 
     async def Disconnect(self) -> None: 
@@ -159,7 +159,7 @@ class ChatServer:
                 username = self.state.uuid_user(uuid)
                 
                 #Broadcast others that User is Offline                
-                payload = json.dumps({"sender":username, "content": self.state.codes['user_exit'], "type":"sys"})                
+                payload = json.dumps({"sender":username, "content": self.state.system_codes['user_exit'], "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')
 
                 await leavingClient.close()

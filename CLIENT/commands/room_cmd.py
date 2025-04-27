@@ -26,7 +26,7 @@ def join_room(args:list, state:object) -> tuple:
 def create_room(room_name:str, state:object) -> tuple: 
     state.receiver_change('/r'+room_name)
                 
-    payload = ('/c'+room_name, state.msgTypes['system'])
+    payload = ((state.client_codes['room_create'], room_name), state.msgTypes['system'])
     return ('send', payload, state)
 
 '''Invite user to Room'''
@@ -34,7 +34,7 @@ def invite_user(username:str, state:object) -> tuple:
     room = obtain_room(state.receiver)
     if(room == None): return None
 
-    payload = ('/i'+room+';'+username, state.msgTypes['system'])
+    payload = ((state.client_codes['room_invite'], (room, username)), state.msgTypes['system'])
     return ('send', payload, state)
 
 '''Make user an Admin'''
@@ -42,5 +42,5 @@ def admin_user(username:str, state:object) -> tuple:
     room = obtain_room(state.receiver)
     if(room == None): return None
 
-    payload = ('/a'+room+';'+username, state.msgTypes['system'])
+    payload = ((state.client_codes['room_admin'], (room, username)), state.msgTypes['system'])
     return ('send', payload, state)

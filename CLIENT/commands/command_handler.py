@@ -42,12 +42,12 @@ def room(args:list, state:object) -> tuple:
     
 '''List of every Online Client'''
 def online_list(args:list, state:object) -> tuple: 
-    payload = ('/o', state.msgTypes['system'])    
+    payload = ((state.client_codes['online_list'], ''), state.msgTypes['system'])    
     return ('send', payload, state)
 
 '''List of every Online Room'''    
 def rooms_list(args:list, state:object) -> tuple: 
-    payload = ('/r', state.msgTypes['system'])
+    payload = ((state.client_codes['rooms_list'], ''), state.msgTypes['system'])
     return ('send', payload, state)
 
 

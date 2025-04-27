@@ -28,7 +28,7 @@ class ServerState:
             self.room_invites[room] = []
 
         '''Codes for System Messages. 'er' prefix for Errors'''
-        self.codes ={            
+        self.system_codes ={            
             "user_exit": 101,
             "relog_begin": 102,
             "relog_finish": 103,            
@@ -38,6 +38,16 @@ class ServerState:
             "er_Invalid_room": 203,
             "er_Not_admin": 204
         }
+
+        self.client_codes ={
+            'user_exit': 1,
+            'online_list': 2,
+            'rooms_list': 3,
+            'room_create': 4,
+            'room_invite': 5,
+            'room_admin' :6
+        }
+
 
     def uuid_user(self, uuid):
         return self.accountsFile[uuid]['username']
