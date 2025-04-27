@@ -43,7 +43,8 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
     }
 
     data = errors.multiple_error_handle(possible_errors, state)
-    if(data): return data[0]
+    if(data):         
+        return data[0]
 
     # If New Member
     if(clientSock in state.roomsFile[room]['invites']):
@@ -58,11 +59,12 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
         state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
         state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
 
-        username = state.uuid_user(response['sender'])
-        response.pop('receiver') 
+        username = state.uuid_user(response['sender'])        
         response['sender'] =response['sender'] = (room, state.uuid_user(response['sender']))
         response['content'] = state.system_codes['new_room_member']
         return (f'/r{room}', json.dumps(response), state)
+    
+    return ('*', None, state)
 
 # Creates a new room [/room create]
 def room_create(clientSock:object, response:dict, state:object) -> tuple:
@@ -81,9 +83,8 @@ def room_create(clientSock:object, response:dict, state:object) -> tuple:
     return ('/s', json.dumps({'content': f"Room {room} Is LIVE", 'type': "sys"}), state)
 
 # Invites someone to a room [/room invite]
-def room_invite(response:dict, state:object) -> tuple:
-    room = response['receiver'][2::]
-    username = response['content']
+def room_invite(response:dict, state:object) -> tuple:    
+    room, username = response['content'][0], response['content'][1]
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
@@ -110,9 +111,8 @@ def room_invite(response:dict, state:object) -> tuple:
     return (uuid, payload, state)
 
 # Makes someone an Admin of Room [/room admin]
-def room_admin(response:dict, state:object) -> tuple:
-    room = response['receiver'][2::]
-    username = response['content']
+def room_admin(response:dict, state:object) -> tuple:    
+    room, username = response['content'][0], response['content'][1]
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):

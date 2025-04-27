@@ -23,16 +23,19 @@ Acitivities:
 '''
 class ChatClient:    
     def __init__(self, clientName):
-        self.state = ClientState(clientName)
+        self.state = ClientState(clientName)        
         #logger = logging_setup.setup_log()
 
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"
+        self.clientProfile = clientName
 
     async def connectClient(self) -> None: 
         async with websockets.connect(self.serverAddress) as clientSocket:   
             self.state.clientSock = clientSocket       
+
+            asyncio.create_task(self.fileHandle())
 
             await self.userLogin()
 
@@ -150,7 +153,7 @@ class ChatClient:
         while True:   
             
             #Open and store data to each file
-            with open("rooms.json", 'w') as roomHandle:
+            with open(f"rooms/{self.clientProfile}.json", 'w') as roomHandle:
                 json.dump({"rooms": list(self.state.clientRoomsFile)}, roomHandle)
 
             await asyncio.sleep(self.fileIOFrequency)

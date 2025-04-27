@@ -68,6 +68,7 @@ class ChatServer:
                         user_uuid = self.state.uuidsFile[username]
                         await self.broadcast(clientSock, json.dumps({"content":user_uuid, "type": "auth"}), '/s')
                         await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
+                    case None: pass
                 continue
             
             await self.broadcast(clientSock, payload, destination)
@@ -171,11 +172,11 @@ class ChatServer:
     '''Handle File I/O'''
     async def fileHandle(self) -> None:
         while True:   
-            
+            print(self.state.sock_rooms)
             #Open and store data to each file
             with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
                 json.dump(self.state.accountsFile, accountHandle)         
-                json.dump(self.state.uuidsFile, uuidHandle)
+                json.dump(self.state.uuidsFile, uuidHandle)                
                 json.dump(self.state.roomsFile, roomHandle)
 
             await asyncio.sleep(self.fileIOFrequency)

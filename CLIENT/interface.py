@@ -19,12 +19,13 @@ def incoming_message(response:dict, state:object) -> object:
 
     def rooms():
         room, username =response['sender'][0], response['sender'][1]
+        if(room not in state.clientRoomsFile): state.clientRoomsFile.append(room)
 
-        data = [response['timestamp'], f"[{room}] {username}", response['content']]
+        data = (response['timestamp'], f"[{room}] {username}", response['content'])
 
         # If New Member Joined
         if(data[2] == 105):       
-            data[2] == state.system_codes[105]
+            data = (response['timestamp'], f"[{room}] {username}", state.system_codes[105])
             print(formatting.format(data, ('bt', 's', 'c')))
 
         # Direct Room Broadcast
@@ -36,8 +37,8 @@ def incoming_message(response:dict, state:object) -> object:
             print(formatting.format(data, ('s', 'cl', 'c', 'A')))
 
     # Check whether the message is a DM or Room Message
-    if( type(response['sender']) == tuple):
-        rooms()
+    if( type(response['sender']) == list):        
+        rooms()        
     else:
         dms()
 
@@ -67,15 +68,11 @@ def system(response:dict, state:object) -> object:
             if(state.receiver == response['sender']):
                 state.receiver_change('')                
             return state
-        
+
         # Trying to message a room that you are not a member of
         if(response['content'] == 104):
             state.receiver_change('')
         
-        # If joining a new room [later to be changed to CODE with Argument]
-        elif("Invitation" in response['content']):
-            state.clientRoomsFile.append(response['sender'])
-
         data= ('', '{System}', state.system_codes[response['content']])
 
     else:    

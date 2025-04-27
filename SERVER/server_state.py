@@ -23,7 +23,6 @@ class ServerState:
 
         for room in self.roomsFile:
             self.room_socks[room] = []
-            self.roomsFile[room]['invites'] = []
 
         '''Codes for System Messages. 'er' prefix for Errors'''
         self.system_codes ={            
