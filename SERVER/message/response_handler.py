@@ -46,7 +46,7 @@ def system(clientSock:object, response:dict, state:object) -> tuple:
     if (command == state.client_codes['room_invite']):  return system_handler.room_invite(response, state)
     if (command == state.client_codes['room_admin']):   return system_handler.room_admin(response, state)
 
-    raise Exception("●→INVALID COMMAND RECEIVED")
+    raise ValueError(f"●→INVALID COMMAND RECEIVED: {command}")
 
 '''Parse Response Received by Clients'''
 def parse_response( clientSock:object, response:dict, state:object) -> tuple:
@@ -55,7 +55,7 @@ def parse_response( clientSock:object, response:dict, state:object) -> tuple:
         data = types[response['type']](clientSock, response, state)
         return data  
     else:
-        raise Exception("●→INVALID MESSAGE TYPE RECEIVED")
+        raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")
 
 '''Response Types'''
 types ={

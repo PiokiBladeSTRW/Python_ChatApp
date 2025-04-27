@@ -89,7 +89,7 @@ class ChatClient:
                             ( (self.state.client_codes['user_exit'], ''), self.state.msgTypes['system']))
                         await self.closeClient()      
                     case None: pass              
-                    case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")
+                    case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
             elif(self.state.receiver):
                 await self.sendPayload( (msgInput, self.state.msgTypes['message']) )
