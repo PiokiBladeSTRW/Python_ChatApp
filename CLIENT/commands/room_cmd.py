@@ -5,12 +5,12 @@ Functions to be Utilized for Room Subcommands.
 
 
 '''<Obtaining Room Name>'''
-def obtain_room(receiver) -> str:
+def obtain_room(receiver) -> bool:
     if(receiver.startswith('/r')):
-        return receiver[2::]
+        return True
     
     print("Invalid Room")
-    return None
+    return False
 
 '''----------------------------------------------'''
 
@@ -31,16 +31,17 @@ def create_room(room_name:str, state:object) -> tuple:
 
 '''Invite user to Room'''
 def invite_user(username:str, state:object) -> tuple:
-    room = obtain_room(state.receiver)
-    if(room == None): return None
+    # To avoid having the error handled after reaching server
+    room_exists = obtain_room(state.receiver)
+    if(room_exists): return None
 
-    payload = ((state.client_codes['room_invite'], (room, username)), state.msgTypes['system'])
+    payload = ((state.client_codes['room_invite'],  username), state.msgTypes['system'])
     return ('send', payload, state)
 
 '''Make user an Admin'''
 def admin_user(username:str, state:object) -> tuple:
-    room = obtain_room(state.receiver)
-    if(room == None): return None
+    room_exists = obtain_room(state.receiver)
+    if(room_exists): return None
 
-    payload = ((state.client_codes['room_admin'], (room, username)), state.msgTypes['system'])
+    payload = ((state.client_codes['room_admin'], username), state.msgTypes['system'])
     return ('send', payload, state)

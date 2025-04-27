@@ -49,7 +49,8 @@ def room_create(clientSock:object, response:dict, state:object) -> tuple:
 
 # Invites someone to a room [/room invite]
 def room_invite(response:dict, state:object) -> tuple:
-    room, username = response['content'][0], response['content'][1]
+    room = response['receiver'][2::]
+    username = response['content']
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
@@ -76,7 +77,8 @@ def room_invite(response:dict, state:object) -> tuple:
 
 # Makes someone an Admin of Room [/room admin]
 def room_admin(response:dict, state:object) -> tuple:
-    room, username = response['content'][0], response['content'][1] 
+    room = response['receiver'][2::]
+    username = response['content']
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
