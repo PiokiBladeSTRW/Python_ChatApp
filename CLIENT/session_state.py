@@ -73,19 +73,21 @@ class ClientState:
 
     '''Encode the data'''
     def encode(self, payload:tuple):
-        timestamp = str(time.time())
 
-        data = {"sender": self.clientUUID, 
-                "receiver": self.receiver,                 
+        # Data always to be sent regardless of Type
+        data = {
+                "sender": self.clientUUID,                      
                 "content": payload[0], 
-                "type": payload[1],
-                "timestamp": timestamp}
+                "type": payload[1]
+            }
         
-        if(data['type'] in ('auth', 'sys', 'hbp')):
-            data.pop('receiver')
-            data.pop('timestamp')
+        # Additional Data Entries
+        if(data['type'] in ('msg', 'room')):
+            data['receiver'] = self.receiver
+            data['timestamp'] = str(time.time())
         
-        if(data['type'] == 'sys'):
+        elif(data['type'] == 'sys'):
+            #payload[0] = (command_code, arguments)
             data["command"] = payload[0][0]
             data["content"] = payload[0][1]
 
@@ -102,6 +104,7 @@ class ClientState:
         ->sys: System Message / Commands
         ->hbp: Heartbeat Pings. Letting Server know you are there.
         ->auth: Handles Authentication of User and ONLINE displays 
+        ->room: Handles messages to rooms
         '''   
 
         return json.dumps(data)
