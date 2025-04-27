@@ -44,7 +44,7 @@ class ClientState:
         0: Room Name
         1: User name'''
         self.sys_code_msg={
-            101 : "",
+            101 : "is OFFLINE",
             102 : "OLD SESSION LIVE; FORCE CLOSING..",
             103 : "SUCCESSFUL RELOG!",           
             104 : "{1} Joined the Room",
