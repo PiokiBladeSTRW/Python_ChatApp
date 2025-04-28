@@ -41,9 +41,6 @@ class ClientState:
             "er_Invalid_user": 208,
         }
         
-        '''Room Args:
-        0: Room Name
-        1: User name'''
         self.sys_code_msg={
             101 : "is OFFLINE",
             102 : "OLD SESSION LIVE; FORCE CLOSING..",
