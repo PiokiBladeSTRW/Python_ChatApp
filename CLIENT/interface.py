@@ -49,47 +49,48 @@ def online_user(response:dict, state:object) -> object:
     return state
 
 '''Handle System Messages'''
-def system(response:dict, state:object) -> object:       
+def system(response:dict, state:object) -> object:  
     
-    '''
-        Types of System Codes:
-        Special Actions : More action than just display [Can be of Various Types]
-        Argumented      : Has Arguments
-        Default         : Just Display
-    '''
-    if(response.get('command')):
-
-        # ARGUMENTED
-        argument_codes = (state.system_codes['new_room_member'], state.system_codes['room_live'],
-                          state.system_codes['room_invite'], state.system_codes['member_admin'])
-        
-        if(response['command'] in argument_codes):
-            args = response['content']            
-            disp_msg = state.sys_code_msg[response['command']].format(*args)
-
-            '''As of now there's only Room Commands being Argumented. Hence no extra Ifs'''
-            data = ('', f"[{args[0]}] {{System}}", disp_msg)
-
-        #SPECIAL      
-        if(response['command'] == state.system_codes['user_exit']):
-            # User Exit
-            data = ('', response['content'], state.sys_code_msg[response['command']])
-            print(formatting.format(data, ('s', 'c', 'S')))
-
-            # Reset Receiver if exited user was the Receiver
-            if(state.receiver == response['content']):
-                state.receiver_change('')                
-            return state
-
-        if(response['command'] in (state.system_codes['er_Not_room_member'], state.system_codes['er_Room_exists'])):
-            #Receiver Change
-            state.receiver_change('')  
-            data= ('', '{System}', state.sys_code_msg[response['command']])
-    else:    
+    # Guard Clause  (if not a command)
+    if(not response['command']):
         data = ('', '{System}', response['content']) 
 
-    #  Sender ({System}) : Message
-    print(formatting.format(data, ('s', 'cl', 'c')))    
+        print(formatting.format(data, ('s', 'cl', 'c')))    
+        return state
+    
+
+    ''' Handle Different Types of Sys Commands. More Dynamic (& confusing) than other modules'''
+
+    # Room Based System Message
+    if(response.get('sender').startswith('/r')):
+        args = [response['sender'][2::]] + list(response['content'])
+        disp_msg = state.sys_code_msg[response['command']]
+
+        if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
+
+        data = ('', f"[{args[0]}] {{System}}", disp_msg)
+    
+    else:
+        args = list(response.get('content'))
+        disp_msg = state.sys_code_msg[response['command']]
+
+        # Excuse these magic values
+        receiver_change= (101,)
+        receiver_change_force = (204, 205)
+        
+        # If Needs Formatting
+        if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
+
+        # Change Receiver if currently in contact or by force
+        if(response['command'] in receiver_change and state.receiver== args[0]):
+            state.receiver_change('')
+        
+        elif(response['command'] in receiver_change_force):
+            state.receiver_change('')
+
+        data = ('', "{System}", disp_msg)
+
+    print(formatting.format(data, ('s', 'cl', 'c')))
     return state
     
 

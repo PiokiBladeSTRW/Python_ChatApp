@@ -42,7 +42,7 @@ class ClientState:
         }
         
         self.sys_code_msg={
-            101 : "is OFFLINE",
+            101 : "{0} is OFFLINE",
             102 : "OLD SESSION LIVE; FORCE CLOSING..",
             103 : "SUCCESSFUL RELOG!",           
             104 : "{1} Joined the Room",
@@ -59,6 +59,7 @@ class ClientState:
             207 : "Member already admin",
             208 : "The user doesn't exist"
         }
+        self.sys_format = (104,105,106,107)
 
         self.client_codes ={
             'user_exit': 1,

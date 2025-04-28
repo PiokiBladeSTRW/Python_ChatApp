@@ -87,7 +87,7 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
     modify_room(room, ('JOIN', 'R_INVITE'), state, clientSock)     
 
     return (f'/r{room}', 
-            encode_payload((state.uuid_user(response['sender']),), state.system_codes['new_room_member'], f'/r{room}'), 
+            encode_payload( [state.uuid_user(response['sender'])], state.system_codes['new_room_member'], f'/r{room}'), 
             state)
 
 '''# Creates a new room [/room create]'''
@@ -99,7 +99,7 @@ def room_create(clientSock:object, response:dict, state:object) -> tuple:
     modify_room(room, ('CREATE', 'JOIN', 'ADMIN'), state, clientSock)
 
     return ('/s',
-            encode_payload( (room,), state.system_codes['room_live']),
+            encode_payload(None, state.system_codes['room_live'], f'/r{room}'),
             state)
 
 
@@ -116,7 +116,7 @@ def room_invite(response:dict, state:object) -> tuple:
 
     #Catch Errors
     possible_errors = {
-        'user_exit': (uuid not in state.uuid_sock, (username,)),
+        'user_exit': (uuid not in state.uuid_sock, username),
         'er_Not_admin': (response['sender'] not in state.roomsFile[room]['admins'], None),
         'er_Member_in_room': (
             state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.roomsFile[room]['invites'],
@@ -148,5 +148,5 @@ def room_admin(response:dict, state:object) -> tuple:
     # Modify and Send
     modify_room(room, ('ADMIN'), state, uuid= uuid)          
     return (f'/r{room}',
-            encode_payload( (state.uuid_user(response['sender']),), state.system_codes['member_admin'], f'/r{room}'), 
+            encode_payload( [state.uuid_user(response['sender'])], state.system_codes['member_admin'], f'/r{room}'), 
             state)
