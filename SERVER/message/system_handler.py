@@ -12,6 +12,14 @@ Commands and their Arguments:
 5: Room Invite -> (Room Name, Username)
 6: Room Admin -> (Room Name, Username)'''
 
+def encode_payload(content=None, command: int=None) -> str:
+    data = {
+        'command': command,
+        'content': content,
+        'type': 'sys',
+    }
+    return json.dumps(data)
+
 '''----------------------------------------------'''
 
 
@@ -23,15 +31,19 @@ def user_exit(state:object) -> tuple:
 def online_list(response:dict, state:object) -> tuple:
     uuid_data = list(state.uuid_sock)
     uuid_data.remove(response['sender'])
-
+    
     user_data = (state.uuid_user(x) for x in uuid_data) 
     data = '\n'.join(user_data)    
-    return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
+
+    return ('/s', encode_payload(data), state)
 
 '''# Gives user a list of rooms [/rooms]'''
 def room_list(state:object) -> tuple:
     data = '\n'.join(state.room_socks.keys())
-    return ('/s', json.dumps({'content': data, 'type': 'sys'}), state)
+    return ('/s', encode_payload(data), state)
+
+
+'''============================='''
 
 
 '''# Join a Room [/room join]'''
@@ -39,8 +51,8 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']   
 
     #Not a Member of Room
-    if(not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])):         
-        return ('/s', json.dumps({'command': state.system_codes['er_Not_room_member'], 'type': "sys"}), state)
+    if(not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])):  
+        return ('/s', encode_payload(command = state.system_codes['er_Not_room_member']), state)       
 
     state.roomsFile[room]['invites'].remove(clientSock)
     state.room_socks[room].append(clientSock)
@@ -48,15 +60,16 @@ def room_join(clientSock:object, response:dict, state:object) -> tuple:
     state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
     state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
  
-    return (f'/r{room}', json.dumps({"command": state.system_codes['new_room_member'], "content":(room, 
-                                     state.uuid_user(response['sender'])), "type":"sys"}), state)
-    
+    return (f'/r{room}', 
+            encode_payload((room,state.uuid_user(response['sender'])), state.system_codes['new_room_member'] ), 
+            state)
+
 '''# Creates a new room [/room create]'''
 def room_create(clientSock:object, response:dict, state:object) -> tuple:
     room = response['content']
     
-    if(room in state.roomsFile): return ('/s', json.dumps({"command": state.system_codes['er_Room_exists'],
-                                         "type":"sys"}), state)
+    if(room in state.roomsFile): 
+        return ('/s', encode_payload(command = state.system_codes['er_Room_exists']), state)
 
     state.room_socks[room] = [clientSock]    
     state.sock_rooms[clientSock].append(room)    
@@ -65,7 +78,12 @@ def room_create(clientSock:object, response:dict, state:object) -> tuple:
     state.roomsFile[room]['admins'].append(response['sender'])
     state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
 
-    return ('/s', json.dumps({'command': state.system_codes['room_live'],"content": (room,), 'type': "sys"}), state)
+    return ('/s',
+            encode_payload( (room,), state.system_codes['room_live']),
+            state)
+
+
+'''============================='''
 
 
 '''# Invites someone to a room [/room invite]'''
@@ -74,7 +92,7 @@ def room_invite(response:dict, state:object) -> tuple:
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
-        return ('/s', json.dumps({'command': state.system_codes['user_exit'], 'content': (username,),'type': "sys"}), state)
+        return ('/s', encode_payload( (username,), state.system_codes['user_exit']), state)
     uuid = state.uuidsFile[username]
 
     #Catch Errors
@@ -87,12 +105,10 @@ def room_invite(response:dict, state:object) -> tuple:
 
     #If user is already in room OR already invite
     if(state.uuid_sock[uuid] in state.room_socks[room] or state.uuid_sock[uuid] in state.roomsFile[room]['invites']):
-        payload = json.dumps({"command": state.system_codes['er_Member_in_room'], "type":"sys"})
-        return ('/s', payload, state)
+        return ('/s', encode_payload(command = state.system_codes['er_Member_in_room']), state)
          
     state.roomsFile[room]['invites'].append(state.uuid_sock[uuid])
-    payload = json.dumps({"command": state.system_codes['room_invite'], "content":room, "type":"sys"})            
-    return (uuid, payload, state)
+    return (uuid, encode_payload( (room,), state.system_codes['room_invite']), state)
 
 '''# Makes someone an Admin of Room [/room admin]'''
 def room_admin(response:dict, state:object) -> tuple:    
@@ -100,7 +116,7 @@ def room_admin(response:dict, state:object) -> tuple:
 
     #Handle non-existent account, for now Offline
     if(username not in state.uuidsFile):
-        return ('/s', json.dumps({'command': state.system_codes['user_exit'], 'content': (username,),'type': "sys"}), state)  
+        return ('/s', encode_payload( (username,), state.system_codes['user_exit']), state)  
     uuid = state.uuidsFile[username]       
 
     #Catch Errors
@@ -113,10 +129,9 @@ def room_admin(response:dict, state:object) -> tuple:
 
     # If User is already admin
     if(uuid in state.roomsFile[room]['admins']):
-        payload = json.dumps({"command": state.system_codes['er_Member_is_admin'], "type": "sys"})
-        return ('/s', payload, state)
+        return ('/s', encode_payload(command = state.system_codes['er_Member_is_admin']), state)
  
-    state.roomsFile[room]['admins'].append(uuid)            
-    payload = json.dumps({"command": state.system_codes['member_admin'], 
-                          "content": (room, state.uuid_user(response['sender'])),"type":"sys"})             
-    return (f'/r{room}', payload, state)
+    state.roomsFile[room]['admins'].append(uuid)           
+    return (f'/r{room}',
+            encode_payload( (room, state.uuid_user(response['sender'])), state.system_codes['member_admin']),
+            state)
