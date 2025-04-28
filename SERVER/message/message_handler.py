@@ -9,7 +9,7 @@ errors = CatchError()
 def room_handle(clientSock:object, response:dict, state:object) -> tuple:
     room = response['receiver'][2::]
     possible_errors = {
-        "not_room_member": not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites'])
+        "er_Not_room_member": (not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites']), None)
     }
     data = errors.multiple_error_handle(possible_errors, state)
     if(data): return data[0]

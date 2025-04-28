@@ -68,7 +68,6 @@ class ChatServer:
                         user_uuid = self.state.uuidsFile[username]
                         await self.broadcast(clientSock, json.dumps({"content":user_uuid, "type": "auth"}), '/s')
                         await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
-                    case None: pass
                 continue
             
             await self.broadcast(clientSock, payload, destination)
@@ -84,7 +83,7 @@ class ChatServer:
             return
                   
         #If no Receiving Clients but not an Error case
-        if(destination.startswith('/r') or destination == '/.'):return
+        if(destination.startswith('/r') or destination == '/.'): return
         
         #If receiving client does not exist
         payload = json.dumps({"command":self.state.system_codes['user_exit'], "content": destination, "type":"sys"})
@@ -160,7 +159,7 @@ class ChatServer:
                 username = self.state.uuid_user(uuid)
                 
                 #Broadcast others that User is Offline                
-                payload = json.dumps({"command": self.state.system_codes['user_exit'], "content": username, "type":"sys"})                
+                payload = json.dumps({"command": self.state.system_codes['user_exit'], "content": [username], "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')
 
                 await leavingClient.close()

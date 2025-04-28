@@ -37,8 +37,7 @@ def handle_messages(clientSock:object, response:dict, state:object) -> tuple:
 '''Handle system messages, that is, commands'''
 def system(clientSock:object, response:dict, state:object) -> tuple: 
     # Obtain Command
-    command = response['command']
-
+    command = response['command']    
     if (command == state.client_codes['user_exit']):    return system_handler.user_exit(state)
     if (command == state.client_codes['online_list']):  return system_handler.online_list(response, state)
     if (command == state.client_codes['rooms_list']):   return system_handler.room_list(state)

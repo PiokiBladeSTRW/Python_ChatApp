@@ -50,6 +50,7 @@ def online_user(response:dict, state:object) -> object:
 
 '''Handle System Messages'''
 def system(response:dict, state:object) -> object:  
+    '''Only Module where response['content'] is not guranteed'''
     
     # Guard Clause  (if not a command)
     if(not response['command']):
@@ -62,26 +63,30 @@ def system(response:dict, state:object) -> object:
     ''' Handle Different Types of Sys Commands. More Dynamic (& confusing) than other modules'''
 
     # Room Based System Message
-    if(response.get('sender').startswith('/r')):
-        args = [response['sender'][2::]] + list(response['content'])
-        disp_msg = state.sys_code_msg[response['command']]
+    if(response.get('sender')):
+        '''
+        As of now, only room has sender tag, in case of future aversion, add within if-else
+        '''
+
+        args = [response['sender'][2::]]
+        if(response.get('content')): args += response['content']
+        
+        disp_msg = state.sys_code_msg[response['command']]        
 
         if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
         data = ('', f"[{args[0]}] {{System}}", disp_msg)
     
     else:
-        args = list(response.get('content'))
+        if(args:=response.get('content')): args = list(args)        
         disp_msg = state.sys_code_msg[response['command']]
 
-        # Excuse these magic values
-        receiver_change= (101,)
-        receiver_change_force = (204, 205)
-        
-        # If Needs Formatting
         if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
-        # Change Receiver if currently in contact or by force
+        # Change Receiver if currently in contact or by force (Excuse these magic values)
+        receiver_change= (101,)
+        receiver_change_force = (204, 205)
+
         if(response['command'] in receiver_change and state.receiver== args[0]):
             state.receiver_change('')
         

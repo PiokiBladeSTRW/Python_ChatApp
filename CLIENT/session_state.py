@@ -39,6 +39,7 @@ class ClientState:
             "er_Member_in_room": 206,
             "er_Member_is_admin": 207,
             "er_Invalid_user": 208,
+            'er_Invalid_room': 209
         }
         
         self.sys_code_msg={
@@ -57,9 +58,10 @@ class ClientState:
             205 : "This Room Already Exists",
             206 : "Member already in room",
             207 : "Member already admin",
-            208 : "The user doesn't exist"
+            208 : "The user doesn't exist",
+            209 : "The room doesn't exist"
         }
-        self.sys_format = (104,105,106,107)
+        self.sys_format = (101,104,105,106,107)
 
         self.client_codes ={
             'user_exit': 1,

@@ -10,10 +10,6 @@ import commands.error_handle as errors
 
 '''Join a Room'''
 def join_room(room_name:str, state:object) -> tuple:    
-    if(room_name in state.clientRoomsFile): 
-        state.receiver_change('/r'+room_name)
-        return (None, None, state)
-    
     state.receiver_change('/r'+room_name)
     payload = ((state.client_codes['room_join'], room_name), state.msgTypes['system'])
     return ('send', payload, state)    

@@ -12,6 +12,7 @@ def every(clientSock, destination:str, state:object):
 def room(clientSock, destination:str, state:object): 
     rC = list(state.room_socks[destination[2::]])
     rC.remove(clientSock)
+    print(rC)
 
     return tuple(rC)
 
