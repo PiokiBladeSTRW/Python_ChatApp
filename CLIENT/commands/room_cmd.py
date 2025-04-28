@@ -3,44 +3,39 @@ Functions to be Utilized for Room Subcommands.
 <> Wraps indicate the Function is used only within this very Module
 '''
 
-
-'''<Obtaining Room Name>'''
-def obtain_room(receiver) -> str:
-    if(receiver.startswith('/r')):
-        return receiver[2::]
-    
-    print("Invalid Room")
-    return None
+#Header
+import commands.error_handle as errors
 
 '''----------------------------------------------'''
 
 '''Join a Room'''
-def join_room(args:list, state:object) -> tuple: 
-    '''Args[0] = Room, Args[1::] = Message'''
-
-    state.receiver_change('/r'+args[0])
-    payload = (' '.join(args[1::]), state.msgTypes['message'])
+def join_room(room_name:str, state:object) -> tuple:    
+    state.receiver_change('/r'+room_name)
+    payload = ((state.client_codes['room_join'], room_name), state.msgTypes['system'])
     return ('send', payload, state)    
-    
+
 '''Create a Room'''
 def create_room(room_name:str, state:object) -> tuple: 
-    state.receiver_change('/r'+room_name)
-                
-    payload = ('/c'+room_name, state.msgTypes['system'])
+    if(room_name in state.clientRoomsFile): return errors.error_handle("Room Already Exists", state)
+
+    state.clientRoomsFile.append(room_name)
+
+    state.receiver_change('/r'+room_name)                
+    payload = ((state.client_codes['room_create'], room_name), state.msgTypes['system'])
     return ('send', payload, state)
 
 '''Invite user to Room'''
-def invite_user(username:str, state:object) -> tuple:
-    room = obtain_room(state.receiver)
-    if(room == None): return None
+def invite_user(username:str, state:object) -> tuple:    
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room", state)
 
-    payload = ('/i'+room+';'+username, state.msgTypes['system'])
+    room = state.receiver[2::]
+    payload = ((state.client_codes['room_invite'],  (room,username)), state.msgTypes['system'])
     return ('send', payload, state)
 
 '''Make user an Admin'''
 def admin_user(username:str, state:object) -> tuple:
-    room = obtain_room(state.receiver)
-    if(room == None): return None
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room", state)
 
-    payload = ('/a'+room+';'+username, state.msgTypes['system'])
+    room = state.receiver[2::]
+    payload = ((state.client_codes['room_admin'], (room,username)), state.msgTypes['system'])
     return ('send', payload, state)

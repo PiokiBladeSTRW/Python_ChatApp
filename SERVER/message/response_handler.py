@@ -32,28 +32,34 @@ def handle_messages(clientSock:object, response:dict, state:object) -> tuple:
     if(response['receiver'].startswith('/r')):
         return message_handle.room_handle(clientSock, response, state)    
     else:
-        return message_handle.dm_handle(response, state)
-    
+        return message_handle.dm_handle(response, state) 
+
+'''Handle system messages, that is, commands'''
 def system(clientSock:object, response:dict, state:object) -> tuple: 
     # Obtain Command
-    content = response['content']
+    command = response['command']    
+    if (command == state.client_codes['user_exit']):    return system_handler.user_exit(state)
+    if (command == state.client_codes['online_list']):  return system_handler.online_list(response, state)
+    if (command == state.client_codes['rooms_list']):   return system_handler.room_list(state)
+    if (command == state.client_codes['room_join']):    return system_handler.room_join(clientSock, response, state)
+    if (command == state.client_codes['room_create']):  return system_handler.room_create(clientSock, response, state)
+    if (command == state.client_codes['room_invite']):  return system_handler.room_invite(response, state)
+    if (command == state.client_codes['room_admin']):   return system_handler.room_admin(response, state)
 
-    match content[:2]:
-        case '/e': return system_handler.user_exit(state)
-        case '/o': return system_handler.online_list(response, state)
-        case '/r': return system_handler.room_list(state)
-        case '/c': return system_handler.create_room(clientSock, response, state)
-        case '/i': return system_handler.room_invite(response, state)
-        case '/a': return system_handler.room_admin(response, state)
+    raise ValueError(f"●→INVALID COMMAND RECEIVED: {command}")
+
+
+'''----------------------------------------------'''
+
 
 '''Parse Response Received by Clients'''
 def parse_response( clientSock:object, response:dict, state:object) -> tuple:
 
     if(response['type'] in types): 
-        data = types[response['type']](clientSock, response, state)
+        data = types[response['type']](clientSock, response, state)        
         return data  
     else:
-        raise Exception("●→INVALID MESSAGE TYPE RECEIVED")
+        raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")
 
 '''Response Types'''
 types ={
@@ -62,7 +68,6 @@ types ={
     "msg": handle_messages,
     "sys": system    
 }
-
 
 '''
 RETURN FORMAT: (DESTINATION, PAYLOAD, STATE)

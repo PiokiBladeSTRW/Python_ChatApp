@@ -10,8 +10,6 @@ class ServerState:
          
         self.sock_rooms = {}            # socket : [rooms]                  -Auth
         self.room_socks= {}             # room name : [sockets]             -State
-        self.room_invites = {}          # room name : [invited sockets]     - Volatile
-
         self.timeout= {}                # socket: last heartbeat  
         
         with open("accounts.json", 'r') as fileHandle:
@@ -25,19 +23,38 @@ class ServerState:
 
         for room in self.roomsFile:
             self.room_socks[room] = []
-            self.room_invites[room] = []
 
         '''Codes for System Messages. 'er' prefix for Errors'''
-        self.codes ={            
+        self.system_codes ={            
             "user_exit": 101,
             "relog_begin": 102,
-            "relog_finish": 103,            
-            "not_room_member": 104,
+            "relog_finish": 103,        
+            "new_room_member": 104,
+            "room_live": 105,
+            "room_invite": 106,
+            "member_admin": 107,
+
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
-            "er_Invalid_room": 203,
-            "er_Not_admin": 204
+            "er_Not_admin": 203,
+            "er_Not_room_member": 204,
+            "er_Room_exists": 205,
+            "er_Member_in_room": 206,
+            "er_Member_is_admin": 207,
+            "er_Invalid_user": 208,
+            'er_Invalid_room': 209
         }
+
+        self.client_codes ={
+            'user_exit': 1,
+            'online_list': 2,
+            'rooms_list': 3,
+            'room_join': 4,
+            'room_create': 5,
+            'room_invite': 6,
+            'room_admin' :7
+        }
+
 
     def uuid_user(self, uuid):
         return self.accountsFile[uuid]['username']

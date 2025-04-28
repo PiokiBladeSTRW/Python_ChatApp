@@ -2,6 +2,7 @@
 import json
 import asyncio
 import websockets
+import argparse
 #import logging
 
 import login
@@ -21,16 +22,20 @@ Acitivities:
     Heartbeats & Elegant Disconnection during Crash
 '''
 class ChatClient:    
-    def __init__(self):
-        self.state = ClientState()
+    def __init__(self, clientName):
+        self.state = ClientState(clientName)        
         #logger = logging_setup.setup_log()
 
         self.heartbeatPing = 20
+        self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"
+        self.clientProfile = clientName
 
     async def connectClient(self) -> None: 
         async with websockets.connect(self.serverAddress) as clientSocket:   
             self.state.clientSock = clientSocket       
+
+            asyncio.create_task(self.fileHandle())
 
             await self.userLogin()
 
@@ -85,10 +90,11 @@ class ChatClient:
                 match action:
                     case 'send': await self.sendPayload(payload)
                     case 'exit': 
-                        await self.sendPayload( ('/e', self.state.msgTypes['system']) )
+                        await self.sendPayload(
+                            ( (self.state.client_codes['user_exit'], ''), self.state.msgTypes['system']))
                         await self.closeClient()      
                     case None: pass              
-                    case _: raise Exception("●→ INVALID PAYLOAD ACTION RECEIVED")
+                    case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
             elif(self.state.receiver):
                 await self.sendPayload( (msgInput, self.state.msgTypes['message']) )
@@ -107,7 +113,7 @@ class ChatClient:
                 
                 print()
 
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosedError:
             await self.closeServer()
             
     async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
@@ -115,7 +121,7 @@ class ChatClient:
         try: 
             await self.state.clientSock.send(self.state.encode(payload))
 
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosedError:
             await self.closeServer()
    
 
@@ -137,16 +143,35 @@ class ChatClient:
         print("SERVER DOWN!")
         await self.closeClient()
         return
+   
+
+    '''------------------------------------------------'''
+
+
+    '''Handle File I/O'''
+    async def fileHandle(self) -> None:
+        while True:   
+            
+            #Open and store data to each file
+            with open(f"rooms/{self.clientProfile}.json", 'w') as roomHandle:
+                json.dump({"rooms": list(self.state.clientRoomsFile)}, roomHandle)
+            
+            await asyncio.sleep(self.fileIOFrequency)
 
 
 
 '''ENTRY POINT FOR CLIENT SETUP'''
 async def eventLoop():
-    client = ChatClient()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--profile', type=str, required=True)
+    args = parser.parse_args()
+
+    client = ChatClient(args.profile)
 
     try:
         await client.connectClient()
-    except asyncio.exceptions.CancelledError:       # i.e., tasks have been cancelled, program exit
+    # i.e., tasks have been cancelled, program exit
+    except (asyncio.CancelledError, ConnectionRefusedError, asyncio.TimeoutError):
         pass
         
 #__MAIN__
