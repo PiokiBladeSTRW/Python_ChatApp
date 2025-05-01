@@ -104,7 +104,7 @@ def system(response:dict, state:object) -> object:
 
 '''Handle Responses'''
 def parse_response(response:dict, state:object) -> object: 
-
+    print(response)
     # For future purpose of Storing in DB
     if(not response.get('timestamp')): response['timestamp'] = time.time()
 
@@ -118,6 +118,6 @@ def parse_response(response:dict, state:object) -> object:
 '''Response Types'''
 types ={
     "msg": incoming_message,
-    "auth": online_user,
+    "con": online_user,
     "sys": system
 }

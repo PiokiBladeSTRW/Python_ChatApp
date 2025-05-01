@@ -19,7 +19,7 @@ class ClientState:
             "message": "msg",            
             "system": "sys",
             "heartbeat": "hbp",
-            "authentication": "auth"
+            "connect": "con"
         }
 
         self.system_codes ={            
@@ -105,7 +105,7 @@ class ClientState:
         ->msg: Default String Message
         ->sys: System Message / Commands
         ->hbp: Heartbeat Pings. Letting Server know you are there.
-        ->auth: Handles Authentication of User and ONLINE displays 
+        ->con: Displays new users logins
         '''   
 
         return json.dumps(data)

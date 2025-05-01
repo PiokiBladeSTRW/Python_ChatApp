@@ -13,8 +13,7 @@ The Server Object
 Purpose: The Server. Handles every client's request
 Acitivities:
     Starting the Server
-    Handling Connection of Clients
-    Handling authentication of Clients
+    Handling Connection of Clients    
     Receiving and Broadcasting Clients' Messages
     Handling Disconenction of Clients
     Handling File storage
@@ -62,11 +61,6 @@ class ChatServer:
                     case '/exit': await self.disconnectionPending.put(clientSock)
                     case '/hbp': state.timeout[clientSock] = time.time()
                     case '/relog': await self.relog(state.uuidsFile[response['content']['username']], clientSock)
-                    case '/logged':
-                        username = response['content']['username']
-                        user_uuid = state.uuidsFile[username]
-                        await self.broadcast(clientSock, json.dumps({"content":user_uuid, "type": "auth"}), '/s')
-                        await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
                 continue
             
             await self.broadcast(clientSock, payload, destination)
@@ -132,7 +126,7 @@ class ChatServer:
 
         # Let user and others know
         username = state.accountsFile[uuid]['username']
-        await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
+        await self.broadcast(clientSock, json.dumps({"sender":username, "type": "con"}), '/.')
 
         await self.send(clientSock, json.dumps({"command": state.system_codes['relog_finish'], "type": "sys"}))
         return

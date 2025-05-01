@@ -1,5 +1,6 @@
 #Header
 from server_state import state
+import json
 import message.message_handler as message_handle
 import message.system_handler as system_handler
 
@@ -12,6 +13,9 @@ def heartbeats(clientSock:object, response:dict) -> tuple:
 def connect(clientSock:object, response:dict) -> tuple:
     user_uuid = response['sender']
 
+    if(user_uuid in state.uuid_sock):
+        return ('*', '/relog')
+
     state.uuid_sock[user_uuid] = clientSock
     state.sock_uuid[clientSock] = user_uuid
     state.sock_rooms[clientSock] = []
@@ -19,6 +23,8 @@ def connect(clientSock:object, response:dict) -> tuple:
     for room in state.accountsFile[user_uuid]['rooms']:
         state.room_socks[room].append(clientSock)                
         state.sock_rooms[clientSock].append(room)
+
+    return ('/.', json.dumps({"sender":state.uuid_user(user_uuid),"type": "con" }), )
 
 '''Handle regular old messages'''
 def handle_messages(clientSock:object, response:dict) -> tuple: 
