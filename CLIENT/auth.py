@@ -51,23 +51,6 @@ def register():
 
     return False
 
-    
-    
-    
-
-# while True:
-#     usrname = input("Enter Username: ")
-#     passwd = input("Enter Password: ")
-
-#     data = {
-#         "username": usrname,
-#         "password": passwd
-#     }
-
-#     res = requests.post("http://127.0.0.1:8000/login/", json = data)
-#     print(res.json() )
-
-
 def start_auth() -> dict:
     ch = input("0: Login to Account\n1: Register an Account\n>")
 
@@ -81,5 +64,3 @@ def start_auth() -> dict:
             continue
 
         return user_uuid
-    
-print(start_auth())

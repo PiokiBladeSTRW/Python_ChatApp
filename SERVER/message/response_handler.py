@@ -1,6 +1,5 @@
 #Header
 from server_state import state
-import message.auth_handle as auth_handle
 import message.message_handler as message_handle
 import message.system_handler as system_handler
 
@@ -11,21 +10,7 @@ def heartbeats(clientSock:object, response:dict) -> tuple:
 
 '''Handle User Authentication'''
 def authentication(clientSock:object, response:dict) -> tuple:
-    #Content Format: {Action: <>, Username: <>, Passwd: <>, Email: <>}
-    content = response['content']    
-    
-    # If Relog
-    if(content['username'] in state.uuidsFile):
-        if(state.uuidsFile[content['username']] in state.uuid_sock):
-            content['action'] = 'relog'
-
-    # Confirm Authentication
-    data= auth_handle.parse_authentication(clientSock, content, state)
-
-    if(data == True):
-        return ('*', '/logged', state)
-      
-    return data
+    pass
 
 '''Handle regular old messages'''
 def handle_messages(clientSock:object, response:dict) -> tuple: 
