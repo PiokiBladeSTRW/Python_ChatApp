@@ -8,13 +8,6 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-
-with open("accounts.json", 'r') as fileHandle:
-            accountsFile = json.load(fileHandle)
-
-with open("uuids.json", 'r') as fileHandle:
-            uuidsFile = json.load(fileHandle)
-
 class authPayload(BaseModel):
     username: str
     password: str
@@ -26,15 +19,15 @@ chatApp = FastAPI()
 @chatApp.post('/login')
 def login(credentials: authPayload):
 
-    if(credentials.username in uuidsFile):
+    if(credentials.username in state.uuidsFile):
         #Hash password
-        user_uuid = uuidsFile[credentials.username]
-        salt = accountsFile[user_uuid]['salt']
+        user_uuid = state.uuidsFile[credentials.username]
+        salt = state.accountsFile[user_uuid]['salt']
         salted_pass = credentials.password + salt
         passwd = hashlib.sha256(salted_pass.encode()).hexdigest()        
 
         #Match Password
-        if(passwd== accountsFile[user_uuid]['passwd']):  
+        if(passwd == state.accountsFile[user_uuid]['passwd']):  
             return {"sender_id": user_uuid}
         
     return False
@@ -43,7 +36,7 @@ def login(credentials: authPayload):
 def register(credentials: authPayload): 
 
     #Ensure Username Doesn't Exist Already
-    if(credentials.username in uuidsFile):        
+    if(credentials.username in state.uuidsFile):        
         return False
 
     #Secure the Data   
@@ -52,6 +45,16 @@ def register(credentials: authPayload):
     passwd = hashlib.sha256(salted_pass.encode()).hexdigest()
     print(passwd)
     user_uuid = str(uuid.uuid4())
+
+    #Store the Data
+    state.accountsFile[user_uuid] = {
+        "username":credentials.username, 
+        "passwd": passwd, 
+        "email": credentials.email,
+        "salt": salt, 
+        "rooms": []                                     
+        }
+    state.uuidsFile[credentials.username] = user_uuid
 
     return {"sender_id": user_uuid}
 
