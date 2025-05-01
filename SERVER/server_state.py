@@ -58,3 +58,5 @@ class ServerState:
 
     def uuid_user(self, uuid):
         return self.accountsFile[uuid]['username']
+    
+state = ServerState()

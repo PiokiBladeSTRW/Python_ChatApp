@@ -2,10 +2,12 @@ import json
 import secrets
 import hashlib
 import uuid
+from server_state import state
 
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
+
 
 with open("accounts.json", 'r') as fileHandle:
             accountsFile = json.load(fileHandle)

@@ -23,7 +23,7 @@ Acitivities:
 '''
 class ChatClient:    
     def __init__(self, clientProfile):
-        self.state = ClientState(clientProfile)        
+        state = ClientState(clientProfile)        
         #logger = logging_setup.setup_log()
 
         self.heartbeatPing = 20
@@ -33,7 +33,7 @@ class ChatClient:
 
     async def connectClient(self) -> None: 
         async with websockets.connect(self.serverAddress) as clientSocket:   
-            self.state.clientSock = clientSocket       
+            state.clientSock = clientSocket       
 
             asyncio.create_task(self.fileHandle())
 
@@ -53,20 +53,20 @@ class ChatClient:
                 }'''
 
             # Validate Credentials From Server
-            await self.sendPayload( (authContent, self.state.msgTypes['authentication']) )
-            response = json.loads(await self.state.clientSock.recv())
+            await self.sendPayload( (authContent, state.msgTypes['authentication']) )
+            response = json.loads(await state.clientSock.recv())
 
             # Check condition of Log-in
             if(login.was_succesful(response)):
-                self.state.clientUUID = response['content']
+                state.clientUUID = response['content']
                 return
             
             elif(response['content'] == 102):                
-                print(f"{{System}}: {self.state.system_codes[102]}")                
-                response = json.loads(await self.state.clientSock.recv())
+                print(f"{{System}}: {state.system_codes[102]}")                
+                response = json.loads(await state.clientSock.recv())
 
-                print(f"{{System}}: {self.state.system_codes[103]}")
-                self.state.clientUUID = response['content']
+                print(f"{{System}}: {state.system_codes[103]}")
+                state.clientUUID = response['content']
                 return
             
             else:
@@ -82,7 +82,7 @@ class ChatClient:
             msgInput = await asyncio.to_thread(input)
 
             if(command_handler.is_command(msgInput)):
-                action, payload, self.state = command_handler.parse_command(msgInput, self.state)
+                action, payload, state = command_handler.parse_command(msgInput, state)
                 '''Action: send, exit, None
                   Payload Format: (content, type)'''
                 
@@ -91,13 +91,13 @@ class ChatClient:
                     case 'send': await self.sendPayload(payload)
                     case 'exit': 
                         await self.sendPayload(
-                            ( (self.state.client_codes['user_exit'], ''), self.state.msgTypes['system']))
+                            ( (state.client_codes['user_exit'], ''), state.msgTypes['system']))
                         await self.closeClient()      
                     case None: pass              
                     case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
-            elif(self.state.receiver):
-                await self.sendPayload( (msgInput, self.state.msgTypes['message']) )
+            elif(state.receiver):
+                await self.sendPayload( (msgInput, state.msgTypes['message']) )
 
             else:
                 print("[!!ERROR: No Destination Chosen]")       
@@ -106,10 +106,10 @@ class ChatClient:
 
     async def receive(self) -> None:
         try:
-            async for dataReceived in self.state.clientSock:
+            async for dataReceived in state.clientSock:
                 response = json.loads(dataReceived)
 
-                self.state = interface.parse_response(response, self.state) 
+                state = interface.parse_response(response, state) 
                 
                 print()
 
@@ -119,7 +119,7 @@ class ChatClient:
     async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
         '''Payload : ( Message, Type )'''
         try: 
-            await self.state.clientSock.send(self.state.encode(payload))
+            await state.clientSock.send(state.encode(payload))
 
         except websockets.ConnectionClosedError:
             await self.closeServer()
@@ -130,11 +130,11 @@ class ChatClient:
          
     async def heartbeat(self) -> None:
         while True:
-            await self.sendPayload( ('', self.state.msgTypes['heartbeat']) )
+            await self.sendPayload( ('', state.msgTypes['heartbeat']) )
             await asyncio.sleep(self.heartbeatPing)
     
     async def closeClient(self) -> None:        
-        await self.state.clientSock.close()
+        await state.clientSock.close()
         for task in asyncio.all_tasks():
             task.cancel()
             return
@@ -154,7 +154,7 @@ class ChatClient:
             
             #Open and store data to each file
             with open(f"rooms/{self.clientProfile}.json", 'w') as roomHandle:
-                json.dump({"rooms": list(self.state.clientRoomsFile)}, roomHandle)
+                json.dump({"rooms": list(state.clientRoomsFile)}, roomHandle)
             
             await asyncio.sleep(self.fileIOFrequency)
 

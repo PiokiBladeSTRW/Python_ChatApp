@@ -7,7 +7,7 @@ import secrets
 import uuid
 
 '''Register New User'''
-def reg(clientSock:object, content:dict, state:object) -> tuple:
+def reg(clientSock:object, content:dict) -> tuple:
     
     #Ensure Username Doesn't Exist Already
     if(content['username'] in state.uuidsFile):        
@@ -38,7 +38,7 @@ def reg(clientSock:object, content:dict, state:object) -> tuple:
     return True
 
 '''Log in to already made Account'''
-def log(clientSock:object, content:dict, state:object) -> tuple:
+def log(clientSock:object, content:dict) -> tuple:
 
     if(content['username'] in state.uuidsFile):
         #Hash password
@@ -64,7 +64,7 @@ def log(clientSock:object, content:dict, state:object) -> tuple:
 
 
 '''Relog to currently Active Account'''
-def relog(clientSock:object, content:dict, state:object) -> tuple:   
+def relog(clientSock:object, content:dict) -> tuple:   
     user_uuid = state.uuidsFile[content['username']]
     
     #Check for valid log-in
@@ -77,7 +77,7 @@ def relog(clientSock:object, content:dict, state:object) -> tuple:
 
 
 '''Decide what to do with current case'''
-def parse_authentication(clientSock:object, content:dict, state:object) -> tuple:
+def parse_authentication(clientSock:object, content:dict) -> tuple:
     match content['action']:
         case 'reg': return reg(clientSock, content, state)
         case 'log': return log(clientSock, content, state)

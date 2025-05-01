@@ -1,15 +1,16 @@
 #Header
+from server_state import state
 import message.auth_handle as auth_handle
 import message.message_handler as message_handle
 import message.system_handler as system_handler
 
 '''Handle user heartbeats- Ensuring the Client is Alive'''
-def heartbeats(clientSock:object, response:dict, state:object) -> tuple: 
+def heartbeats(clientSock:object, response:dict) -> tuple: 
     #Nothing to do here, main class adds time to timeout
-    return ('*', '/hbp', state)   
+    return ('*', '/hbp')   
 
 '''Handle User Authentication'''
-def authentication(clientSock:object, response:dict, state:object) -> tuple:
+def authentication(clientSock:object, response:dict) -> tuple:
     #Content Format: {Action: <>, Username: <>, Passwd: <>, Email: <>}
     content = response['content']    
     
@@ -27,24 +28,24 @@ def authentication(clientSock:object, response:dict, state:object) -> tuple:
     return data
 
 '''Handle regular old messages'''
-def handle_messages(clientSock:object, response:dict, state:object) -> tuple: 
+def handle_messages(clientSock:object, response:dict) -> tuple: 
     # Seperately Handle Room and Normal Messages
     if(response['receiver'].startswith('/r')):
-        return message_handle.room_handle(clientSock, response, state)    
+        return message_handle.room_handle(clientSock, response)    
     else:
-        return message_handle.dm_handle(response, state) 
+        return message_handle.dm_handle(response) 
 
 '''Handle system messages, that is, commands'''
-def system(clientSock:object, response:dict, state:object) -> tuple: 
+def system(clientSock:object, response:dict) -> tuple: 
     # Obtain Command
     command = response['command']    
-    if (command == state.client_codes['user_exit']):    return system_handler.user_exit(state)
-    if (command == state.client_codes['online_list']):  return system_handler.online_list(response, state)
-    if (command == state.client_codes['rooms_list']):   return system_handler.room_list(state)
-    if (command == state.client_codes['room_join']):    return system_handler.room_join(clientSock, response, state)
-    if (command == state.client_codes['room_create']):  return system_handler.room_create(clientSock, response, state)
-    if (command == state.client_codes['room_invite']):  return system_handler.room_invite(response, state)
-    if (command == state.client_codes['room_admin']):   return system_handler.room_admin(response, state)
+    if (command == state.client_codes['user_exit']):    return system_handler.user_exit()
+    if (command == state.client_codes['online_list']):  return system_handler.online_list(response)
+    if (command == state.client_codes['rooms_list']):   return system_handler.room_list()
+    if (command == state.client_codes['room_join']):    return system_handler.room_join(clientSock, response)
+    if (command == state.client_codes['room_create']):  return system_handler.room_create(clientSock, response)
+    if (command == state.client_codes['room_invite']):  return system_handler.room_invite(response)
+    if (command == state.client_codes['room_admin']):   return system_handler.room_admin(response)
 
     raise ValueError(f"●→INVALID COMMAND RECEIVED: {command}")
 
@@ -53,10 +54,10 @@ def system(clientSock:object, response:dict, state:object) -> tuple:
 
 
 '''Parse Response Received by Clients'''
-def parse_response( clientSock:object, response:dict, state:object) -> tuple:
+def parse_response( clientSock:object, response:dict) -> tuple:
 
     if(response['type'] in types): 
-        data = types[response['type']](clientSock, response, state)        
+        data = types[response['type']](clientSock, response)        
         return data  
     else:
         raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")

@@ -1,12 +1,13 @@
 '''Handle and Parse errors for modular message_handling'''
 
 import json
+from server_state import state
 
 class CatchError:
     def __init__(self):
         self.error_list = []
 
-    def error_handle(self, condition:bool, error:str, state: object, args:tuple =None) -> tuple:
+    def error_handle(self, condition:bool, error:str, args:tuple =None) -> tuple:
         '''Returns Specific Payload if the condition is true
         @params: 
             condition: Boolean value checking for error
@@ -20,7 +21,7 @@ class CatchError:
             if(args): payload = json.dumps({'command': state.system_codes[error], 'content':args, 'type': "sys"})
             else: payload = json.dumps({'command': state.system_codes[error], 'type': "sys"})
             
-            return('/s', payload, state)
+            return('/s', payload)
         
         return None
     
@@ -30,7 +31,7 @@ class CatchError:
         return data
 
     
-    def multiple_error_handle(self, possible_errors:dict[str,tuple], state:object) -> tuple:
+    def multiple_error_handle(self, possible_errors:dict[str,tuple]) -> tuple:
         '''Handles Multiple Errors at once, returns the first error to appear
         @params:
             possible_errors: Dictionary with key:value -> error key : [error condition, arguments if any]
