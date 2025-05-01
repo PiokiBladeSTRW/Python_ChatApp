@@ -32,7 +32,7 @@ class ChatServer:
 
     async def start(self) -> None:
         async with websockets.serve(self.handleClient, "localhost", 8765):
-            print("SERVER ON")
+            print("CHAT SERVER ACTIVE & LISTENING")
 
             asyncio.create_task(self.Disconnect())
             asyncio.create_task(self.fileHandle())
@@ -182,9 +182,6 @@ class ChatServer:
 
 
 '''Entry Point to Event Loop'''
-async def eventLoop():
+async def chat_eventLoop():
     server = ChatServer()
     await server.start()
-
-#__MAIN__
-asyncio.run(eventLoop())
