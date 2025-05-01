@@ -5,13 +5,13 @@ import time
 import json
 
 class ClientState:
-    def __init__(self, clientName):
+    def __init__(self, clientProfile):
         self.clientUUID = ''
         self.receiver = ''
         self.pReceiver = ''
         self.clientSock = None
 
-        with open(f"rooms/{clientName}.json", 'r') as roomsHandler:
+        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
             data = json.load(roomsHandler)
             self.clientRoomsFile = data['rooms']
 
@@ -19,7 +19,7 @@ class ClientState:
             "message": "msg",            
             "system": "sys",
             "heartbeat": "hbp",
-            "authentication": "auth"
+            "connect": "con"
         }
 
         self.system_codes ={            
@@ -105,7 +105,7 @@ class ClientState:
         ->msg: Default String Message
         ->sys: System Message / Commands
         ->hbp: Heartbeat Pings. Letting Server know you are there.
-        ->auth: Handles Authentication of User and ONLINE displays 
+        ->con: Displays new users logins
         '''   
 
         return json.dumps(data)

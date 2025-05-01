@@ -6,23 +6,21 @@ import websockets
 
 import routing
 import message.response_handler as response_handler
-from server_state import ServerState
+from server_state import state
 
 '''
 The Server Object
 Purpose: The Server. Handles every client's request
 Acitivities:
     Starting the Server
-    Handling Connection of Clients
-    Handling authentication of Clients
+    Handling Connection of Clients    
     Receiving and Broadcasting Clients' Messages
     Handling Disconenction of Clients
     Handling File storage
 '''
 class ChatServer:
     '''Initialize'''
-    def __init__(self): 
-        self.state = ServerState()         
+    def __init__(self):        
         self.timeout = 40
         self.pingFrequency = 25
 
@@ -32,7 +30,7 @@ class ChatServer:
 
     async def start(self) -> None:
         async with websockets.serve(self.handleClient, "localhost", 8765):
-            print("SERVER ON")
+            print("CHAT SERVER ACTIVE & LISTENING")
 
             asyncio.create_task(self.Disconnect())
             asyncio.create_task(self.fileHandle())
@@ -55,26 +53,21 @@ class ChatServer:
             response = json.loads(dataReceived)
 
             '''Payload is json dumped message'''
-            destination, payload, self.state = response_handler.parse_response(clientSock, response, self.state)
+            destination, payload = response_handler.parse_response(clientSock, response)
             
             # Handle Special Cases, otherwise broadcast
             if(destination=='*'):
                 match payload:
                     case '/exit': await self.disconnectionPending.put(clientSock)
-                    case '/hbp': self.state.timeout[clientSock] = time.time()
-                    case '/relog': await self.relog(self.state.uuidsFile[response['content']['username']], clientSock)
-                    case '/logged':
-                        username = response['content']['username']
-                        user_uuid = self.state.uuidsFile[username]
-                        await self.broadcast(clientSock, json.dumps({"content":user_uuid, "type": "auth"}), '/s')
-                        await self.broadcast(clientSock, json.dumps({"sender":username,"type": "auth" }), '/.')
+                    case '/hbp': state.timeout[clientSock] = time.time()
+                    case '/relog': await self.relog(state.uuidsFile[response['content']['username']], clientSock)
                 continue
             
             await self.broadcast(clientSock, payload, destination)
 
     async def broadcast(self, clientSock:websockets.ClientConnection, payload:str, destination:str) -> None:
         #Obtain list of Receivers
-        receivingClients = routing.parse_destination(clientSock, destination, self.state)
+        receivingClients = routing.parse_destination(clientSock, destination)
 
         #Send to receiving clients
         if(receivingClients):
@@ -86,7 +79,7 @@ class ChatServer:
         if(destination.startswith('/r') or destination == '/.'): return
         
         #If receiving client does not exist
-        payload = json.dumps({"command":self.state.system_codes['user_exit'], "content": destination, "type":"sys"})
+        payload = json.dumps({"command":state.system_codes['user_exit'], "content": destination, "type":"sys"})
         await self.send(clientSock, payload)
        
        
@@ -104,8 +97,8 @@ class ChatServer:
     async def heartbeats(self) -> None:        
         while True:
             cTime = time.time()
-            for client in self.state.timeout:
-                timeElapsed = cTime - self.state.timeout[client]     
+            for client in state.timeout:
+                timeElapsed = cTime - state.timeout[client]     
                            
                 if(timeElapsed >= self.timeout):    
                     await self.disconnectionPending.put(client)
@@ -113,29 +106,29 @@ class ChatServer:
 
     async def relog(self, uuid:str, clientSock: websockets.ClientConnection) -> None:
         #So User knows to wait while they Relog
-        await self.send(clientSock, json.dumps({"command": self.state.system_codes['relog_begin'], "type":"sys"}))
+        await self.send(clientSock, json.dumps({"command": state.system_codes['relog_begin'], "type":"sys"}))
 
-        oldClientSock = self.state.uuid_sock[uuid]        
+        oldClientSock = state.uuid_sock[uuid]        
         await self.disconnectionPending.put(oldClientSock)
 
         #Once Disconnect Finishes
-        while oldClientSock not in self.state.sock_uuid:
+        while oldClientSock not in state.sock_uuid:
             await asyncio.sleep(3)
 
         #Configure Client's new Socket    
-        self.state.uuid_sock[uuid] = clientSock
-        self.state.sock_uuid[clientSock] = uuid
-        self.state.sock_rooms[clientSock] = []
+        state.uuid_sock[uuid] = clientSock
+        state.sock_uuid[clientSock] = uuid
+        state.sock_rooms[clientSock] = []
 
-        for room in self.state.accountsFile[uuid]['rooms']:
-            self.state.room_socks[room].append(clientSock)
-            self.state.sock_rooms[clientSock].append(room)
+        for room in state.accountsFile[uuid]['rooms']:
+            state.room_socks[room].append(clientSock)
+            state.sock_rooms[clientSock].append(room)
 
         # Let user and others know
-        username = self.state.accountsFile[uuid]['username']
-        await self.broadcast(clientSock, json.dumps({"sender":username, "type": "auth"}), '/.')
+        username = state.accountsFile[uuid]['username']
+        await self.broadcast(clientSock, json.dumps({"sender":username, "type": "con"}), '/.')
 
-        await self.send(clientSock, json.dumps({"command": self.state.system_codes['relog_finish'], "type": "sys"}))
+        await self.send(clientSock, json.dumps({"command": state.system_codes['relog_finish'], "type": "sys"}))
         return
 
     async def Disconnect(self) -> None: 
@@ -145,21 +138,21 @@ class ChatServer:
             if(leavingClient):  
                 
                 #Remove Client from Rooms
-                if(leavingClient in self.state.sock_rooms):
-                    for room in self.state.sock_rooms[leavingClient]:
-                        self.state.room_socks[room].remove(leavingClient)
+                if(leavingClient in state.sock_rooms):
+                    for room in state.sock_rooms[leavingClient]:
+                        state.room_socks[room].remove(leavingClient)
 
-                    self.state.sock_rooms.pop(leavingClient)
+                    state.sock_rooms.pop(leavingClient)
                 
                 #Room user from Global Variables
-                uuid = self.state.sock_uuid.pop(leavingClient)
-                self.state.uuid_sock.pop(uuid)
+                uuid = state.sock_uuid.pop(leavingClient)
+                state.uuid_sock.pop(uuid)
 
-                self.state.timeout.pop(leavingClient)                
-                username = self.state.uuid_user(uuid)
+                state.timeout.pop(leavingClient)                
+                username = state.uuid_user(uuid)
                 
                 #Broadcast others that User is Offline                
-                payload = json.dumps({"command": self.state.system_codes['user_exit'], "content": [username], "type":"sys"})                
+                payload = json.dumps({"command": state.system_codes['user_exit'], "content": [username], "type":"sys"})                
                 await self.broadcast(leavingClient, payload, '/.')
 
                 await leavingClient.close()
@@ -174,17 +167,14 @@ class ChatServer:
             
             #Open and store data to each file
             with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
-                json.dump(self.state.accountsFile, accountHandle)         
-                json.dump(self.state.uuidsFile, uuidHandle)                
-                json.dump(self.state.roomsFile, roomHandle)
+                json.dump(state.accountsFile, accountHandle)         
+                json.dump(state.uuidsFile, uuidHandle)                
+                json.dump(state.roomsFile, roomHandle)
 
             await asyncio.sleep(self.fileIOFrequency)
 
 
 '''Entry Point to Event Loop'''
-async def eventLoop():
+async def chat_eventLoop():
     server = ChatServer()
     await server.start()
-
-#__MAIN__
-asyncio.run(eventLoop())

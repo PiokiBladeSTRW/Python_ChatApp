@@ -1,7 +1,9 @@
 '''Chooses the array of clients who'll receive the data to be broadcasted'''
+#Header
+from server_state import state
 
 '''Global Broadcasts'''
-def every(clientSock, destination:str, state:object):
+def every(clientSock, destination:str):
     rC = list(state.sock_uuid)
     if(clientSock in state.sock_uuid):
         rC.remove(clientSock)
@@ -9,7 +11,7 @@ def every(clientSock, destination:str, state:object):
     return tuple(rC)
 
 '''Room Broadcasts'''
-def room(clientSock, destination:str, state:object): 
+def room(clientSock, destination:str): 
     rC = list(state.room_socks[destination[2::]])
     rC.remove(clientSock)
     print(rC)
@@ -17,11 +19,11 @@ def room(clientSock, destination:str, state:object):
     return tuple(rC)
 
 '''User Alert'''
-def user(clientSock, destination:str, state:object): 
+def user(clientSock, destination:str): 
     return (clientSock,)
 
 '''DM Broadcasts'''
-def direct(destination:str, state:object): 
+def direct(destination:str): 
     if(destination not in state.uuid_sock):
         return None    
     
@@ -32,12 +34,12 @@ def direct(destination:str, state:object):
 
 
 '''Parse Destination to determine Receivers'''
-def parse_destination(clientSock, destination:str, state:object):
+def parse_destination(clientSock, destination:str):
     if(destination[:2] in dest):
-        data = dest[destination[:2]](clientSock, destination, state)
+        data = dest[destination[:2]](clientSock, destination)
         return data
     else:        
-        data = direct(destination, state)
+        data = direct(destination)
         return data
 
 '''Destinations'''
