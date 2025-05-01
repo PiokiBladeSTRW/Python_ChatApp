@@ -40,7 +40,7 @@ class CatchError:
         '''
 
         for error in possible_errors:
-            self.error_list.append(self.error_handle(possible_errors[error][0], error, state,possible_errors[error][1],))
+            self.error_list.append(self.error_handle(possible_errors[error][0], error, possible_errors[error][1]))
             if(any(self.error_list)): break
 
         return self.error_return()
