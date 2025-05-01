@@ -5,13 +5,13 @@ import time
 import json
 
 class ClientState:
-    def __init__(self, clientName):
+    def __init__(self, clientProfile):
         self.clientUUID = ''
         self.receiver = ''
         self.pReceiver = ''
         self.clientSock = None
 
-        with open(f"rooms/{clientName}.json", 'r') as roomsHandler:
+        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
             data = json.load(roomsHandler)
             self.clientRoomsFile = data['rooms']
 

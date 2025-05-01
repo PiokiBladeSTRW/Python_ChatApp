@@ -22,14 +22,14 @@ Acitivities:
     Heartbeats & Elegant Disconnection during Crash
 '''
 class ChatClient:    
-    def __init__(self, clientName):
-        self.state = ClientState(clientName)        
+    def __init__(self, clientProfile):
+        self.state = ClientState(clientProfile)        
         #logger = logging_setup.setup_log()
 
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"
-        self.clientProfile = clientName
+        self.clientProfile = clientProfile
 
     async def connectClient(self) -> None: 
         async with websockets.connect(self.serverAddress) as clientSocket:   
@@ -37,12 +37,12 @@ class ChatClient:
 
             asyncio.create_task(self.fileHandle())
 
-            await self.userLogin()
+            #await self.userLogin()
 
             await asyncio.gather(self.message(), self.receive(),self.heartbeat())
             
 
-    async def userLogin(self) -> None:
+    #async def userLogin(self) -> None:
         # Loop till Succesfully Logged-on to Server
         while True:  
             authContent = login.start_auth()
