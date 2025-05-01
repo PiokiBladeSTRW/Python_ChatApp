@@ -4,17 +4,20 @@ import maskpass
 
 legal_char = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890@#"
 
-'''Return UUID if succesful, False otherwise'''
-def login() -> str:    
-    username = input("\nENTER USERNAME: ").strip()
+def login() -> str:   
+    '''Takes credentials as Input from user and sends request to server to verify them
+    Returns: uuid if Succesful ; False if server denies request''' 
 
+    # Username Entry
+    username = input("\nENTER USERNAME: ").strip()
     if(not all(c in legal_char for c in username)):
         print("ILLEGAL CHARACTERS")
         return False
 
-    password = maskpass.askpass(prompt="ENTER PASSWORD: ", mask='*')    
-    
-    
+    # Password Entry
+    password = maskpass.askpass(prompt="ENTER PASSWORD: ", mask='*')   
+     
+    # Server Request
     content = {"username": username, "password": password}
     authRes = requests.post("http://127.0.0.1:8000/login", json=content).json() 
 
@@ -24,25 +27,30 @@ def login() -> str:
     return False
 
 def register(): 
-    # Email Validation
+    '''Takes credentials as Input from user and sends request to server to create an account
+    Returns: uuid if Succesful ; False if server denies request'''
+    
     def is_invalid_email(email):
         if('@' not in email):
             return True
         return False 
     
+    # Username Entry
     username = input("\nENTER USERNAME: ").strip()
-
     if(not all(c in legal_char for c in username)):
         print("ILLEGAL CHARACTERS")
         return False
 
+    # Password Entry
     password = maskpass.askpass(prompt="ENTER PASSWORD: ", mask='*')    
+    
+    # Email Entry
     email = input("ENTER EMAIL: ")
-
     if(is_invalid_email(email)): 
         print("INVALID EMAIL")
         return False
 
+    # Server Request
     content = {"username": username, "password": password, "email": email}
     authRes = requests.post("http://127.0.0.1:8000/register", json=content).json() 
 
@@ -51,6 +59,11 @@ def register():
 
     return False
 
+
+'''-------------------------------------'''
+
+ 
+'''Start the Process by determining New or Old account'''
 def start_auth() -> dict:
     ch = input("0: Login to Account\n1: Register an Account\n>")
 

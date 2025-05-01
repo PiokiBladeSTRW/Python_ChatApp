@@ -7,6 +7,8 @@ from server_state import state
 
 
 def login(credentials: object): 
+    '''Verify the credentials sent are Valid'''
+
     if(credentials.username in state.uuidsFile):
         #Hash password
         user_uuid = state.uuidsFile[credentials.username]
@@ -21,6 +23,7 @@ def login(credentials: object):
     return False
 
 def register(credentials: object): 
+    '''Create an account with given credentials if username isn't conflicting'''
     
     #Ensure Username Doesn't Exist Already
     if(credentials.username in state.uuidsFile):        

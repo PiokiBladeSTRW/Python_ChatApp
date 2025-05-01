@@ -4,14 +4,15 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+chatApp = FastAPI()
+
+
+# Authentication
 class authPayload(BaseModel):
     username: str
     password: str
     email: str = ''
 
-chatApp = FastAPI()
-
-# Authentication
 @chatApp.post('/login')
 def login(credentials: authPayload):
     return auth_handle.login(credentials)    
