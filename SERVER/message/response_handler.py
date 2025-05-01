@@ -8,9 +8,17 @@ def heartbeats(clientSock:object, response:dict) -> tuple:
     #Nothing to do here, main class adds time to timeout
     return ('*', '/hbp')   
 
-'''Handle User Authentication'''
-def authentication(clientSock:object, response:dict) -> tuple:
-    pass
+'''Handle connecting User to server'''
+def connect(clientSock:object, response:dict) -> tuple:
+    user_uuid = response['sender']
+
+    state.uuid_sock[user_uuid] = clientSock
+    state.sock_uuid[clientSock] = user_uuid
+    state.sock_rooms[clientSock] = []
+
+    for room in state.accountsFile[user_uuid]['rooms']:
+        state.room_socks[room].append(clientSock)                
+        state.sock_rooms[clientSock].append(room)
 
 '''Handle regular old messages'''
 def handle_messages(clientSock:object, response:dict) -> tuple: 
@@ -50,7 +58,7 @@ def parse_response( clientSock:object, response:dict) -> tuple:
 '''Response Types'''
 types ={
     'hbp': heartbeats,
-    'auth': authentication,
+    'con': connect,
     "msg": handle_messages,
     "sys": system    
 }
