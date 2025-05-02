@@ -3,6 +3,7 @@
 # Header
 import time
 import json
+from loguru import logger
 
 class ClientState:
     def __init__(self, clientProfile):
@@ -14,6 +15,22 @@ class ClientState:
         with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
             data = json.load(roomsHandler)
             self.clientRoomsFile = data['rooms']
+
+        logger.remove()
+        log_format = (
+            "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
+            "<level>{level: <8}</level> |"
+            "<cyan>{module}</cyan> : <cyan>{function}</cyan> -"
+            "<level>{message}</level>"
+        )
+        logger.add(
+            "logs/log_{time}.log",
+            rotation= "1 day",
+            level = "INFO",
+            format = log_format,
+            encoding= 'utf-8'
+        )
+        
 
         self.msgTypes= {
             "message": "msg",            
@@ -122,3 +139,7 @@ class ClientState:
             return
 
         print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
+
+    '''Log Something'''
+    def log(self, msg):
+        logger.opt(depth=1).info(msg)
