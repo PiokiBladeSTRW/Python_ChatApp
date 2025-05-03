@@ -4,8 +4,10 @@
 import formatting
 import time
 
+from session_state import state
+
 '''Handle Default Messages'''
-def incoming_message(response:dict, state:object) -> object:
+def incoming_message(response:dict) -> object:
     def dms(): 
         data = (response['timestamp'], response['sender'], response['content'])
 
@@ -37,27 +39,22 @@ def incoming_message(response:dict, state:object) -> object:
     else:
         dms()
 
-    return state
-
 '''Handle User Loggings'''
-def online_user(response:dict, state:object) -> object:
+def online_user(response:dict) -> object:
     data = ('', response['sender'], "is ONLINE")
 
     # OUTPUT : [Sender 'is Online'
     print(formatting.format(data, ('s', 'c', 'S')))
 
-    return state
-
 '''Handle System Messages'''
-def system(response:dict, state:object) -> object:  
+def system(response:dict) -> object:  
     '''Only Module where response['content'] is not guranteed'''
     
     # Guard Clause  (if not a command)
     if(not response['command']):
         data = ('', '{System}', response['content']) 
 
-        print(formatting.format(data, ('s', 'cl', 'c')))    
-        return state
+        print(formatting.format(data, ('s', 'cl', 'c')))            
     
 
     ''' Handle Different Types of Sys Commands. More Dynamic (& confusing) than other modules'''
@@ -96,22 +93,20 @@ def system(response:dict, state:object) -> object:
         data = ('', "{System}", disp_msg)
 
     print(formatting.format(data, ('s', 'cl', 'c')))
-    return state
     
 
 '''-------------------------------------'''
 
 
 '''Handle Responses'''
-def parse_response(response:dict, state:object) -> object: 
+def parse_response(response:dict) -> object: 
     print(response)
     # For future purpose of Storing in DB
     if(not response.get('timestamp')): response['timestamp'] = time.time()
 
     if(response['type'] in types):          
-        state = types[response['type']](response, state)
-        return state
-    else:        
+        types[response['type']](response)        
+    else:                
         raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")
     
 
