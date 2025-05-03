@@ -20,10 +20,8 @@ Acitivities:
     Heartbeats & Elegant Disconnection during Crash
 '''
 class ChatClient:    
-    def __init__(self, clientProfile, user_uuid):
-        state.enable_roomHandler(clientProfile)   
+    def __init__(self, clientProfile, user_uuid):        
         state.clientUUID= user_uuid
-
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"
@@ -138,6 +136,8 @@ async def eventLoop():
     parser = argparse.ArgumentParser()
     parser.add_argument('--profile', type=str, required=True)
     args = parser.parse_args()
+
+    state.profileBased(args.profile)
 
     state.log(f"Event Loop started w/ Profile {args.profile} and UUID {user_uuid}")
     

@@ -13,22 +13,7 @@ class ClientState:
         self.clientSock = None
         self.clientRoomsFile = []
 
-
         logger.remove()
-        log_format = (
-            "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
-            "<level>{level: <8}</level> |"
-            "<cyan>{module}</cyan> : <cyan>{function}</cyan> -"
-            "<level>{message}</level>"
-        )
-        logger.add(
-            "logs/log_{time}.log",
-            rotation= "1 day",
-            level = "INFO",
-            format = log_format,
-            encoding= 'utf-8',
-            retention= "3 day"
-        )
         
 
         self.msgTypes= {
@@ -90,8 +75,25 @@ class ClientState:
         }
 
 
-    '''Fetches Client side List of Rooms for Less data Transfer'''
-    def enable_roomHandler(self, clientProfile):
+    '''Tasks that requires clientProfile'''
+    def profileBased(self, clientProfile):
+        #Log Setup
+        log_format = (
+            "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
+            "<level>{level: <8}</level> |"
+            "<cyan>{module}</cyan> : <cyan>{function}</cyan> -"
+            "<level>{message}</level>"
+        )
+        logger.add(
+            f"logs/log_{clientProfile}_{time.time()}.log",
+            rotation= "1 day",
+            level = "INFO",
+            format = log_format,
+            encoding= 'utf-8',
+            retention= "3 day"
+        )
+
+        #Room Handling setup
         with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
             data = json.load(roomsHandler)
             self.clientRoomsFile = data['rooms']
