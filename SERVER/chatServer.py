@@ -22,14 +22,16 @@ class ChatServer:
     '''Initialize'''
     def __init__(self):        
         self.timeout = 40
-        self.pingFrequency = 25
-
-        #For testing Purpose it's low, increase in future
+        self.pingFrequency = 25        
         self.fileIOFrequency = 30
+
+        self.host = "localhost"
+        self.port = 8765
+
         self.disconnectionPending = asyncio.Queue()
 
     async def start(self) -> None:
-        async with websockets.serve(self.handleClient, "localhost", 8765):
+        async with websockets.serve(self.handleClient, self.host, self.port):            
             print("CHAT SERVER ACTIVE & LISTENING")
 
             asyncio.create_task(self.Disconnect())
