@@ -32,6 +32,7 @@ class ChatServer:
 
     async def start(self) -> None:
         async with websockets.serve(self.handleClient, self.host, self.port):            
+            state.log(f"Chat Server Active & Listening at {self.host}:{self.port}")
             print("CHAT SERVER ACTIVE & LISTENING")
 
             asyncio.create_task(self.Disconnect())
@@ -53,6 +54,7 @@ class ChatServer:
     async def receive(self, clientSock: websockets.ClientConnection) -> None:
         async for dataReceived in clientSock:   
             response = json.loads(dataReceived)
+            state.log(f"Received Data: {response}")
 
             '''Payload is json dumped message'''
             destination, payload = response_handler.parse_response(clientSock, response)
@@ -70,6 +72,8 @@ class ChatServer:
     async def broadcast(self, clientSock:websockets.ClientConnection, payload:str, destination:str) -> None:
         #Obtain list of Receivers
         receivingClients = routing.parse_destination(clientSock, destination)
+
+        state.log(f"Sending data -{payload} to -{receivingClients}")
 
         #Send to receiving clients
         if(receivingClients):
@@ -137,8 +141,8 @@ class ChatServer:
         while True:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
-            if(leavingClient):  
-                
+            if(leavingClient):                 
+
                 #Remove Client from Rooms
                 if(leavingClient in state.sock_rooms):
                     for room in state.sock_rooms[leavingClient]:
@@ -152,6 +156,8 @@ class ChatServer:
 
                 state.timeout.pop(leavingClient)                
                 username = state.uuid_user(uuid)
+
+                state.log(f"UUID {uuid} disconnected")
                 
                 #Broadcast others that User is Offline                
                 payload = json.dumps({"command": state.system_codes['user_exit'], "content": [username], "type":"sys"})                
@@ -166,7 +172,7 @@ class ChatServer:
     '''Handle File I/O'''
     async def fileHandle(self) -> None:
         while True:  
-            
+            state.log("Server Files Reupdated")
             #Open and store data to each file
             with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
                 json.dump(state.accountsFile, accountHandle)         

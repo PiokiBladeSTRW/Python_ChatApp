@@ -14,8 +14,10 @@ def connect(clientSock:object, response:dict) -> tuple:
     user_uuid = response['sender']
 
     if(user_uuid in state.uuid_sock):
+        state.log(f"User Relogging: {user_uuid}")
         return ('*', '/relog')
 
+    state.log(f"User Joined: {user_uuid}")
     state.uuid_sock[user_uuid] = clientSock
     state.sock_uuid[clientSock] = user_uuid
     state.sock_rooms[clientSock] = []
