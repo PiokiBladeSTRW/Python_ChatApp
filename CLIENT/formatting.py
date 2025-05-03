@@ -25,7 +25,7 @@ def format(data:tuple, tags:tuple) -> str:
             case 'A': wrap = ('<', '>')
             case 'S': wrap = ('[', ']')
     
-    # Prepare final message from bits
+    # Prepare final message from bits    
     final_msg = ' '.join(msg_bits)
     if(wrap): final_msg = f"{wrap[0]} {final_msg} {wrap[1]}"
 

@@ -79,7 +79,7 @@ def room(args:list, state:object) -> tuple:
         case "invite": data = room_cmd.invite_user(args[1], state)
         case "admin": data = room_cmd.admin_user(args[1], state)
         case _: return errors.error_handle("Invalid Command!", state)
-  
+
     return data
 
 
@@ -104,7 +104,8 @@ def parse_command(input_cmd:str, state:object) -> tuple:
         cmd, args = parts[0], parts[1::]
     
     # Execute Command
-    if cmd in commands:        
+    if cmd in commands: 
+        state.log(f"Running Command: {cmd}")       
         data = commands[cmd](args, state)
         return data
     

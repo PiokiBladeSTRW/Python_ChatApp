@@ -133,6 +133,8 @@ class ClientState:
         self.receiver = receiver
         
         if(receiver==''): receiver = 'No One'
+
+        self.log(f"Changed Receiver to {receiver}")
         
         if(receiver.startswith('/r')):
             print('', "="*25, f"Now Chatting in {receiver[2::]}", "="*25, sep='\n')

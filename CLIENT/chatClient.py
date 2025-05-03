@@ -3,12 +3,10 @@ import json
 import asyncio
 import websockets
 import argparse
-#import logging
 
 import auth
 import commands.command_handler as command_handler
 import interface
-#import logging_setup
 from session_state import ClientState
 
 '''
@@ -23,9 +21,7 @@ Acitivities:
 '''
 class ChatClient:    
     def __init__(self, clientProfile, user_uuid):
-        self.state = ClientState(clientProfile)        
-        #logger = logging_setup.setup_log()
-
+        self.state = ClientState(clientProfile)       
         self.state.clientUUID= user_uuid
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
@@ -36,7 +32,7 @@ class ChatClient:
         async with websockets.connect(self.serverAddress) as clientSocket:   
             await clientSocket.send(json.dumps({"sender": self.state.clientUUID, "type":"con"}))
 
-            self.state.log("CONNECTED TO CLIENT")
+            self.state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")
 
             self.state.clientSock = clientSocket      
             asyncio.create_task(self.fileHandle())
@@ -50,6 +46,7 @@ class ChatClient:
     async def message(self) -> None:
         while True:
             msgInput = await asyncio.to_thread(input)
+            self.state.log(f"Entered Message: {msgInput}")
 
             if(command_handler.is_command(msgInput)):
                 action, payload, self.state = command_handler.parse_command(msgInput, self.state)
@@ -78,6 +75,7 @@ class ChatClient:
         try:
             async for dataReceived in self.state.clientSock:
                 response = json.loads(dataReceived)
+                self.state.log(f"Received from Server: {response}")
 
                 self.state = interface.parse_response(response, self.state) 
                 
@@ -89,6 +87,7 @@ class ChatClient:
     async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
         '''Payload : ( Message, Type )'''
         try: 
+            self.state.log(f"Sending Payload: {payload}")
             await self.state.clientSock.send(self.state.encode(payload))
 
         except websockets.ConnectionClosedError:
@@ -100,16 +99,19 @@ class ChatClient:
          
     async def heartbeat(self) -> None:
         while True:
+            self.state.log("HeartBeat prompted")
             await self.sendPayload( ('', self.state.msgTypes['heartbeat']) )
             await asyncio.sleep(self.heartbeatPing)
     
-    async def closeClient(self) -> None:        
+    async def closeClient(self) -> None:
+        self.state.log("Program Exited")     
         await self.state.clientSock.close()
         for task in asyncio.all_tasks():
             task.cancel()
             return
 
     async def closeServer(self) -> None:
+        self.state.log("Server Down")
         print("SERVER DOWN!")
         await self.closeClient()
         return
@@ -121,7 +123,7 @@ class ChatClient:
     '''Handle File I/O'''
     async def fileHandle(self) -> None:
         while True:   
-            
+            self.state.log("Client Files Reupdated")
             #Open and store data to each file
             with open(f"rooms/{self.clientProfile}.json", 'w') as roomHandle:
                 json.dump({"rooms": list(self.state.clientRoomsFile)}, roomHandle)
@@ -131,13 +133,13 @@ class ChatClient:
 
 
 '''ENTRY POINT FOR CLIENT SETUP'''
-async def eventLoop():
+async def eventLoop():    
     user_uuid = auth.start_auth()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--profile', type=str, required=True)
     args = parser.parse_args()
-
+    
     client = ChatClient(args.profile, user_uuid)
 
     try:
