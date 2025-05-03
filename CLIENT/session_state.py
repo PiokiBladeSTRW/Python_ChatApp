@@ -6,15 +6,13 @@ import json
 from loguru import logger
 
 class ClientState:
-    def __init__(self, clientProfile):
+    def __init__(self):
         self.clientUUID = ''
         self.receiver = ''
         self.pReceiver = ''
         self.clientSock = None
+        self.clientRoomsFile = []
 
-        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
-            data = json.load(roomsHandler)
-            self.clientRoomsFile = data['rooms']
 
         logger.remove()
         log_format = (
@@ -90,6 +88,13 @@ class ClientState:
             'room_admin' : 7
         }
 
+
+    '''Fetches Client side List of Rooms for Less data Transfer'''
+    def enable_roomHandler(self, clientProfile):
+        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
+            data = json.load(roomsHandler)
+            self.clientRoomsFile = data['rooms']
+
     '''Encode the data'''
     def encode(self, payload:tuple):
 
@@ -145,3 +150,5 @@ class ClientState:
     '''Log Something'''
     def log(self, msg):
         logger.opt(depth=1).info(msg)
+
+state = ClientState()
