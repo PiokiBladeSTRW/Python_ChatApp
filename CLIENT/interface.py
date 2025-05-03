@@ -7,7 +7,7 @@ import time
 from session_state import state
 
 '''Handle Default Messages'''
-def incoming_message(response:dict) -> object:
+def incoming_message(response:dict):
     def dms(): 
         data = (response['timestamp'], response['sender'], response['content'])
 
@@ -40,21 +40,22 @@ def incoming_message(response:dict) -> object:
         dms()
 
 '''Handle User Loggings'''
-def online_user(response:dict) -> object:
+def online_user(response:dict):
     data = ('', response['sender'], "is ONLINE")
 
     # OUTPUT : [Sender 'is Online'
     print(formatting.format(data, ('s', 'c', 'S')))
 
 '''Handle System Messages'''
-def system(response:dict) -> object:  
+def system(response:dict):  
     '''Only Module where response['content'] is not guranteed'''
     
     # Guard Clause  (if not a command)
     if(not response['command']):
         data = ('', '{System}', response['content']) 
 
-        print(formatting.format(data, ('s', 'cl', 'c')))            
+        print(formatting.format(data, ('s', 'cl', 'c')))           
+        return 
     
 
     ''' Handle Different Types of Sys Commands. More Dynamic (& confusing) than other modules'''
@@ -99,8 +100,7 @@ def system(response:dict) -> object:
 
 
 '''Handle Responses'''
-def parse_response(response:dict) -> object: 
-    print(response)
+def parse_response(response:dict): 
     # For future purpose of Storing in DB
     if(not response.get('timestamp')): response['timestamp'] = time.time()
 

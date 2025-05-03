@@ -32,7 +32,7 @@ def connect(clientSock:object, response:dict) -> tuple:
 def handle_messages(clientSock:object, response:dict) -> tuple: 
     # Seperately Handle Room and Normal Messages
     if(response['receiver'].startswith('/r')):
-        return message_handle.room_handle(clientSock, response)    
+        return message_handle.room_handle(response)    
     else:
         return message_handle.dm_handle(response) 
 
