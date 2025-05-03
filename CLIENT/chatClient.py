@@ -140,6 +140,8 @@ async def eventLoop():
     parser = argparse.ArgumentParser()
     parser.add_argument('--profile', type=str, required=True)
     args = parser.parse_args()
+
+    state.log(f"Event Loop started w/ Profile {args.profile} and UUID {user_uuid}")
     
     client = ChatClient(args.profile, user_uuid)
 
