@@ -2,6 +2,7 @@
 
 #Header
 import json
+from loguru import logger
 
 class ServerState:
     def __init__(self):
@@ -23,6 +24,21 @@ class ServerState:
 
         for room in self.roomsFile:
             self.room_socks[room] = []
+
+        logger.remove()
+        log_format = (
+            "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
+            "<level>{level: <8}</level> |"
+            "<cyan>{module}</cyan> : <cyan>{function}</cyan> -"
+            "<level>{message}</level>"
+        )
+        logger.add(
+            "logs/log_{time}.log",
+            rotation= "1 day",
+            level = "INFO",
+            format = log_format,
+            encoding= 'utf-8'
+        )
 
         '''Codes for System Messages. 'er' prefix for Errors'''
         self.system_codes ={            
@@ -58,5 +74,8 @@ class ServerState:
 
     def uuid_user(self, uuid):
         return self.accountsFile[uuid]['username']
+    
+    def log(self, msg):
+        logger.opt(depth=1).info(msg)
     
 state = ServerState()
