@@ -4,38 +4,39 @@ Functions to be Utilized for Room Subcommands.
 '''
 
 #Header
+from session_state import state
 import commands.error_handle as errors
 
 '''----------------------------------------------'''
 
 '''Join a Room'''
-def join_room(room_name:str, state:object) -> tuple:    
+def join_room(room_name:str) -> tuple:    
     state.receiver_change('/r'+room_name)
     payload = ((state.client_codes['room_join'], room_name), state.msgTypes['system'])
-    return ('send', payload, state)    
+    return ('send', payload)    
 
 '''Create a Room'''
-def create_room(room_name:str, state:object) -> tuple: 
-    if(room_name in state.clientRoomsFile): return errors.error_handle("Room Already Exists", state)
+def create_room(room_name:str) -> tuple: 
+    if(room_name in state.clientRoomsFile): return errors.error_handle("Room Already Exists")
 
     state.clientRoomsFile.append(room_name)
 
     state.receiver_change('/r'+room_name)                
     payload = ((state.client_codes['room_create'], room_name), state.msgTypes['system'])
-    return ('send', payload, state)
+    return ('send', payload)
 
 '''Invite user to Room'''
-def invite_user(username:str, state:object) -> tuple:    
-    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room", state)
+def invite_user(username:str) -> tuple:    
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
 
     room = state.receiver[2::]
     payload = ((state.client_codes['room_invite'],  (room,username)), state.msgTypes['system'])
-    return ('send', payload, state)
+    return ('send', payload)
 
 '''Make user an Admin'''
-def admin_user(username:str, state:object) -> tuple:
-    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room", state)
+def admin_user(username:str) -> tuple:
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
 
     room = state.receiver[2::]
     payload = ((state.client_codes['room_admin'], (room,username)), state.msgTypes['system'])
-    return ('send', payload, state)
+    return ('send', payload)

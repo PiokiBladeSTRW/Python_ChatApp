@@ -26,7 +26,7 @@ def login() -> str:
 
     return False
 
-def register(): 
+def register() -> str: 
     '''Takes credentials as Input from user and sends request to server to create an account
     Returns: uuid if Succesful ; False if server denies request'''
     
@@ -64,7 +64,7 @@ def register():
 
  
 '''Start the Process by determining New or Old account'''
-def start_auth() -> dict:
+def start_auth() -> str:
     ch = input("0: Login to Account\n1: Register an Account\n>")
 
     while True:       

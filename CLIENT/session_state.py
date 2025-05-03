@@ -6,30 +6,14 @@ import json
 from loguru import logger
 
 class ClientState:
-    def __init__(self, clientProfile):
+    def __init__(self):
         self.clientUUID = ''
         self.receiver = ''
         self.pReceiver = ''
         self.clientSock = None
-
-        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
-            data = json.load(roomsHandler)
-            self.clientRoomsFile = data['rooms']
+        self.clientRoomsFile = []
 
         logger.remove()
-        log_format = (
-            "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
-            "<level>{level: <8}</level> |"
-            "<cyan>{module}</cyan> : <cyan>{function}</cyan> -"
-            "<level>{message}</level>"
-        )
-        logger.add(
-            "logs/log_{time}.log",
-            rotation= "1 day",
-            level = "INFO",
-            format = log_format,
-            encoding= 'utf-8'
-        )
         
 
         self.msgTypes= {
@@ -90,6 +74,30 @@ class ClientState:
             'room_admin' : 7
         }
 
+
+    '''Tasks that requires clientProfile'''
+    def profileBased(self, clientProfile):
+        #Log Setup
+        log_format = (
+            "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
+            "<level>{level: <8}</level> |"
+            "<cyan>{module}</cyan> : <cyan>{function}</cyan> -"
+            "<level>{message}</level>"
+        )
+        logger.add(
+            f"logs/log_{clientProfile}_{time.time()}.log",
+            rotation= "1 day",
+            level = "INFO",
+            format = log_format,
+            encoding= 'utf-8',
+            retention= "3 day"
+        )
+
+        #Room Handling setup
+        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
+            data = json.load(roomsHandler)
+            self.clientRoomsFile = data['rooms']
+
     '''Encode the data'''
     def encode(self, payload:tuple):
 
@@ -145,3 +153,5 @@ class ClientState:
     '''Log Something'''
     def log(self, msg):
         logger.opt(depth=1).info(msg)
+
+state = ClientState()

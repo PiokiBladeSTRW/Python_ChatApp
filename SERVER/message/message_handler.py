@@ -7,27 +7,25 @@ errors = CatchError()
 
 '''----------------------------------------------'''
 
-def room_handle(clientSock:object, response:dict) -> tuple:
+def room_handle(response:dict) -> tuple:
     room = response['receiver'][2::]
-    possible_errors = {
-        "er_Not_room_member": (not(clientSock in state.room_socks[room] or clientSock in state.roomsFile[room]['invites']), None)
-    }
-    data = errors.multiple_error_handle(possible_errors, state)
-    if(data): return data[0]
-
-    response.pop('receiver')
+    response.pop('receiver')    
     response['sender'] = (room, state.uuid_user(response['sender']))
+    
     return (f'/r{room}', json.dumps(response))
 
 '''----------------------------------------------'''
 
 
-def dm_handle(response:dict) -> tuple:
+def dm_handle(response:dict) -> tuple: 
 
-    #Ensure receiving username is valid
-    if(state.uuidsFile[response['receiver']] not in state.uuid_sock):
-        return ('/s', json.dumps({"command": state.system_codes['user_exit'], "content": response['receiver'],
-                                "type":'sys'}))
+    # Handle Errors
+    possible_errors = {
+        'er_Invalid_user':  (response['receiver'] not in state.uuidsFile, None),
+        'user_exit':        (state.uuidsFile.get(response['receiver']) not in state.uuid_sock, [response['receiver']])
+    }
+    
+    if(data := errors.multiple_error_handle(possible_errors)): return data
 
     #Sender: UUID->USERNAME  ; Receiver: USERNAME->UUID
     response['sender'] = state.uuid_user(response['sender'])    

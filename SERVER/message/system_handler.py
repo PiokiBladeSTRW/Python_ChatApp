@@ -23,7 +23,7 @@ def encode_payload(content=None, command:int=None, sender: str = None) -> str:
     return json.dumps(data)
 
 def modify_room(room:str, operation: tuple, clientSock:object =None, uuid:str =None ) -> None:
-    '''Types of Operation: (CREATE, N_JOIN, JOIN, INVITE, R_INVITE, ADMIN)
+    '''Types of Operation: (CREATE, N_JOIN, INVITE, R_INVITE, ADMIN)
     clientSock: Person using Command ;  uuid: Person on receiving End of Command'''
 
     # Ran By Person Creating Server
@@ -37,12 +37,7 @@ def modify_room(room:str, operation: tuple, clientSock:object =None, uuid:str =N
         state.sock_rooms[clientSock].append(room)       
 
         state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
-        state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)
-    
-    # Ran by Person joining Server
-    if('JOIN' in operation):
-        state.room_socks[room].append(clientSock)
-        state.sock_rooms[clientSock].append(room)       
+        state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room)      
     
     # Ran by Admin Targetted to Invitee
     if('INVITE' in operation):
@@ -96,8 +91,7 @@ def room_join(clientSock:object, response:dict) -> tuple:
         modify_room(room, ('N_JOIN', 'R_INVITE'), clientSock)    
         return (f'/r{room}', 
             encode_payload( [state.uuid_user(response['sender'])], state.system_codes['new_room_member'], f'/r{room}'))
-    else:
-        modify_room(room, ('JOIN'),  clientSock)  
+    else:         
         return ('*', None)  
 
 
