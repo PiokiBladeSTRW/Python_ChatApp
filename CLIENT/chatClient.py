@@ -99,8 +99,7 @@ class ChatClient:
 
          
     async def heartbeat(self) -> None:
-        while True:
-            state.log("HeartBeat prompted")
+        while True:            
             await self.sendPayload( ('', state.msgTypes['heartbeat']) )
             await asyncio.sleep(self.heartbeatPing)
     
