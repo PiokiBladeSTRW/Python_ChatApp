@@ -37,7 +37,8 @@ class ServerState:
             rotation= "1 day",
             level = "INFO",
             format = log_format,
-            encoding= 'utf-8'
+            encoding= 'utf-8',
+            retention= "3 day"
         )
 
         '''Codes for System Messages. 'er' prefix for Errors'''

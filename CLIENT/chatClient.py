@@ -47,8 +47,7 @@ class ChatClient:
     async def message(self) -> None:
         while True:
             msgInput = await asyncio.to_thread(input)
-            state.log(f"Entered Message: {msgInput}")
-
+            
             if(command_handler.is_command(msgInput)):
                 action, payload = command_handler.parse_command(msgInput)
                 '''Action: send, exit, None
@@ -76,7 +75,7 @@ class ChatClient:
         try:
             async for dataReceived in state.clientSock:
                 response = json.loads(dataReceived)
-                state.log(f"Received from Server: {response}")
+                state.log(f"Received from Server: {response} \n")
 
                 interface.parse_response(response) 
                 
@@ -88,7 +87,7 @@ class ChatClient:
     async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
         '''Payload : ( Message, Type )'''
         try: 
-            state.log(f"Sending Payload: {payload}")
+            state.log(f"Sending Payload: {payload} \n")
             await state.clientSock.send(state.encode(payload))
 
         except websockets.ConnectionClosedError:

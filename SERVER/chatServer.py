@@ -54,7 +54,8 @@ class ChatServer:
     async def receive(self, clientSock: websockets.ClientConnection) -> None:
         async for dataReceived in clientSock:   
             response = json.loads(dataReceived)
-            state.log(f"Received Data: {response}")
+
+            state.log(f"Received Data: {response} \n")
 
             '''Payload is json dumped message'''
             destination, payload = response_handler.parse_response(clientSock, response)
@@ -71,7 +72,7 @@ class ChatServer:
 
     async def broadcast(self, clientSock:websockets.ClientConnection, payload:str, destination:str) -> None:
         
-        state.log(f"Sending data -{payload} to -{destination}")
+        state.log(f"Sending data {payload} to {destination} \n")
 
         #Obtain list of Receivers
         receivingClients = routing.parse_destination(clientSock, destination)
