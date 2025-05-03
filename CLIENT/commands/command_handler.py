@@ -11,6 +11,7 @@ Commands and Actions
     /b                      : Backtracks Receiver to Swap
 '''
 # Header
+from session_state import state
 import commands.room_cmd as room_cmd
 import commands.error_handle as errors
 
@@ -19,67 +20,67 @@ import commands.error_handle as errors
 
 
 '''Handle DMS'''
-def handle_dm(args:list, state:object) -> tuple:  
+def handle_dm(args:list) -> tuple:  
 
-    if(len(args)<2): return errors.error_handle("Invalid Arguments!", state)
+    if(len(args)<2): return errors.error_handle("Invalid Arguments!")
 
     '''Args[0]= Username, Args[1::]= Message''' 
     state.receiver_change(args[0])
     payload = (' '.join(args[1::]), state.msgTypes['message'])
-    return ('send', payload, state)
+    return ('send', payload)
 
 '''========================== type : sys'''
    
 
 '''List of every Online Client'''
-def online_list(args:list, state:object) -> tuple: 
+def online_list(args:list) -> tuple: 
     payload = ((state.client_codes['online_list'], ''), state.msgTypes['system'])    
-    return ('send', payload, state)
+    return ('send', payload)
 
 '''List of every Online Room'''    
-def rooms_list(args:list, state:object) -> tuple: 
+def rooms_list(args:list) -> tuple: 
     payload = ((state.client_codes['rooms_list'], ''), state.msgTypes['system'])
-    return ('send', payload, state)
+    return ('send', payload)
 
 '''Exit Program'''
-def close(args:list, state:object) -> tuple: 
-    return ('exit', None, state)
+def close(args:list) -> tuple: 
+    return ('exit', None)
 
 
 '''========================== type : none'''
 
 
 '''Reset Receiver'''
-def reset_rec(args:list, state:object) -> tuple: 
+def reset_rec(args:list) -> tuple: 
     state.receiver_change('')
-    return (None, None, state)
+    return (None, None)
     
 '''Backtrack Receiver'''
-def back_rec(args:list, state:object) -> tuple: 
+def back_rec(args:list) -> tuple: 
     state.receiver_change(state.pReceiver)
-    return (None, None, state)
+    return (None, None)
 
 '''Display Help'''
-def chat_help(args:list, state:object) -> tuple:
+def chat_help(args:list) -> tuple:
     import help
-    return (None, None, state)
+    return (None, None)
 
 
 '''========================== type : depends'''
 
 
 '''Room Related Commands'''
-def room(args:list, state:object) -> tuple: 
+def room(args:list) -> tuple: 
 
-    if(len(args)<2): return errors.error_handle("Invalid Arguments!", state)
+    if(len(args)<2): return errors.error_handle("Invalid Arguments!")
 
     match args[0]:
-        case "join": data = room_cmd.join_room(args[1], state)
-        case "create": data = room_cmd.create_room(args[1], state)
-        case "invite": data = room_cmd.invite_user(args[1], state)
-        case "admin": data = room_cmd.admin_user(args[1], state)
-        case _: return errors.error_handle("Invalid Command!", state)
-  
+        case "join": data = room_cmd.join_room(args[1])
+        case "create": data = room_cmd.create_room(args[1])
+        case "invite": data = room_cmd.invite_user(args[1])
+        case "admin": data = room_cmd.admin_user(args[1])
+        case _: return errors.error_handle("Invalid Command!")
+
     return data
 
 
@@ -93,7 +94,7 @@ def is_command(msg:str):
     return False
 
 '''Match Command to Function'''
-def parse_command(input_cmd:str, state:object) -> tuple:    
+def parse_command(input_cmd:str) -> tuple:    
     parts = input_cmd.split()    
 
     # Check if the command has arguments
@@ -104,11 +105,12 @@ def parse_command(input_cmd:str, state:object) -> tuple:
         cmd, args = parts[0], parts[1::]
     
     # Execute Command
-    if cmd in commands:        
-        data = commands[cmd](args, state)
+    if cmd in commands: 
+        state.log(f"Running Command: {cmd}")       
+        data = commands[cmd](args)
         return data
     
-    return errors.error_handle("Invalid Command!", state)
+    return errors.error_handle("Invalid Command!")
     
 
 '''Convert Command to Function call in One Step'''
@@ -128,10 +130,9 @@ commands = {
 
 
 '''
-Return Type: (ACTION, PAYLOAD, STATE)
+Return Type: (ACTION, PAYLOAD)
 ACTION : Describes action to do with the returned Payload
 PAYLOAD: Returned Data
-STATE  : Updates Class Variables of Clients.
 
 ACTION ->   'send': Send Payload to server with pending encoding
             'exit': Special Handling Disconnection

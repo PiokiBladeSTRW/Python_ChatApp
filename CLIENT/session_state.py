@@ -3,17 +3,32 @@
 # Header
 import time
 import json
+from loguru import logger
 
 class ClientState:
-    def __init__(self, clientProfile):
+    def __init__(self):
         self.clientUUID = ''
         self.receiver = ''
         self.pReceiver = ''
         self.clientSock = None
+        self.clientRoomsFile = []
 
-        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
-            data = json.load(roomsHandler)
-            self.clientRoomsFile = data['rooms']
+
+        logger.remove()
+        log_format = (
+            "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
+            "<level>{level: <8}</level> |"
+            "<cyan>{module}</cyan> : <cyan>{function}</cyan> -"
+            "<level>{message}</level>"
+        )
+        logger.add(
+            "logs/log_{time}.log",
+            rotation= "1 day",
+            level = "INFO",
+            format = log_format,
+            encoding= 'utf-8'
+        )
+        
 
         self.msgTypes= {
             "message": "msg",            
@@ -73,6 +88,13 @@ class ClientState:
             'room_admin' : 7
         }
 
+
+    '''Fetches Client side List of Rooms for Less data Transfer'''
+    def enable_roomHandler(self, clientProfile):
+        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
+            data = json.load(roomsHandler)
+            self.clientRoomsFile = data['rooms']
+
     '''Encode the data'''
     def encode(self, payload:tuple):
 
@@ -116,9 +138,17 @@ class ClientState:
         self.receiver = receiver
         
         if(receiver==''): receiver = 'No One'
+
+        self.log(f"Changed Receiver to {receiver}")
         
         if(receiver.startswith('/r')):
             print('', "="*25, f"Now Chatting in {receiver[2::]}", "="*25, sep='\n')
             return
 
         print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
+
+    '''Log Something'''
+    def log(self, msg):
+        logger.opt(depth=1).info(msg)
+
+state = ClientState()

@@ -60,7 +60,7 @@ class ChatServer:
                 match payload:
                     case '/exit': await self.disconnectionPending.put(clientSock)
                     case '/hbp': state.timeout[clientSock] = time.time()
-                    case '/relog': await self.relog(state.uuidsFile[response['content']['username']], clientSock)
+                    case '/relog': await self.relog(payload['sender'], clientSock)
                 continue
             
             await self.broadcast(clientSock, payload, destination)
