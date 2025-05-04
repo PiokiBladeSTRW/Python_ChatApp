@@ -63,6 +63,8 @@ class ClientState:
             209 : "The room doesn't exist"
         }
         self.sys_format = (101,104,105,106,107)
+        self.receiver_change_codes = (101,)
+        self.receiver_force_change_codes = (204, 205)
 
         self.client_codes ={
             'user_exit': 1,

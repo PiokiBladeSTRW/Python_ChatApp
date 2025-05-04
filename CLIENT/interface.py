@@ -74,25 +74,25 @@ def system(response:dict):
         if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
         data = ('', f"[{args[0]}] {{System}}", disp_msg)
+        print(formatting.format(data, ('s', 'cl', 'c')))
+        return
     
-    else:
-        if(args:=response.get('content')): args = list(args)        
-        disp_msg = state.sys_code_msg[response['command']]
 
-        if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
+    '''Normal System Prompts'''
+    
+    if(response.get('content')): args = list(response.get('content'))        
+    disp_msg = state.sys_code_msg[response['command']]
 
-        # Change Receiver if currently in contact or by force (Excuse these magic values)
-        receiver_change= (101,)
-        receiver_change_force = (204, 205)
+    if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
-        if(response['command'] in receiver_change and state.receiver== args[0]):
-            state.receiver_change('')
-        
-        elif(response['command'] in receiver_change_force):
-            state.receiver_change('')
+    # Change Receiver if currently in contact or by force 
+    if(response['command'] in state.receiver_change_codes and state.receiver == args[0]):
+        state.receiver_change('')
+    
+    elif(response['command'] in state.receiver_change_codes):
+        state.receiver_change('')
 
-        data = ('', "{System}", disp_msg)
-
+    data = ('', "{System}", disp_msg)
     print(formatting.format(data, ('s', 'cl', 'c')))
     
 
