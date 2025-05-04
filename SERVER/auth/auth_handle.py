@@ -6,9 +6,8 @@ import uuid
 from server_state import state
 
 
-def login(credentials: object): 
+def login(credentials: object) -> dict: 
     '''Verify the credentials sent are Valid'''
-
     if(credentials.username in state.uuidsFile):
         #Hash password
         user_uuid = state.uuidsFile[credentials.username]
@@ -20,14 +19,14 @@ def login(credentials: object):
         if(passwd == state.accountsFile[user_uuid]['passwd']):  
             return {"sender_id": user_uuid}
         
-    return False
+    return {"content": "Invalid Username or Password"}
 
-def register(credentials: object): 
+def register(credentials: object) -> dict: 
     '''Create an account with given credentials if username isn't conflicting'''
     
     #Ensure Username Doesn't Exist Already
     if(credentials.username in state.uuidsFile):        
-        return False
+        return {"content": "The Username is Taken"}
 
     #Secure the Data   
     salt = secrets.token_hex(16)

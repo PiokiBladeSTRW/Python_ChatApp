@@ -74,7 +74,8 @@ class ChatClient:
                 response = json.loads(dataReceived)
                 state.log(f"Received from Server: {response} \n")
 
-                interface.parse_response(response) 
+                task = interface.parse_response(response) 
+                if(task=='kick'): await self.closeClient()
                 
                 print()
 

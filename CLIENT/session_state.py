@@ -31,6 +31,8 @@ class ClientState:
             "room_live": 105,
             "room_invite": 106,
             "member_admin": 107,
+            "account_risk": 108,
+            "session_active": 109,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -51,6 +53,8 @@ class ClientState:
             105 : "Room {0} is Live",
             106 : "{0} has sent an invitation",
             107 : "Made {1} an Admin",
+            108 : "Your account is at Risk; Password Compromised",
+            109 : "The Session is still active, Try Again Later",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
@@ -65,6 +69,7 @@ class ClientState:
         self.sys_format = (101,104,105,106,107)
         self.receiver_change_codes = (101,)
         self.receiver_force_change_codes = (204, 205)
+        self.special_commands = (109,)
 
         self.client_codes ={
             'user_exit': 1,

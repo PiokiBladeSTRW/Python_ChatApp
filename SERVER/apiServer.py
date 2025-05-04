@@ -16,11 +16,11 @@ class authPayload(BaseModel):
     email: str = ''
 
 @chatApp.post('/login')
-def login(credentials: authPayload):
+def login(credentials: authPayload) -> dict:
     return auth_handle.login(credentials)    
 
 @chatApp.post('/register')
-def register(credentials: authPayload): 
+def register(credentials: authPayload) -> dict: 
     return auth_handle.register(credentials)
 
     

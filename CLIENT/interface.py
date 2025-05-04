@@ -59,6 +59,13 @@ def system(response:dict):
     
 
     ''' Handle Different Types of Sys Commands. More Dynamic (& confusing) than other modules'''
+    #Special Commands
+    if(response['command'] in state.special_commands):
+        
+        # Force Kick
+        if(response['command'] == state.system_codes['session_active']): 
+            print(formatting.format(('', '{System}', state.sys_code_msg[response['command']]), ('s', 'cl', 'c')))
+            return 'kick'
 
     # Room Based System Message
     if(response.get('sender')):
@@ -105,7 +112,7 @@ def parse_response(response:dict):
     if(not response.get('timestamp')): response['timestamp'] = time.time()
 
     if(response['type'] in types):          
-        types[response['type']](response)        
+        return types[response['type']](response)        
     else:                
         raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")
     

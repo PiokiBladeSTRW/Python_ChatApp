@@ -50,6 +50,8 @@ class ServerState:
             "room_live": 105,
             "room_invite": 106,
             "member_admin": 107,
+            "account_risk": 108,
+            "session_active": 109,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
