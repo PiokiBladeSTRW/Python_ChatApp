@@ -67,9 +67,14 @@ def start_auth() -> str:
         else: 
             ch = input("0: Login to Account\n1: Register an Account\n>")
             continue
+        
+        # Client Side Fail
+        if(not authRes): continue
 
+        # Succesful Log-In
         if(authRes.get('sender_id')):        
             return authRes['sender_id']
 
+        # Server Side Fail
         print(authRes['content'])
         continue
