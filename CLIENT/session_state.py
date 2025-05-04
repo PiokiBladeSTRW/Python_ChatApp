@@ -69,6 +69,7 @@ class ClientState:
         self.sys_format = (101,104,105,106,107)
         self.receiver_change_codes = (101,)
         self.receiver_force_change_codes = (204, 205)
+        self.special_commands = (109,)
 
         self.client_codes ={
             'user_exit': 1,

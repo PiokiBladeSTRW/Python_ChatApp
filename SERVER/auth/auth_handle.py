@@ -8,7 +8,6 @@ from server_state import state
 
 def login(credentials: object) -> dict: 
     '''Verify the credentials sent are Valid'''
-
     if(credentials.username in state.uuidsFile):
         #Hash password
         user_uuid = state.uuidsFile[credentials.username]

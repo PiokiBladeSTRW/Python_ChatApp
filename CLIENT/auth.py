@@ -64,7 +64,9 @@ def start_auth() -> str:
     while True:       
         if (ch == '0'): authRes = login()
         elif (ch == '1'): authRes = register()
-        else: continue
+        else: 
+            ch = input("0: Login to Account\n1: Register an Account\n>")
+            continue
 
         if(authRes.get('sender_id')):        
             return authRes['sender_id']

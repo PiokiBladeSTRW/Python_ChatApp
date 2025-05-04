@@ -55,7 +55,7 @@ class ChatServer:
         async for dataReceived in clientSock:   
             response = json.loads(dataReceived)
 
-            state.log(f"Received Data: {response} \n")
+            state.log(f"{clientSock} Received Data: {response} \n")
 
             '''Payload is json dumped message'''
             destination, payload = response_handler.parse_response(clientSock, response)
@@ -118,7 +118,8 @@ class ChatServer:
         oldClientSock = state.uuid_sock[uuid] 
 
         try:    
-            await oldClientSock.send(json.dumps({"command": state.system_codes['account_risk'], "type":"sys"}))         
+            await oldClientSock.send(json.dumps({"command": state.system_codes['account_risk'], "type":"sys"}))
+
         except websockets.exceptions.ConnectionClosed:  
             pass
         else:
@@ -127,7 +128,6 @@ class ChatServer:
 
         #So User knows to wait while they Relog
         await self.send(clientSock, json.dumps({"command": state.system_codes['relog_begin'], "type":"sys"}))
-
         await self.disconnectionPending.put(oldClientSock)  
 
         #Once Disconnect Finishes        
@@ -154,7 +154,8 @@ class ChatServer:
         while True:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
-            if(leavingClient):     
+            if(leavingClient):   
+                state.log(f"SOCK UUID: {state.sock_uuid}")  
                 state.log(f"UUID {state.sock_uuid[leavingClient]} disconnected")   
 
                 #Remove Client from Rooms
