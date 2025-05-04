@@ -21,10 +21,7 @@ def login() -> str:
     content = {"username": username, "password": password}
     authRes = requests.post("http://127.0.0.1:8000/login", json=content).json() 
 
-    if(authRes.get('sender_id')):        
-        return authRes['sender_id']
-
-    return authRes['content']
+    return authRes
 
 def register() -> str: 
     '''Takes credentials as Input from user and sends request to server to create an account
@@ -54,10 +51,7 @@ def register() -> str:
     content = {"username": username, "password": password, "email": email}
     authRes = requests.post("http://127.0.0.1:8000/register", json=content).json() 
 
-    if(authRes.get('sender_id')):        
-        return authRes['sender_id']
-
-    return authRes['content']
+    return authRes
 
 
 '''-------------------------------------'''
@@ -68,12 +62,12 @@ def start_auth() -> str:
     ch = input("0: Login to Account\n1: Register an Account\n>")
 
     while True:       
-        if (ch == '0'): user_uuid = login()
-        elif (ch == '1'): user_uuid = register()
+        if (ch == '0'): authRes = login()
+        elif (ch == '1'): authRes = register()
         else: continue
 
-        if (not user_uuid): 
-            print("INVALID LOGIN")
-            continue
+        if(authRes.get('sender_id')):        
+            return authRes['sender_id']
 
-        return user_uuid
+        print(authRes['content'])
+        continue

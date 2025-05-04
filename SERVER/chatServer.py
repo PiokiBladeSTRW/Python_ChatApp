@@ -65,7 +65,7 @@ class ChatServer:
                 match payload:
                     case '/exit': await self.disconnectionPending.put(clientSock)
                     case '/hbp': state.timeout[clientSock] = time.time()
-                    case '/relog': await self.relog(payload['sender'], clientSock)
+                    case '/relog': await self.relog(response['sender'], clientSock)
                 continue
             
             await self.broadcast(clientSock, payload, destination)
@@ -94,7 +94,8 @@ class ChatServer:
     async def send(self, receiveClient:websockets.ClientConnection, payload:str) -> None:
         try:    
             await receiveClient.send(payload)                      
-        except websockets.exceptions.ConnectionClosed:       
+        except websockets.exceptions.ConnectionClosed:    
+            state.log(f"Disconenction Pending of {state.sock_uuid[receiveClient]}")   
             await self.disconnectionPending.put(receiveClient)
 
 
@@ -113,14 +114,24 @@ class ChatServer:
             await asyncio.sleep(self.pingFrequency)
 
     async def relog(self, uuid:str, clientSock: websockets.ClientConnection) -> None:
+        # Check if current user is offline
+        oldClientSock = state.uuid_sock[uuid] 
+
+        try:    
+            await oldClientSock.send(json.dumps({"command": state.system_codes['account_risk'], "type":"sys"}))         
+        except websockets.exceptions.ConnectionClosed:  
+            pass
+        else:
+            await clientSock.send(json.dumps({"command": state.system_codes['session_active'], "type": "sys"}))
+            return
+
         #So User knows to wait while they Relog
         await self.send(clientSock, json.dumps({"command": state.system_codes['relog_begin'], "type":"sys"}))
 
-        oldClientSock = state.uuid_sock[uuid]        
-        await self.disconnectionPending.put(oldClientSock)
+        await self.disconnectionPending.put(oldClientSock)  
 
-        #Once Disconnect Finishes
-        while oldClientSock not in state.sock_uuid:
+        #Once Disconnect Finishes        
+        while oldClientSock in state.sock_uuid:
             await asyncio.sleep(3)
 
         #Configure Client's new Socket    
@@ -134,7 +145,7 @@ class ChatServer:
 
         # Let user and others know
         username = state.accountsFile[uuid]['username']
-        await self.broadcast(clientSock, json.dumps({"sender":username, "type": "con"}), '/.')
+        await self.broadcast(clientSock, json.dumps({"sender":username,"type": "con" }), '/.')
 
         await self.send(clientSock, json.dumps({"command": state.system_codes['relog_finish'], "type": "sys"}))
         return
@@ -143,7 +154,8 @@ class ChatServer:
         while True:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
-            if(leavingClient):                 
+            if(leavingClient):     
+                state.log(f"UUID {state.sock_uuid[leavingClient]} disconnected")   
 
                 #Remove Client from Rooms
                 if(leavingClient in state.sock_rooms):
@@ -158,8 +170,6 @@ class ChatServer:
 
                 state.timeout.pop(leavingClient)                
                 username = state.uuid_user(uuid)
-
-                state.log(f"UUID {uuid} disconnected")
                 
                 #Broadcast others that User is Offline                
                 payload = json.dumps({"command": state.system_codes['user_exit'], "content": [username], "type":"sys"})                
