@@ -26,6 +26,7 @@ class ChatClient:
         self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"
         self.clientProfile = clientProfile
+        self.reconnecting = False
         asyncio.create_task(self.fileHandle())
         
     async def connectClient(self) -> None: 
@@ -33,7 +34,8 @@ class ChatClient:
             await clientSocket.send(json.dumps({"sender": state.clientUUID, "type":"con"}))
 
             state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")
-            state.clientSock = clientSocket   
+            state.clientSock = clientSocket         
+            self.reconnectTask = None      
 
             await asyncio.gather(self.message(), self.receive(),self.heartbeat())
 
@@ -43,7 +45,7 @@ class ChatClient:
 
     async def message(self) -> None:
         while True:
-            msgInput = await asyncio.to_thread(input)
+            msgInput = await asyncio.to_thread(input)            
             
             if(command_handler.is_command(msgInput)):
                 action, payload = command_handler.parse_command(msgInput)
@@ -79,9 +81,9 @@ class ChatClient:
                 
                 print()
 
-        except websockets.ConnectionClosedError:
-            await self.closeServer()
-            
+        except websockets.ConnectionClosedError:            
+            await self.reconnectServer()
+
     async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
         '''Payload : ( Message, Type )'''
         try: 
@@ -89,7 +91,7 @@ class ChatClient:
             await state.clientSock.send(state.encode(payload))
 
         except websockets.ConnectionClosedError:
-            await self.closeServer()
+            await self.reconnectServer()        
    
 
     '''------------------------------------------------'''
@@ -105,13 +107,22 @@ class ChatClient:
         await state.clientSock.close()
         for task in asyncio.all_tasks():
             task.cancel()
-            return
-
-    async def closeServer(self) -> None:
-        state.log("Server Down")
-        print("SERVER DOWN!")
-        await self.closeClient()
         return
+
+    async def reconnectServer(self) -> None:
+        state.log("Server Down")        
+
+        while True:
+            print("Trying to Connect to Server...")
+            try:
+                await self.connectClient()
+        
+            except asyncio.CancelledError:
+                return
+            
+            except ConnectionRefusedError:
+                await asyncio.sleep(3)
+                continue
    
 
     '''------------------------------------------------'''
@@ -146,10 +157,10 @@ async def eventLoop():
     try:
         requests.get("http://127.0.0.1:8000/")
         user_uuid = auth.start_auth()
-        
+
     except requests.exceptions.ConnectionError:
         state.log(f"API Server Failed; Reconnecting")
-        await asyncio.gather(reconnect(client))  
+        await reconnect(client)
         return
 
     state.log(f"UUID OBTAINED: {user_uuid}")
@@ -160,7 +171,7 @@ async def eventLoop():
     except asyncio.CancelledError:
         pass            
     except ConnectionRefusedError:
-        await asyncio.gather(reconnect(client, user_uuid))
+        await reconnect(client, user_uuid)
         state.log(f"Chat Server Failed; Reconnecting")
         return
 
