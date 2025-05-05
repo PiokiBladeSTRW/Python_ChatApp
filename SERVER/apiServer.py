@@ -23,7 +23,10 @@ def login(credentials: authPayload) -> dict:
 def register(credentials: authPayload) -> dict: 
     return auth_handle.register(credentials)
 
-    
+# Check for Server being online
+@chatApp.get("/")
+def online() -> bool:
+    return True
 
 #Entry point to server
 async def api_eventLoop():   

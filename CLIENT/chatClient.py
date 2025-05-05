@@ -3,6 +3,7 @@ import json
 import asyncio
 import websockets
 import argparse
+import requests
 
 import auth
 import commands.command_handler as command_handler
@@ -20,8 +21,7 @@ Acitivities:
     Heartbeats & Elegant Disconnection during Crash
 '''
 class ChatClient:    
-    def __init__(self, clientProfile, user_uuid):        
-        state.clientUUID= user_uuid
+    def __init__(self, clientProfile):       
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"
@@ -130,24 +130,66 @@ class ChatClient:
 
 
 '''ENTRY POINT FOR CLIENT SETUP'''
-async def eventLoop():    
-    user_uuid = auth.start_auth()
-
+async def eventLoop():  
+    
+    # Basic Setup
     parser = argparse.ArgumentParser()
     parser.add_argument('--profile', type=str, required=True)
     args = parser.parse_args()
 
     state.profileBased(args.profile)
+    client = ChatClient(args.profile)
 
-    state.log(f"Event Loop started w/ Profile {args.profile} and UUID {user_uuid}")
-    
-    client = ChatClient(args.profile, user_uuid)
+    state.log(f"Event Loop started w/ Profile {args.profile}")
+
+    # Failure Prone Activities
+    try:
+        requests.get("http://127.0.0.1:8000/")
+        user_uuid = auth.start_auth()
+        
+    except requests.exceptions.ConnectionError:
+        state.log(f"API Server Failed; Reconnecting")
+        await asyncio.gather(reconnect(client))  
+        return
+
+    state.log(f"UUID OBTAINED: {user_uuid}")
+    state.clientUUID = user_uuid
 
     try:
-        await client.connectClient()
-    # i.e., tasks have been cancelled, program exit
-    except (asyncio.CancelledError, ConnectionRefusedError, asyncio.TimeoutError):
-        pass
+        await client.connectClient()   
+    except asyncio.CancelledError:
+        pass            
+    except ConnectionRefusedError:
+        await asyncio.gather(reconnect(client, user_uuid))
+        state.log(f"Chat Server Failed; Reconnecting")
+        return
+
+async def reconnect(client:ChatClient, uuid: str = None):    
+    
+    while True:
+        print("Trying to Connect to Server...")
+        if(not uuid):
+            try:
+                requests.get("http://127.0.0.1:8000/")
+                uuid = auth.start_auth()
+            except requests.exceptions.ConnectionError:
+                await asyncio.sleep(3)
+                continue
+            else: 
+                state.log(f"UUID OBTAINED: {uuid}")
+                state.clientUUID = uuid               
+        
+        try:
+            await client.connectClient()
+    
+        except asyncio.CancelledError:
+            return
+        
+        except ConnectionRefusedError:
+            await asyncio.sleep(3)
+            continue
+
+        
         
 #__MAIN__
 asyncio.run(eventLoop())
