@@ -25,8 +25,7 @@ class ChatClient:
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"
-        self.clientProfile = clientProfile
-        self.reconnecting = False
+        self.clientProfile = clientProfile        
         asyncio.create_task(self.fileHandle())
         
     async def connectClient(self) -> None: 
@@ -34,8 +33,7 @@ class ChatClient:
             await clientSocket.send(json.dumps({"sender": state.clientUUID, "type":"con"}))
 
             state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")
-            state.clientSock = clientSocket         
-            self.reconnectTask = None      
+            self.clientSock = clientSocket        
 
             await asyncio.gather(self.message(), self.receive(),self.heartbeat())
 
@@ -72,7 +70,7 @@ class ChatClient:
 
     async def receive(self) -> None:
         try:
-            async for dataReceived in state.clientSock:
+            async for dataReceived in self.clientSock:
                 response = json.loads(dataReceived)
                 state.log(f"Received from Server: {response} \n")
 
@@ -88,7 +86,7 @@ class ChatClient:
         '''Payload : ( Message, Type )'''
         try: 
             state.log(f"Sending Payload: {payload} \n")
-            await state.clientSock.send(state.encode(payload))
+            await self.clientSock.send(state.encode(payload))
 
         except websockets.ConnectionClosedError:
             await self.reconnectServer()        
@@ -104,9 +102,12 @@ class ChatClient:
     
     async def closeClient(self) -> None:
         state.log("Program Exited")     
-        await state.clientSock.close()
+        await self.clientSock.close()
         for task in asyncio.all_tasks():
-            task.cancel()
+            try:
+                task.cancel()
+            except asyncio.CancelledError:
+                pass
         return
 
     async def reconnectServer(self) -> None:
@@ -116,10 +117,8 @@ class ChatClient:
             print("Trying to Connect to Server...")
             try:
                 await self.connectClient()
-        
-            except asyncio.CancelledError:
                 return
-            
+                        
             except ConnectionRefusedError:
                 await asyncio.sleep(3)
                 continue
@@ -168,8 +167,8 @@ async def eventLoop():
 
     try:
         await client.connectClient()   
-    except asyncio.CancelledError:
-        pass            
+        pass  
+           
     except ConnectionRefusedError:
         await reconnect(client, user_uuid)
         state.log(f"Chat Server Failed; Reconnecting")
@@ -192,8 +191,6 @@ async def reconnect(client:ChatClient, uuid: str = None):
         
         try:
             await client.connectClient()
-    
-        except asyncio.CancelledError:
             return
         
         except ConnectionRefusedError:
