@@ -29,12 +29,12 @@ class ChatClient:
         asyncio.create_task(self.fileHandle())
         
     async def connectClient(self) -> None: 
-        async with websockets.connect(self.serverAddress) as clientSocket:   
-            await clientSocket.send(json.dumps({"sender": state.clientUUID, "type":"con"}))
+        self.clientSock = await websockets.connect(self.serverAddress)
+        await self.clientSocket.send(json.dumps({"sender": state.clientUUID, "type":"con"}))
+        state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")
+              
 
-            state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")
-            self.clientSock = clientSocket        
-
+    async def start_methods(self) -> None:
             await asyncio.gather(self.message(), self.receive(),self.heartbeat())
 
 
