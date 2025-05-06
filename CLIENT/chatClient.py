@@ -21,27 +21,48 @@ Acitivities:
     Heartbeats & Elegant Disconnection during Crash
 '''
 class ChatClient:    
-    def __init__(self, clientProfile):       
+    def __init__(self):       
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
-        self.serverAddress = "ws://localhost:8765"
-        self.clientProfile = clientProfile        
-        asyncio.create_task(self.fileHandle())
+        self.serverAddress = "ws://localhost:8765"     
+        self.exit_code = None        
+                
         
     async def connectClient(self) -> None: 
         self.clientSock = await websockets.connect(self.serverAddress)
-        await self.clientSocket.send(json.dumps({"sender": state.clientUUID, "type":"con"}))
-        state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")
+        await self.clientSock.send(json.dumps({"sender": state.clientUUID, "type":"con"}))
+        state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")        
               
 
     async def start_methods(self) -> None:
-            await asyncio.gather(self.message(), self.receive(),self.heartbeat())
+        #asyncio.create_task(self.fileHandle())        
+
+        tasks = [
+            asyncio.create_task(self.message()),
+            asyncio.create_task(self.receive()),
+            asyncio.create_task(self.heartbeat())
+        ]
+        state.log(f"Starting Co-routines")
+        done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+
+        state.log("Program Exited")     
+        await self.clientSock.close()
+
+        for task in asyncio.all_tasks():            
+            if(task != asyncio.current_task()):
+                task.cancel()
+
+            try: await task
+            except asyncio.CancelledError: pass
+        
+        return self.exit_code
 
 
     '''------------------------------------------------'''
 
 
-    async def message(self) -> None:
+    async def message(self) -> None:    
+        state.log(f"Message Up & Running")
         while True:
             msgInput = await asyncio.to_thread(input)            
             
@@ -52,23 +73,26 @@ class ChatClient:
                 
                 # Check what to do to Payload
                 match action:
-                    case 'send': await self.sendPayload(payload)
+                    case 'send': self.exit_code = await self.sendPayload(payload)
                     case 'exit': 
-                        await self.sendPayload(
+                        self.exit_code = await self.sendPayload(
                             ( (state.client_codes['user_exit'], ''), state.msgTypes['system']))
-                        await self.closeClient()      
+                        self.exit_code = 1                        
                     case None: pass              
                     case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
             elif(state.receiver):
-                await self.sendPayload( (msgInput, state.msgTypes['message']) )
+                self.exit_code = await self.sendPayload( (msgInput, state.msgTypes['message']) )
 
             else:
                 print("[!!ERROR: No Destination Chosen]")       
             
+            if(self.exit_code): return
+
             print()
 
     async def receive(self) -> None:
+        state.log(f"Receive Up & Running")
         try:
             async for dataReceived in self.clientSock:
                 response = json.loads(dataReceived)
@@ -79,8 +103,9 @@ class ChatClient:
                 
                 print()
 
-        except websockets.ConnectionClosedError:            
-            await self.reconnectServer()
+        except websockets.ConnectionClosedError: 
+            self.exit_code = 1           
+            return 
 
     async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
         '''Payload : ( Message, Type )'''
@@ -89,39 +114,18 @@ class ChatClient:
             await self.clientSock.send(state.encode(payload))
 
         except websockets.ConnectionClosedError:
-            await self.reconnectServer()        
+            self.exit_code = 1
+            return    
    
 
     '''------------------------------------------------'''
 
          
     async def heartbeat(self) -> None:
+        state.log(f"Heartbeat Up & Running")
         while True:            
             await self.sendPayload( ('', state.msgTypes['heartbeat']) )
             await asyncio.sleep(self.heartbeatPing)
-    
-    async def closeClient(self) -> None:
-        state.log("Program Exited")     
-        await self.clientSock.close()
-        for task in asyncio.all_tasks():
-            try:
-                task.cancel()
-            except asyncio.CancelledError:
-                pass
-        return
-
-    async def reconnectServer(self) -> None:
-        state.log("Server Down")        
-
-        while True:
-            print("Trying to Connect to Server...")
-            try:
-                await self.connectClient()
-                return
-                        
-            except ConnectionRefusedError:
-                await asyncio.sleep(3)
-                continue
    
 
     '''------------------------------------------------'''
@@ -132,72 +136,10 @@ class ChatClient:
         while True:   
             state.log("Client Files Reupdated")
             #Open and store data to each file
-            with open(f"rooms/{self.clientProfile}.json", 'w') as roomHandle:
+            with open(f"rooms/{state.clientProfile}.json", 'w') as roomHandle:
                 json.dump({"rooms": list(state.clientRoomsFile)}, roomHandle)
             
             await asyncio.sleep(self.fileIOFrequency)
 
-
-
-'''ENTRY POINT FOR CLIENT SETUP'''
-async def eventLoop():  
-    
-    # Basic Setup
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--profile', type=str, required=True)
-    args = parser.parse_args()
-
-    state.profileBased(args.profile)
-    client = ChatClient(args.profile)
-
-    state.log(f"Event Loop started w/ Profile {args.profile}")
-
-    # Failure Prone Activities
-    try:
-        requests.get("http://127.0.0.1:8000/")
-        user_uuid = auth.start_auth()
-
-    except requests.exceptions.ConnectionError:
-        state.log(f"API Server Failed; Reconnecting")
-        await reconnect(client)
-        return
-
-    state.log(f"UUID OBTAINED: {user_uuid}")
-    state.clientUUID = user_uuid
-
-    try:
-        await client.connectClient()   
-        pass  
-           
-    except ConnectionRefusedError:
-        await reconnect(client, user_uuid)
-        state.log(f"Chat Server Failed; Reconnecting")
-        return
-
-async def reconnect(client:ChatClient, uuid: str = None):    
-    
-    while True:
-        print("Trying to Connect to Server...")
-        if(not uuid):
-            try:
-                requests.get("http://127.0.0.1:8000/")
-                uuid = auth.start_auth()
-            except requests.exceptions.ConnectionError:
-                await asyncio.sleep(3)
-                continue
-            else: 
-                state.log(f"UUID OBTAINED: {uuid}")
-                state.clientUUID = uuid               
-        
-        try:
-            await client.connectClient()
-            return
-        
-        except ConnectionRefusedError:
-            await asyncio.sleep(3)
-            continue
-
-        
-        
 #__MAIN__
-asyncio.run(eventLoop())
+client = ChatClient()
