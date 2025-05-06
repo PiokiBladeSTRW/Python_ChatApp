@@ -48,12 +48,12 @@ class ChatClient:
         state.log("Program Exited")     
         await self.clientSock.close()
 
+        # Cancel The
         for task in asyncio.all_tasks():            
             if(task != asyncio.current_task()):
                 task.cancel()
-
-            try: await task
-            except asyncio.CancelledError: pass
+                try: await task
+                except asyncio.CancelledError: pass
         
         return self.exit_code
 
