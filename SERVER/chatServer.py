@@ -58,8 +58,15 @@ class ChatServer:
             state.log(f"{clientSock} Received Data: {response} \n")
 
             '''Payload is json dumped message'''
-            destination, payload = response_handler.parse_response(clientSock, response)
+            packets = response_handler.parse_response(clientSock, response)
             
+            # Multi-Broadcast
+            if(type(packets[0]) == tuple): 
+                for packet in packets:
+                    await self.broadcast(clientSock, *packet)
+                continue
+
+            destination, payload = packets
             # Handle Special Cases, otherwise broadcast
             if(destination=='*'):
                 match payload:
@@ -68,10 +75,9 @@ class ChatServer:
                     case '/relog': await self.relog(response['sender'], clientSock)
                 continue
             
-            await self.broadcast(clientSock, payload, destination)
+            await self.broadcast(clientSock, destination, payload)
 
-    async def broadcast(self, clientSock:websockets.ClientConnection, payload:str, destination:str) -> None:
-        
+    async def broadcast(self, clientSock:websockets.ClientConnection, destination:str, payload:str) -> None:
         state.log(f"Sending data {payload} to {destination} \n")
 
         #Obtain list of Receivers
@@ -145,7 +151,7 @@ class ChatServer:
 
         # Let user and others know
         username = state.accountsFile[uuid]['username']
-        await self.broadcast(clientSock, json.dumps({"sender":username,"type": "con" }), '/.')
+        await self.broadcast(clientSock,  '/.', json.dumps({"sender":username,"type": "con" }))
 
         await self.send(clientSock, json.dumps({"command": state.system_codes['relog_finish'], "type": "sys"}))
         return
@@ -174,7 +180,7 @@ class ChatServer:
                 
                 #Broadcast others that User is Offline                
                 payload = json.dumps({"command": state.system_codes['user_exit'], "content": [username], "type":"sys"})                
-                await self.broadcast(leavingClient, payload, '/.')
+                await self.broadcast(leavingClient, '/.', payload)
 
                 await leavingClient.close()
 

@@ -127,7 +127,7 @@ commands = {
     "/b": back_rec,      
     "/help": chat_help, 
 
-    "/room": room,
+    "/room": room
 }
 
 

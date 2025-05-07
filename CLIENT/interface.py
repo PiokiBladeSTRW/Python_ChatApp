@@ -51,7 +51,7 @@ def system(response:dict):
     '''Only Module where response['content'] is not guranteed'''
     
     # Guard Clause  (if not a command)
-    if(not response['command']):
+    if(not response.get('command')):
         data = ('', '{System}', response['content']) 
 
         print(formatting.format(data, ('s', 'cl', 'c')))           
