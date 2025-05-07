@@ -36,6 +36,8 @@ class ClientState:
             "session_active": 109,
             "member_kick": 110,
             "member_ban" : 111,
+            "got_kicked": 112,
+            "got_banned": 113,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -61,6 +63,8 @@ class ClientState:
             109 : "The Session is still active, Try Again Later",
             110 : "{1} has been Kicked from {0}",
             111 : "{1} has been Banned from {0}",
+            112 : "You were Kicked from {0} by {1}",
+            113 : "You were Banned from {0} by {1}",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            

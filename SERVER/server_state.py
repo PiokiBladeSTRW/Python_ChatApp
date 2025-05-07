@@ -53,6 +53,8 @@ class ServerState:
             "session_active": 109,
             "member_kick": 110,
             "member_ban": 111,
+            "got_kicked": 112,
+            "got_banned": 113,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
