@@ -73,7 +73,7 @@ def system(response:dict):
         '''
         As of now, only room has sender tag, in case of future aversion, add within if-else
         '''
-
+        # Format: [0] = Room ; [1] =  Username
         args = [response['sender'][2::]]
         if(response.get('content')): args += response['content']
         
