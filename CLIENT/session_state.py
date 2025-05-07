@@ -96,11 +96,10 @@ class ClientState:
         )
         logger.add(
             f"logs/log_{clientProfile}_{time.time()}.log",
-            rotation= "1 day",
             level = "INFO",
             format = log_format,
             encoding= 'utf-8',
-            retention= "3 day"
+            retention= 3
         )
 
         #Room Handling setup

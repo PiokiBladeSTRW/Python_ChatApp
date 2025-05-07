@@ -10,7 +10,7 @@ class ServerState:
         self.uuid_sock = {}             # uuid : socket       
          
         self.sock_rooms = {}            # socket : [rooms]                  -Auth
-        self.room_socks= {}             # room name : [sockets]             -State
+        self.room_sock= {}             # room name : [sockets]             -State
         self.timeout= {}                # socket: last heartbeat  
         
         with open("accounts.json", 'r') as fileHandle:
@@ -23,7 +23,7 @@ class ServerState:
             self.roomsFile = json.load(fileHandle)
 
         for room in self.roomsFile:
-            self.room_socks[room] = []
+            self.room_sock[room] = []
 
         logger.remove()
         log_format = (
@@ -33,12 +33,11 @@ class ServerState:
             "<level>{message}</level>"
         )
         logger.add(
-            "logs/log_{time}.log",
-            rotation= "1 day",
+            "logs/log_{time}.log",            
             level = "INFO",
             format = log_format,
             encoding= 'utf-8',
-            retention= "3 day"
+            retention= 3
         )
 
         '''Codes for System Messages. 'er' prefix for Errors'''

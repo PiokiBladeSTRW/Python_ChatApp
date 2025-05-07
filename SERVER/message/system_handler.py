@@ -28,12 +28,12 @@ def modify_room(room:str, operation: tuple, clientSock:object =None, uuid:str =N
 
     # Ran By Person Creating Server
     if('CREATE' in operation):
-        state.room_socks[room] = []
+        state.room_sock[room] = []
         state.roomsFile[room] = {'members': [], 'admins': [], 'invites': []}  
 
     # Ran by Person joining Server
     if('N_JOIN' in operation):
-        state.room_socks[room].append(clientSock)
+        state.room_sock[room].append(clientSock)
         state.sock_rooms[clientSock].append(room)       
 
         state.roomsFile[room]['members'].append(state.sock_uuid[clientSock])
@@ -70,7 +70,7 @@ def online_list(response:dict) -> tuple:
 
 '''# Gives user a list of rooms [/rooms]'''
 def room_list() -> tuple:
-    data = '\n'.join(state.room_socks.keys())
+    data = '\n'.join(state.room_sock.keys())
     return ('/s', encode_payload(data))
 
 
@@ -84,7 +84,7 @@ def room_join(clientSock:object, response:dict) -> tuple:
     #ERROR HANDLING [NOT DONE BY ERROR CLASS DUE TO SECOND CONDITION BEING MASSING AND DEPENDENT ON FIRST]
     if(data := errors.error_handle(room not in state.roomsFile, 'er_Invalid_room')): return data
 
-    if(not(clientSock in state.room_socks[room] or state.sock_uuid[clientSock] in state.roomsFile[room]['invites'])): 
+    if(not(clientSock in state.room_sock[room] or state.sock_uuid[clientSock] in state.roomsFile[room]['invites'])): 
         return ('/s', encode_payload(command = state.system_codes['er_Not_room_member']))  
     
     if(state.sock_uuid[clientSock] in state.roomsFile[room]['invites']): 
@@ -119,7 +119,7 @@ def room_invite(response:dict) -> tuple:
         'user_exit':        (state.uuidsFile.get(username) not in state.uuid_sock, [username]),
         'er_Not_admin':     (response['sender'] not in state.roomsFile[room]['admins'], None),
         'er_Member_in_room':(
-            state.uuid_sock.get(state.uuidsFile.get(username)) in state.room_socks[room] or 
+            state.uuid_sock.get(state.uuidsFile.get(username)) in state.room_sock[room] or 
             state.uuidsFile.get(username) in state.roomsFile[room]['invites'], None)}      
     
     if(data := errors.multiple_error_handle(possible_errors)): return data
