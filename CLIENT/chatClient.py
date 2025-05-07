@@ -1,10 +1,9 @@
 # Header
 import json
 import asyncio
+import aioconsole
 import websockets
-import argparse
 
-import auth
 import commands.command_handler as command_handler
 import interface
 from session_state import state
@@ -20,30 +19,52 @@ Acitivities:
     Heartbeats & Elegant Disconnection during Crash
 '''
 class ChatClient:    
-    def __init__(self, clientProfile, user_uuid):        
-        state.clientUUID= user_uuid
+    def __init__(self):       
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
-        self.serverAddress = "ws://localhost:8765"
-        self.clientProfile = clientProfile
-        asyncio.create_task(self.fileHandle())
+        self.serverAddress = "ws://localhost:8765"     
+        self.exit_code = None        
+                
         
     async def connectClient(self) -> None: 
-        async with websockets.connect(self.serverAddress) as clientSocket:   
-            await clientSocket.send(json.dumps({"sender": state.clientUUID, "type":"con"}))
+        self.clientSock = await websockets.connect(self.serverAddress)
+        await self.clientSock.send(json.dumps({"sender": state.clientUUID, "type":"con"}))    
+        state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")     
+        print("Connected to Server! ")
+              
 
-            state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")
-            state.clientSock = clientSocket   
+    async def start_methods(self) -> None:
+        #asyncio.create_task(self.fileHandle())        
 
-            await asyncio.gather(self.message(), self.receive(),self.heartbeat())
+        tasks = [
+            asyncio.create_task(self.message()),
+            asyncio.create_task(self.receive()),
+            asyncio.create_task(self.heartbeat())
+        ]
+        state.log(f"Starting Co-routines")
+        #Remove var later
+        useless_var = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+
+        state.log("Program Exited")     
+        await self.clientSock.close()
+
+        # Cancel The
+        for task in asyncio.all_tasks():            
+            if(task != asyncio.current_task()):
+                task.cancel()
+                try: await task
+                except asyncio.CancelledError: pass
+        
+        return self.exit_code
 
 
     '''------------------------------------------------'''
 
 
-    async def message(self) -> None:
-        while True:
-            msgInput = await asyncio.to_thread(input)
+    async def message(self) -> None:    
+        state.log(f"Message Up & Running")
+        while True:            
+            msgInput = await aioconsole.ainput()            
             
             if(command_handler.is_command(msgInput)):
                 action, payload = command_handler.parse_command(msgInput)
@@ -52,66 +73,62 @@ class ChatClient:
                 
                 # Check what to do to Payload
                 match action:
-                    case 'send': await self.sendPayload(payload)
+                    case 'send': self.exit_code = await self.sendPayload(payload)
                     case 'exit': 
-                        await self.sendPayload(
-                            ( (state.client_codes['user_exit'], ''), state.msgTypes['system']))
-                        await self.closeClient()      
+                        self.exit_code = await self.sendPayload(
+                            ((state.client_codes['user_exit'], ''), state.msgTypes['system']) )                        
+                        self.exit_code = 0                        
                     case None: pass              
                     case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
             elif(state.receiver):
-                await self.sendPayload( (msgInput, state.msgTypes['message']) )
+                self.exit_code = await self.sendPayload( (msgInput, state.msgTypes['message']) )
 
             else:
                 print("[!!ERROR: No Destination Chosen]")       
             
+            if(self.exit_code): return
+
             print()
 
     async def receive(self) -> None:
+        state.log(f"Receive Up & Running")
         try:
-            async for dataReceived in state.clientSock:
+            async for dataReceived in self.clientSock:
                 response = json.loads(dataReceived)
                 state.log(f"Received from Server: {response} \n")
 
                 task = interface.parse_response(response) 
-                if(task=='kick'): await self.closeClient()
+                if(task=='kick'):                     
+                    self.exit_code= 0
                 
                 print()
 
-        except websockets.ConnectionClosedError:
-            await self.closeServer()
-            
+        except websockets.ConnectionClosedError: 
+            state.log(f"Server Closed")
+            self.exit_code = 1
+            return 
+
     async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
         '''Payload : ( Message, Type )'''
         try: 
             state.log(f"Sending Payload: {payload} \n")
-            await state.clientSock.send(state.encode(payload))
+            await self.clientSock.send(state.encode(payload))
 
         except websockets.ConnectionClosedError:
-            await self.closeServer()
+            state.log(f"Server Closed")
+            self.exit_code = 1
+            return    
    
 
     '''------------------------------------------------'''
 
          
     async def heartbeat(self) -> None:
+        state.log(f"Heartbeat Up & Running")
         while True:            
             await self.sendPayload( ('', state.msgTypes['heartbeat']) )
             await asyncio.sleep(self.heartbeatPing)
-    
-    async def closeClient(self) -> None:
-        state.log("Program Exited")     
-        await state.clientSock.close()
-        for task in asyncio.all_tasks():
-            task.cancel()
-            return
-
-    async def closeServer(self) -> None:
-        state.log("Server Down")
-        print("SERVER DOWN!")
-        await self.closeClient()
-        return
    
 
     '''------------------------------------------------'''
@@ -122,32 +139,10 @@ class ChatClient:
         while True:   
             state.log("Client Files Reupdated")
             #Open and store data to each file
-            with open(f"rooms/{self.clientProfile}.json", 'w') as roomHandle:
+            with open(f"rooms/{state.clientProfile}.json", 'w') as roomHandle:
                 json.dump({"rooms": list(state.clientRoomsFile)}, roomHandle)
             
             await asyncio.sleep(self.fileIOFrequency)
 
-
-
-'''ENTRY POINT FOR CLIENT SETUP'''
-async def eventLoop():    
-    user_uuid = auth.start_auth()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--profile', type=str, required=True)
-    args = parser.parse_args()
-
-    state.profileBased(args.profile)
-
-    state.log(f"Event Loop started w/ Profile {args.profile} and UUID {user_uuid}")
-    
-    client = ChatClient(args.profile, user_uuid)
-
-    try:
-        await client.connectClient()
-    # i.e., tasks have been cancelled, program exit
-    except (asyncio.CancelledError, ConnectionRefusedError, asyncio.TimeoutError):
-        pass
-        
 #__MAIN__
-asyncio.run(eventLoop())
+client = ChatClient()

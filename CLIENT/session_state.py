@@ -12,6 +12,7 @@ class ClientState:
         self.pReceiver = ''
         self.clientSock = None
         self.clientRoomsFile = []
+        self.clientProfile = ''
 
         logger.remove()
         
@@ -84,6 +85,8 @@ class ClientState:
 
     '''Tasks that requires clientProfile'''
     def profileBased(self, clientProfile):
+        self.clientProfile = clientProfile
+
         #Log Setup
         log_format = (
             "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
@@ -92,12 +95,11 @@ class ClientState:
             "<level>{message}</level>"
         )
         logger.add(
-            f"logs/log_{clientProfile}_{time.time()}.log",
-            rotation= "1 day",
+            f"logs/log_{clientProfile}.log",
+            mode= 'w',
             level = "INFO",
             format = log_format,
-            encoding= 'utf-8',
-            retention= "3 day"
+            encoding= 'utf-8',            
         )
 
         #Room Handling setup

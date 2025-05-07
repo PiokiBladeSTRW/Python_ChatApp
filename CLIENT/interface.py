@@ -64,6 +64,7 @@ def system(response:dict):
         
         # Force Kick
         if(response['command'] == state.system_codes['session_active']): 
+            state.log(f"Tried Logging with an Active Session; Disconnecting")
             print(formatting.format(('', '{System}', state.sys_code_msg[response['command']]), ('s', 'cl', 'c')))
             return 'kick'
 

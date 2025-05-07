@@ -140,7 +140,7 @@ class ChatServer:
         state.sock_rooms[clientSock] = []
 
         for room in state.accountsFile[uuid]['rooms']:
-            state.room_socks[room].append(clientSock)
+            state.room_sock[room].append(clientSock)
             state.sock_rooms[clientSock].append(room)
 
         # Let user and others know
@@ -161,7 +161,7 @@ class ChatServer:
                 #Remove Client from Rooms
                 if(leavingClient in state.sock_rooms):
                     for room in state.sock_rooms[leavingClient]:
-                        state.room_socks[room].remove(leavingClient)
+                        state.room_sock[room].remove(leavingClient)
 
                     state.sock_rooms.pop(leavingClient)
                 
@@ -186,6 +186,7 @@ class ChatServer:
     async def fileHandle(self) -> None:
         while True:  
             state.log("Server Files Reupdated")
+            state.log(f"\nDATA: {state.uuid_sock} \n{state.room_sock}")
             #Open and store data to each file
             with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
                 json.dump(state.accountsFile, accountHandle)         
