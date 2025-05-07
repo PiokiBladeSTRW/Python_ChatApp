@@ -33,11 +33,11 @@ class ServerState:
             "<level>{message}</level>"
         )
         logger.add(
-            "logs/log_{time}.log",            
+            "logs/log.log",
+            mode= 'w',            
             level = "INFO",
             format = log_format,
-            encoding= 'utf-8',
-            retention= 3
+            encoding= 'utf-8'            
         )
 
         '''Codes for System Messages. 'er' prefix for Errors'''

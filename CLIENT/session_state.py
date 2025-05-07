@@ -95,11 +95,11 @@ class ClientState:
             "<level>{message}</level>"
         )
         logger.add(
-            f"logs/log_{clientProfile}_{time.time()}.log",
+            f"logs/log_{clientProfile}.log",
+            mode= 'w',
             level = "INFO",
             format = log_format,
-            encoding= 'utf-8',
-            retention= 3
+            encoding= 'utf-8',            
         )
 
         #Room Handling setup

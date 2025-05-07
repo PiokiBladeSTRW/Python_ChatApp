@@ -2,10 +2,7 @@
 import json
 import asyncio
 import websockets
-import argparse
-import requests
 
-import auth
 import commands.command_handler as command_handler
 import interface
 from session_state import state
@@ -30,8 +27,9 @@ class ChatClient:
         
     async def connectClient(self) -> None: 
         self.clientSock = await websockets.connect(self.serverAddress)
-        await self.clientSock.send(json.dumps({"sender": state.clientUUID, "type":"con"}))
-        state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")        
+        await self.clientSock.send(json.dumps({"sender": state.clientUUID, "type":"con"}))    
+        state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")     
+        print("Connected to Server! ")
               
 
     async def start_methods(self) -> None:
@@ -43,7 +41,8 @@ class ChatClient:
             asyncio.create_task(self.heartbeat())
         ]
         state.log(f"Starting Co-routines")
-        done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+        #Remove var later
+        useless_var = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
 
         state.log("Program Exited")     
         await self.clientSock.close()
@@ -63,8 +62,9 @@ class ChatClient:
 
     async def message(self) -> None:    
         state.log(f"Message Up & Running")
-        while True:
-            msgInput = await asyncio.to_thread(input)            
+        while True:            
+            msgInput = await asyncio.to_thread(input)
+            if(self.exit_code): break
             
             if(command_handler.is_command(msgInput)):
                 action, payload = command_handler.parse_command(msgInput)
@@ -76,8 +76,8 @@ class ChatClient:
                     case 'send': self.exit_code = await self.sendPayload(payload)
                     case 'exit': 
                         self.exit_code = await self.sendPayload(
-                            ( (state.client_codes['user_exit'], ''), state.msgTypes['system']))
-                        self.exit_code = 1                        
+                            ((state.client_codes['user_exit'], ''), state.msgTypes['system']) )                        
+                        self.exit_code = 0                        
                     case None: pass              
                     case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
@@ -99,12 +99,14 @@ class ChatClient:
                 state.log(f"Received from Server: {response} \n")
 
                 task = interface.parse_response(response) 
-                if(task=='kick'): await self.closeClient()
+                if(task=='kick'):                     
+                    self.exit_code= 0
                 
                 print()
 
         except websockets.ConnectionClosedError: 
-            self.exit_code = 1           
+            state.log(f"Server Closed")
+            self.exit_code = 1
             return 
 
     async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
@@ -114,6 +116,7 @@ class ChatClient:
             await self.clientSock.send(state.encode(payload))
 
         except websockets.ConnectionClosedError:
+            state.log(f"Server Closed")
             self.exit_code = 1
             return    
    

@@ -45,7 +45,8 @@ async def entry():
             # Client Close
             if(exit_code==0): break
 
-            # Other Issues [Add Edge cases in cases of other forms of crash instead of Server Crash]            
+            # Other Issues [Add Edge cases in cases of other forms of crash instead of Server Crash]       
+            client.exit_code =None     
             attempt = 0
             continue
                     
