@@ -51,6 +51,8 @@ class ServerState:
             "member_admin": 107,
             "account_risk": 108,
             "session_active": 109,
+            "member_kick": 110,
+            "member_ban": 111,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -60,7 +62,8 @@ class ServerState:
             "er_Member_in_room": 206,
             "er_Member_is_admin": 207,
             "er_Invalid_user": 208,
-            'er_Invalid_room': 209
+            'er_Invalid_room': 209,
+            'er_Not_in_room': 210,            
         }
 
         self.client_codes ={
@@ -70,7 +73,9 @@ class ServerState:
             'room_join': 4,
             'room_create': 5,
             'room_invite': 6,
-            'room_admin' :7
+            'room_admin' : 7,
+            'room_kick' : 8,
+            'room_ban' : 9
         }
 
 

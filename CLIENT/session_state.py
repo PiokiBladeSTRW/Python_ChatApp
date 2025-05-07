@@ -34,6 +34,8 @@ class ClientState:
             "member_admin": 107,
             "account_risk": 108,
             "session_active": 109,
+            "member_kick": 110,
+            "member_ban" : 111,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -43,7 +45,8 @@ class ClientState:
             "er_Member_in_room": 206,
             "er_Member_is_admin": 207,
             "er_Invalid_user": 208,
-            'er_Invalid_room': 209
+            'er_Invalid_room': 209,
+            'er_Not_in_room': 210            
         }
         
         self.sys_code_msg={
@@ -56,6 +59,8 @@ class ClientState:
             107 : "Made {1} an Admin",
             108 : "Your account is at Risk; Password Compromised",
             109 : "The Session is still active, Try Again Later",
+            110 : "{1} has been Kicked from {0}",
+            111 : "{1} has been Banned from {0}",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
@@ -65,7 +70,8 @@ class ClientState:
             206 : "Member already in room",
             207 : "Member already admin",
             208 : "The user doesn't exist",
-            209 : "The room doesn't exist"
+            209 : "The room doesn't exist",
+            210 : "The Member isn't in Room"            
         }
         self.sys_format = (101,104,105,106,107)
         self.receiver_change_codes = (101,208)
@@ -79,7 +85,9 @@ class ClientState:
             'room_join': 4,
             'room_create': 5,
             'room_invite': 6,
-            'room_admin' : 7
+            'room_admin' : 7,
+            'room_kick' : 8,
+            'room_ban' : 9
         }
 
 

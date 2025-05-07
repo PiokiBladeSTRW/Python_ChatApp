@@ -45,3 +45,21 @@ def admin_user(username:str) -> tuple:
     room = state.receiver[2::]
     payload = ((state.client_codes['room_admin'], (room,username)), state.msgTypes['system'])
     return ('send', payload)
+
+'''Kick User from Room'''
+def kick_user(username:str) -> tuple:
+    state.log(f"Running room:kick {username}")
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+
+    room = state.receiver[2::]
+    payload = ( (state.client_codes['room_kick'], (room, username)), state.msgTypes['system'])
+    return ('send', payload)
+
+'''Ban User from Room'''
+def ban_user(username:str) -> tuple:
+    state.log(f"Running room:ban {username}")
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+
+    room = state.receiver[2::]
+    payload = ( (state.client_codes['room_ban'], (room, username)), state.msgTypes['system'])
+    return ('send', payload)
