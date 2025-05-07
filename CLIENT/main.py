@@ -48,6 +48,8 @@ async def entry():
             # Other Issues [Add Edge cases in cases of other forms of crash instead of Server Crash]       
             client.exit_code =None     
             attempt = 0
+            print("Server Down. Attempting Retry [NOTE: Next message typed isn't responsive]")
+            await asyncio.sleep(3)
             continue
                     
         except ConnectionRefusedError:            

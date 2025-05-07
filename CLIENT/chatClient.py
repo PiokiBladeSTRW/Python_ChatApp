@@ -1,6 +1,7 @@
 # Header
 import json
 import asyncio
+import aioconsole
 import websockets
 
 import commands.command_handler as command_handler
@@ -63,8 +64,7 @@ class ChatClient:
     async def message(self) -> None:    
         state.log(f"Message Up & Running")
         while True:            
-            msgInput = await asyncio.to_thread(input)
-            if(self.exit_code): break
+            msgInput = await aioconsole.ainput()            
             
             if(command_handler.is_command(msgInput)):
                 action, payload = command_handler.parse_command(msgInput)
