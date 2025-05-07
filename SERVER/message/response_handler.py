@@ -47,7 +47,7 @@ def system(clientSock:object, response:dict) -> tuple:
     if (command == state.client_codes['room_create']):  return system_handler.room_create(clientSock, response)
     if (command == state.client_codes['room_invite']):  return system_handler.room_invite(response)
     if (command == state.client_codes['room_admin']):   return system_handler.room_admin(response)
-    if (command == 'test'): return system_handler.test()
+    
     raise ValueError(f"●→INVALID COMMAND RECEIVED: {command}")
 
 
