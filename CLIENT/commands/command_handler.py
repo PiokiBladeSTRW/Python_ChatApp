@@ -83,6 +83,9 @@ def room(args:list) -> tuple:
 
     return data
 
+def test(args:list):
+    return ('send', ( ('test', ''), 'sys'))
+
 
 '''-------------------------------------'''
 
@@ -126,6 +129,7 @@ commands = {
     "/help": chat_help, 
 
     "/room": room,
+    "/test": test
 }
 
 

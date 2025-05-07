@@ -146,3 +146,6 @@ def room_admin(response:dict) -> tuple:
     modify_room(room, ('ADMIN'), state, uuid= uuid)          
     return (f'/r{room}',
             encode_payload( [state.uuid_user(response['sender'])], state.system_codes['member_admin'], f'/r{room}'))
+
+def test():
+    return ( ('/.', json.dumps({"content": "YO", "type": "sys"})), ('/s', json.dumps({"content": "BAH","type": "sys"})))

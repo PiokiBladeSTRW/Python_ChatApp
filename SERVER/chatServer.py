@@ -61,7 +61,10 @@ class ChatServer:
             packets = response_handler.parse_response(clientSock, response)
             
             # Multi-Broadcast
-            if(len(packets)>2): pass
+            if(type(packets[0]) == tuple): 
+                for packet in packets:
+                    await self.broadcast(clientSock, *packet)
+                continue
 
             destination, payload = packets
             # Handle Special Cases, otherwise broadcast
@@ -75,7 +78,6 @@ class ChatServer:
             await self.broadcast(clientSock, destination, payload)
 
     async def broadcast(self, clientSock:websockets.ClientConnection, destination:str, payload:str) -> None:
-        
         state.log(f"Sending data {payload} to {destination} \n")
 
         #Obtain list of Receivers
