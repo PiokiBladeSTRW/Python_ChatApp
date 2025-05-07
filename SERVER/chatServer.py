@@ -58,8 +58,12 @@ class ChatServer:
             state.log(f"{clientSock} Received Data: {response} \n")
 
             '''Payload is json dumped message'''
-            destination, payload = response_handler.parse_response(clientSock, response)
+            packets = response_handler.parse_response(clientSock, response)
             
+            # Multi-Broadcast
+            if(len(packets)>2): pass
+
+            destination, payload = packets
             # Handle Special Cases, otherwise broadcast
             if(destination=='*'):
                 match payload:
