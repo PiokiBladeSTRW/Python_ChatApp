@@ -68,8 +68,8 @@ class ClientState:
             209 : "The room doesn't exist"
         }
         self.sys_format = (101,104,105,106,107)
-        self.receiver_change_codes = (101,)
-        self.receiver_force_change_codes = (204, 205)
+        self.receiver_change_codes = (101,208)
+        self.receiver_force_change_codes = (204, 205, 209)
         self.special_commands = (109,)
 
         self.client_codes ={
@@ -145,9 +145,10 @@ class ClientState:
         return json.dumps(data)
     
     '''Change Receivers'''
-    def receiver_change(self, receiver):
-        self.pReceiver = self.receiver
-        self.receiver = receiver
+    def receiver_change(self, receiver, update_past = True):           
+        if(update_past): 
+            self.pReceiver = self.receiver
+        self.receiver = receiver        
         
         if(receiver==''): receiver = 'No One'
 

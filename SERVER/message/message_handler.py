@@ -21,7 +21,7 @@ def dm_handle(response:dict) -> tuple:
 
     # Handle Errors
     possible_errors = {
-        'er_Invalid_user':  (response['receiver'] not in state.uuidsFile, None),
+        'er_Invalid_user':  (response['receiver'] not in state.uuidsFile, [response['receiver']]),
         'user_exit':        (state.uuidsFile.get(response['receiver']) not in state.uuid_sock, [response['receiver']])
     }
     

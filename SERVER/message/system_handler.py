@@ -115,7 +115,7 @@ def room_invite(response:dict) -> tuple:
 
     #Catch Errors
     possible_errors = {
-        'er_Invalid_user':  (username not in state.uuidsFile, None),
+        'er_Invalid_user':  (username not in state.uuidsFile, [username]),
         'user_exit':        (state.uuidsFile.get(username) not in state.uuid_sock, [username]),
         'er_Not_admin':     (response['sender'] not in state.roomsFile[room]['admins'], None),
         'er_Member_in_room':(
@@ -135,7 +135,7 @@ def room_admin(response:dict) -> tuple:
 
     #Catch Errors
     possible_errors = {
-        'er_Invalid_user':  (username not in state.uuidsFile, None),
+        'er_Invalid_user':  (username not in state.uuidsFile, [username]),
         'er_Not_admin':     (response['sender'] not in state.roomsFile[room]['admins'], None),
         'er_Member_is_admin':(state.uuidsFile.get(username) in state.roomsFile[room]['admins'], None)
     }

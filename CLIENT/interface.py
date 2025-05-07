@@ -95,10 +95,10 @@ def system(response:dict):
 
     # Change Receiver if currently in contact or by force 
     if(response['command'] in state.receiver_change_codes and state.receiver == args[0]):
-        state.receiver_change('')
+        state.receiver_change('', False)
     
     elif(response['command'] in state.receiver_change_codes):
-        state.receiver_change('')
+        state.receiver_change('', False)
 
     data = ('', "{System}", disp_msg)
     print(formatting.format(data, ('s', 'cl', 'c')))

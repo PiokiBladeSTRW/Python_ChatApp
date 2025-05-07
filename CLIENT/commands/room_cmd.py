@@ -11,13 +11,16 @@ import commands.error_handle as errors
 
 '''Join a Room'''
 def join_room(room_name:str) -> tuple:    
+    state.log(f"Running room:join {room_name}")
     state.receiver_change('/r'+room_name)
     payload = ((state.client_codes['room_join'], room_name), state.msgTypes['system'])
     return ('send', payload)    
 
 '''Create a Room'''
 def create_room(room_name:str) -> tuple: 
-    if(room_name in state.clientRoomsFile): return errors.error_handle("Room Already Exists")
+    state.log(f"Running room:create {room_name}")
+
+    if(room_name in state.clientRoomsFile): return errors.error_handle("Room Already Exists")        
 
     state.clientRoomsFile.append(room_name)
 
@@ -26,7 +29,8 @@ def create_room(room_name:str) -> tuple:
     return ('send', payload)
 
 '''Invite user to Room'''
-def invite_user(username:str) -> tuple:    
+def invite_user(username:str) -> tuple:  
+    state.log(f"Running room:invite {username}")  
     if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
 
     room = state.receiver[2::]
@@ -35,6 +39,7 @@ def invite_user(username:str) -> tuple:
 
 '''Make user an Admin'''
 def admin_user(username:str) -> tuple:
+    state.log(f"Running room:adming {username}")
     if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
 
     room = state.receiver[2::]
