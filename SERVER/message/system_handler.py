@@ -120,11 +120,11 @@ def room_desc(response:dict) -> tuple:
     if(data := errors.error_handle(response['sender'] not in state.roomsFile[room]['admins'], 'er_Not_admin')): 
         return data
 
-    desc = ' '.join(response['content'])
+    desc = response['content']
     modify_room(room, ('DESC',), args=desc)  
     return ('*', None)  
 
-'''# Gives user the profile of Asked Individual'''
+'''# Gives user the profile of Asked Individual [/profile get]'''
 def profile_get(response:dict) -> tuple:    
     username  = response['content']
 
@@ -135,9 +135,9 @@ def profile_get(response:dict) -> tuple:
     data = f"{username}> {profile}"
     return ('/s', encode_payload(content= data))
 
-'''# Allows user to modify their profile'''
+'''# Allows user to modify their profile [/profile set]'''
 def profile_set(response:dict) -> tuple:
-    profile = ' '.join(response['content'])
+    profile = response['content']
     state.uuidsFile[state.uuid_user(response['sender'])]['profile'] = profile
 
     return('*', None)   

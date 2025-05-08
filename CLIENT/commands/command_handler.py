@@ -75,7 +75,7 @@ def profile(args:list) -> tuple:
             payload = ((state.client_codes['profile_get'], args[1]), state.msgTypes['system'])
             return ('send', payload)
         case "set": 
-            payload = ((state.client_codes['profile_set'], args[1::]), state.msgTypes['system'])
+            payload = ((state.client_codes['profile_set'], ' '.join(args[1::])), state.msgTypes['system'])
             return ('send', payload)
 
         case _: return errors.error_handle("Invalid Command!")

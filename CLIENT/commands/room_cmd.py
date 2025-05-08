@@ -41,6 +41,8 @@ def create_room(room_name:str) -> tuple:
 '''Set Room Description'''
 def set_desc(description: list) -> tuple:
     state.log(f"Running room:desc {description}")
+
+    description = ' '.join(description)
     payload = ((state.client_codes['room_desc'], description), state.msgTypes['system'])
     return ('send', payload)
 
