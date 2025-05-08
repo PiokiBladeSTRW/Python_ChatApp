@@ -81,7 +81,9 @@ class ServerState:
             'room_kick' : 8,
             'room_ban' : 9,
             "room_members" : 10,
-            'room_unban' : 11
+            'room_unban' : 11,
+            'profile_get': 12,
+            'profile_set': 13
         }
 
 

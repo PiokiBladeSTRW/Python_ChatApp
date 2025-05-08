@@ -46,6 +46,38 @@ def rooms_list(args:list) -> tuple:
 def close(args:list) -> tuple: 
     return ('exit', None)
 
+'''Room Related Commands'''
+def room(args:list) -> tuple: 
+
+    
+    if(len(args)<2 and args[0]!='members'): return errors.error_handle("Invalid Arguments!")
+
+    match args[0]:
+        case "join": return room_cmd.join_room(args[1])
+        case "create": return room_cmd.create_room(args[1])
+        case "invite": return room_cmd.invite_user(args[1])
+        case "admin": return room_cmd.admin_user(args[1])
+        case "kick": return room_cmd.kick_user(args[1])
+        case "ban": return room_cmd.ban_user(args[1])
+        case "unban": return room_cmd.unban_user(args[1])
+        case "members": return room_cmd.members()
+        case _: return errors.error_handle("Invalid Command!")
+
+'''Profile Management'''
+def profile(args:list) -> tuple:
+
+    if(len(args)<2): return errors.error_handle("Invalid Arguments!")
+
+    match args[0]:
+        case "get": 
+            payload = ((state.client_codes['profile_get'], args[1]), state.msgTypes['system'])
+            return ('send', payload)
+        case "set": 
+            payload = ((state.client_codes['profile_set'], args[1::]), state.msgTypes['system'])
+            return ('send', payload)
+
+        case _: return errors.error_handle("Invalid Command!")
+
 
 '''========================== type : none'''
 
@@ -66,27 +98,10 @@ def chat_help(args:list) -> tuple:
     return (None, None)
 
 
-'''========================== type : depends'''
+'''========================== type : sys'''
 
 
-'''Room Related Commands'''
-def room(args:list) -> tuple: 
 
-    
-    if(len(args)<2 and args[0]!='members'): return errors.error_handle("Invalid Arguments!")
-
-    match args[0]:
-        case "join": data = room_cmd.join_room(args[1])
-        case "create": data = room_cmd.create_room(args[1])
-        case "invite": data = room_cmd.invite_user(args[1])
-        case "admin": data = room_cmd.admin_user(args[1])
-        case "kick": data = room_cmd.kick_user(args[1])
-        case "ban": data = room_cmd.ban_user(args[1])
-        case "unban": data = room_cmd.unban_user(args[1])
-        case "members": data = room_cmd.members()
-        case _: return errors.error_handle("Invalid Command!")
-
-    return data
 
 
 '''-------------------------------------'''
@@ -112,7 +127,7 @@ def parse_command(input_cmd:str) -> tuple:
     # Execute Command
     if cmd in commands: 
         state.log(f"Running Command: {cmd}")       
-        data = commands[cmd](args)
+        return commands[cmd](args)
         return data
     
     return errors.error_handle("Invalid Command!")
@@ -130,7 +145,9 @@ commands = {
     "/b": back_rec,      
     "/help": chat_help, 
 
-    "/room": room
+    "/room": room,
+
+    "/profile": profile
 }
 
 

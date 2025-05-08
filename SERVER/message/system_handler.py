@@ -67,6 +67,7 @@ def modify_room(room:str, operation: tuple, clientSock:object =None, uuid:str =N
     if('UNBAN' in operation):            
         state.roomsFile[room]['bans'].remove(uuid)        
 
+
 '''----------------------------------------------'''
 
 
@@ -93,6 +94,25 @@ def room_list() -> tuple:
 def room_members(response: dict) -> tuple:    
     member_data = '\n'.join([state.uuid_user(x) for x in state.roomsFile[response['receiver']]['members']])
     return ('/s', encode_payload(content = member_data))
+
+'''# Gives user the profile of Asked Individual'''
+def profile_get(response:dict) -> tuple:    
+    username  = response['content']
+
+    if(data := errors.error_handle(username not in state.uuidsFile, 'er_Invalid_user')): return data
+
+    profile = state.uuidsFile[username]['profile']   
+    
+    data = f"{username}> {profile}"
+    return ('/s', encode_payload(content= data))
+
+'''# Allows user to modify their profile'''
+def profile_set(response:dict) -> tuple:
+    profile = ' '.join(response['content'])
+    state.uuidsFile[state.uuid_user(response['sender'])]['profile'] = profile
+
+    return('*', None)   
+
 
 '''============================='''
 

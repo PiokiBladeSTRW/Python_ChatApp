@@ -43,6 +43,10 @@ def register(credentials: object) -> dict:
         "salt": salt, 
         "rooms": []                                     
         }
-    state.uuidsFile[credentials.username]['uuid'] = user_uuid
+    
+    state.uuidsFile[credentials.username] ={
+        'uuid': user_uuid,
+        'profile': ''
+    }    
 
     return {"sender_id": user_uuid}
