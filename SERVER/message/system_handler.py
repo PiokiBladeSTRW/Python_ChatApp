@@ -1,5 +1,6 @@
 # Header
 import json
+import time
 from server_state import state
 from message.catch_error import CatchError
 
@@ -22,14 +23,19 @@ def encode_payload(command:int=None, content=None,  sender: str = None) -> str:
     if(sender): data['sender'] = sender
     return json.dumps(data)
 
-def modify_room(room:str, operation: tuple, clientSock:object =None, uuid:str =None ) -> None:
+def modify_room(room:str, operation: tuple, clientSock:object =None, uuid:str =None, args =None) -> None:
     '''Types of Operation: (CREATE, N_JOIN, INVITE, R_INVITE, ADMIN, KICK, BAN)
     clientSock: Person using Command ;  uuid: Person on receiving End of Command'''    
 
     # Ran By Person Creating Server
     if('CREATE' in operation):
         state.room_sock[room] = []
-        state.roomsFile[room] = {'members': [], 'admins': [], 'invites': [], 'bans': []}  
+        state.roomsFile[room] = {'members': [], 
+                                 'admins': [], 
+                                 'invites': [], 
+                                 'bans': [],
+                                 'creation': time.strftime("%D", time.localtime()),
+                                 'desc': ""}  
 
     # Ran by Person joining Server
     if('N_JOIN' in operation):
@@ -65,7 +71,11 @@ def modify_room(room:str, operation: tuple, clientSock:object =None, uuid:str =N
     
     # Ran by Admin Targetted to Member
     if('UNBAN' in operation):            
-        state.roomsFile[room]['bans'].remove(uuid)        
+        state.roomsFile[room]['bans'].remove(uuid)  
+
+    # Ran by Admin Targetted to NONE
+    if('DESC' in operation):
+        state.roomsFile[room]['desc'] = args
 
 
 '''----------------------------------------------'''
@@ -94,6 +104,25 @@ def room_list() -> tuple:
 def room_members(response: dict) -> tuple:    
     member_data = '\n'.join([state.uuid_user(x) for x in state.roomsFile[response['receiver']]['members']])
     return ('/s', encode_payload(content = member_data))
+
+'''# Gives user a detailed info on room [/room info]'''
+def room_info(response:dict) -> tuple:
+    room = response['receiver'][2::]
+
+    desc, created = state.roomsFile[room]['desc'], state.roomsFile[room]['creation']
+    info_data = f"\nRoom Name: {room} \nDescription: {desc} \nCreated On: {created}"
+    return ('/s', encode_payload(content=info_data))
+
+'''# Sets Room's Description [/room desc]'''
+def room_desc(response:dict) -> tuple:
+    room = response['receiver'][2::]  
+
+    if(data := errors.error_handle(response['sender'] not in state.roomsFile[room]['admins'], 'er_Not_admin')): 
+        return data
+
+    desc = ' '.join(response['content'])
+    modify_room(room, ('DESC',), args=desc)  
+    return ('*', None)  
 
 '''# Gives user the profile of Asked Individual'''
 def profile_get(response:dict) -> tuple:    

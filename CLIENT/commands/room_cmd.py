@@ -22,6 +22,12 @@ def members() -> tuple:
     payload = ((state.client_codes['room_members'],''), state.msgTypes['system'])    
     return ('send', payload)
 
+'''Obtain Info of Room'''
+def info() -> tuple:
+    state.log(f"Running room:info")
+    payload = ((state.client_codes['room_info'], ''), state.msgTypes['system'])
+    return ('send', payload)
+
 '''Create a Room'''
 def create_room(room_name:str) -> tuple: 
     state.log(f"Running room:create {room_name}")
@@ -31,6 +37,13 @@ def create_room(room_name:str) -> tuple:
     state.receiver_change('/r'+room_name)                
     payload = ((state.client_codes['room_create'], ''), state.msgTypes['system'])
     return ('send', payload)
+
+'''Set Room Description'''
+def set_desc(description: list) -> tuple:
+    state.log(f"Running room:desc {description}")
+    payload = ((state.client_codes['room_desc'], description), state.msgTypes['system'])
+    return ('send', payload)
+
 
 '''Invite user to Room'''
 def invite_user(username:str) -> tuple:  

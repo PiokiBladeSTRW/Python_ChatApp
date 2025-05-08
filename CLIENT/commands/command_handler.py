@@ -50,7 +50,7 @@ def close(args:list) -> tuple:
 def room(args:list) -> tuple: 
 
     
-    if(len(args)<2 and args[0]!='members'): return errors.error_handle("Invalid Arguments!")
+    if(len(args)<2 and args[0] not in ('members', 'info')): return errors.error_handle("Invalid Arguments!")
 
     match args[0]:
         case "join": return room_cmd.join_room(args[1])
@@ -60,7 +60,9 @@ def room(args:list) -> tuple:
         case "kick": return room_cmd.kick_user(args[1])
         case "ban": return room_cmd.ban_user(args[1])
         case "unban": return room_cmd.unban_user(args[1])
-        case "members": return room_cmd.members()
+        case "desc": return room_cmd.set_desc(args[1::])
+        case "info": return room_cmd.info()
+        case "members": return room_cmd.members()        
         case _: return errors.error_handle("Invalid Command!")
 
 '''Profile Management'''

@@ -99,7 +99,9 @@ class ClientState:
             'room_members' : 10,
             'room_unban' : 11,
             'profile_get': 12,
-            'profile_set': 13
+            'profile_set': 13,
+            'room_desc': 14,
+            'room_info': 15,
         }
 
 
