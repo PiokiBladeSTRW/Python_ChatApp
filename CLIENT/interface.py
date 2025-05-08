@@ -51,7 +51,7 @@ def system(response:dict):
     '''Only Module where response['content'] is not guranteed'''
     
     # Guard Clause  (if not a command)
-    if(not response['command']):
+    if(not response.get('command')):
         data = ('', '{System}', response['content']) 
 
         print(formatting.format(data, ('s', 'cl', 'c')))           
@@ -59,7 +59,8 @@ def system(response:dict):
     
 
     ''' Handle Different Types of Sys Commands. More Dynamic (& confusing) than other modules'''
-    #Special Commands
+
+    #Special Commands [aka Return]
     if(response['command'] in state.special_commands):
         
         # Force Kick
@@ -73,13 +74,25 @@ def system(response:dict):
         '''
         As of now, only room has sender tag, in case of future aversion, add within if-else
         '''
-
+        # Format: [0] = Room ; [1] =  Username
         args = [response['sender'][2::]]
         if(response.get('content')): args += response['content']
         
         disp_msg = state.sys_code_msg[response['command']]        
 
         if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
+
+        # If Have to Change
+        if(response['command'] in state.change_codes and state.receiver == f"/r{args[0]}"):
+            state.receiver_change('', False)
+
+        # Add to Room
+        if(response['command'] in (state.system_codes['room_live'], state.system_codes['room_invite'])):
+            state.clientRoomsFile.append(args[0])
+        
+        # If Removed from Room
+        if(response['command'] in (state.system_codes['got_kicked'], state.system_codes['got_banned'])):
+            state.clientRoomsFile.remove(args[0])
 
         data = ('', f"[{args[0]}] {{System}}", disp_msg)
         print(formatting.format(data, ('s', 'cl', 'c')))
@@ -94,10 +107,10 @@ def system(response:dict):
     if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
     # Change Receiver if currently in contact or by force 
-    if(response['command'] in state.receiver_change_codes and state.receiver == args[0]):
+    if(response['command'] in state.change_codes and state.receiver == args[0]):
         state.receiver_change('', False)
     
-    elif(response['command'] in state.receiver_change_codes):
+    elif(response['command'] in state.force_change_codes):
         state.receiver_change('', False)
 
     data = ('', "{System}", disp_msg)

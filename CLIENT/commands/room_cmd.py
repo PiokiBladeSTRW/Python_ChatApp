@@ -13,8 +13,20 @@ import commands.error_handle as errors
 def join_room(room_name:str) -> tuple:    
     state.log(f"Running room:join {room_name}")
     state.receiver_change('/r'+room_name)
-    payload = ((state.client_codes['room_join'], room_name), state.msgTypes['system'])
-    return ('send', payload)    
+    payload = ((state.client_codes['room_join'], ''), state.msgTypes['system'])
+    return ('send', payload)  
+
+'''Members in Room'''  
+def members() -> tuple: 
+    state.log(f"Running room:members")
+    payload = ((state.client_codes['room_members'],''), state.msgTypes['system'])    
+    return ('send', payload)
+
+'''Obtain Info of Room'''
+def info() -> tuple:
+    state.log(f"Running room:info")
+    payload = ((state.client_codes['room_info'], ''), state.msgTypes['system'])
+    return ('send', payload)
 
 '''Create a Room'''
 def create_room(room_name:str) -> tuple: 
@@ -22,26 +34,55 @@ def create_room(room_name:str) -> tuple:
 
     if(room_name in state.clientRoomsFile): return errors.error_handle("Room Already Exists")        
 
-    state.clientRoomsFile.append(room_name)
-
     state.receiver_change('/r'+room_name)                
-    payload = ((state.client_codes['room_create'], room_name), state.msgTypes['system'])
+    payload = ((state.client_codes['room_create'], ''), state.msgTypes['system'])
     return ('send', payload)
+
+'''Set Room Description'''
+def set_desc(description: list) -> tuple:
+    state.log(f"Running room:desc {description}")
+
+    description = ' '.join(description)
+    payload = ((state.client_codes['room_desc'], description), state.msgTypes['system'])
+    return ('send', payload)
+
 
 '''Invite user to Room'''
 def invite_user(username:str) -> tuple:  
     state.log(f"Running room:invite {username}")  
     if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
-
-    room = state.receiver[2::]
-    payload = ((state.client_codes['room_invite'],  (room,username)), state.msgTypes['system'])
+    
+    payload = ((state.client_codes['room_invite'],  username), state.msgTypes['system'])
     return ('send', payload)
 
 '''Make user an Admin'''
 def admin_user(username:str) -> tuple:
     state.log(f"Running room:adming {username}")
     if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+    
+    payload = ((state.client_codes['room_admin'], username), state.msgTypes['system'])
+    return ('send', payload)
 
-    room = state.receiver[2::]
-    payload = ((state.client_codes['room_admin'], (room,username)), state.msgTypes['system'])
+'''Kick User from Room'''
+def kick_user(username:str) -> tuple:
+    state.log(f"Running room:kick {username}")
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+    
+    payload = ( (state.client_codes['room_kick'], username), state.msgTypes['system'])
+    return ('send', payload)
+
+'''Ban User from Room'''
+def ban_user(username:str) -> tuple:
+    state.log(f"Running room:ban {username}")
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+    
+    payload = ( (state.client_codes['room_ban'], username), state.msgTypes['system'])
+    return ('send', payload)
+
+'''Unban User from Room'''
+def unban_user(username: str) -> tuple:
+    state.log(f"Running room:unban {username}")
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+
+    payload = ( (state.client_codes['room_unban'], username), state.msgTypes['system'])
     return ('send', payload)

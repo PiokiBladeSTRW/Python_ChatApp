@@ -4,3 +4,7 @@ __trash__/
 __llm__/
 logs/
 plans.txt
+SERVER/accounts.json
+SERVER/rooms.json
+SERVER/uuids.json
+CLIENT/rooms/

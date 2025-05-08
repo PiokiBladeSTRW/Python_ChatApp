@@ -10,7 +10,7 @@ def login(credentials: object) -> dict:
     '''Verify the credentials sent are Valid'''
     if(credentials.username in state.uuidsFile):
         #Hash password
-        user_uuid = state.uuidsFile[credentials.username]
+        user_uuid = state.user_uuid(credentials.username)
         salt = state.accountsFile[user_uuid]['salt']
         salted_pass = credentials.password + salt
         passwd = hashlib.sha256(salted_pass.encode()).hexdigest()        
@@ -43,6 +43,10 @@ def register(credentials: object) -> dict:
         "salt": salt, 
         "rooms": []                                     
         }
-    state.uuidsFile[credentials.username] = user_uuid
+    
+    state.uuidsFile[credentials.username] ={
+        'uuid': user_uuid,
+        'profile': ''
+    }    
 
     return {"sender_id": user_uuid}
