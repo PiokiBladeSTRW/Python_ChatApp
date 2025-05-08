@@ -85,10 +85,13 @@ class ServerState:
         }
 
 
-    def uuid_user(self, uuid):
-        return self.accountsFile[uuid]['username']
+    def uuid_user(self, uuid:str):
+        return self.accountsFile.get(uuid)['username']
     
-    def log(self, msg):
+    def user_uuid(self, user:str):        
+        return self.uuidsFile.get(user)['uuid']
+    
+    def log(self, msg:str):
         logger.opt(depth=1).info(msg)
     
 state = ServerState()

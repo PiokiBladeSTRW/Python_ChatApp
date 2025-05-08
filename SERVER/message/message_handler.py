@@ -22,13 +22,13 @@ def dm_handle(response:dict) -> tuple:
     # Handle Errors
     possible_errors = {
         'er_Invalid_user':  (response['receiver'] not in state.uuidsFile, [response['receiver']]),
-        'user_exit':        (state.uuidsFile.get(response['receiver']) not in state.uuid_sock, [response['receiver']])
+        'user_exit':        (state.user_uuid(response['receiver']) not in state.uuid_sock, [response['receiver']])
     }
     
     if(data := errors.multiple_error_handle(possible_errors)): return data
 
     #Sender: UUID->USERNAME  ; Receiver: USERNAME->UUID
     response['sender'] = state.uuid_user(response['sender'])    
-    receiver = state.uuidsFile[response.pop('receiver')]
+    receiver = state.user_uuid(response.pop('receiver'))
 
     return (receiver, json.dumps(response))
