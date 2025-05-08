@@ -38,6 +38,7 @@ class ClientState:
             "member_ban" : 111,
             "got_kicked": 112,
             "got_banned": 113,
+            "member_unban":114,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -48,7 +49,8 @@ class ClientState:
             "er_Member_is_admin": 207,
             "er_Invalid_user": 208,
             'er_Invalid_room': 209,
-            'er_Not_in_room': 210            
+            'er_Not_in_room': 210, 
+            'er_Member_not_ban' : 211      
         }
         
         self.sys_code_msg={
@@ -61,10 +63,11 @@ class ClientState:
             107 : "Made {1} an Admin",
             108 : "Your account is at Risk; Password Compromised",
             109 : "The Session is still active, Try Again Later",
-            110 : "{1} has been Kicked from {0}",
-            111 : "{1} has been Banned from {0}",
+            110 : "{1} has been Kicked",
+            111 : "{1} has been Banned",
             112 : "You were Kicked from {0} by {1}",
             113 : "You were Banned from {0} by {1}",
+            114 : "{1} has been Unbanned",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
@@ -75,9 +78,10 @@ class ClientState:
             207 : "Member already admin",
             208 : "The user doesn't exist",
             209 : "The room doesn't exist",
-            210 : "The Member isn't in Room"            
+            210 : "The Member isn't in Room",
+            211 : "The Member isn't Banned"          
         }
-        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113)
+        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114)
         self.change_codes = (101,208, 112, 113)
         self.force_change_codes = (204, 205, 209)
         self.special_commands = (109,)
@@ -92,7 +96,8 @@ class ClientState:
             'room_admin' : 7,
             'room_kick' : 8,
             'room_ban' : 9,
-            'room_members' : 10
+            'room_members' : 10,
+            'room_unban' : 11
         }
 
 

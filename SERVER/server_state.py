@@ -20,7 +20,7 @@ class ServerState:
             self.uuidsFile = json.load(fileHandle)
 
         with open ("rooms.json", 'r') as fileHandle:
-            self.roomsFile = json.load(fileHandle)
+            self.roomsFile = json.load(fileHandle)            
 
         for room in self.roomsFile:
             self.room_sock[room] = []
@@ -55,6 +55,7 @@ class ServerState:
             "member_ban": 111,
             "got_kicked": 112,
             "got_banned": 113,
+            "member_unban":114,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -65,7 +66,8 @@ class ServerState:
             "er_Member_is_admin": 207,
             "er_Invalid_user": 208,
             'er_Invalid_room': 209,
-            'er_Not_in_room': 210,            
+            'er_Not_in_room': 210, 
+            'er_Member_not_ban' : 211
         }
 
         self.client_codes ={
@@ -78,7 +80,8 @@ class ServerState:
             'room_admin' : 7,
             'room_kick' : 8,
             'room_ban' : 9,
-            "room_members" : 10
+            "room_members" : 10,
+            'room_unban' : 11
         }
 
 

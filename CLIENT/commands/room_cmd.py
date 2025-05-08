@@ -68,3 +68,12 @@ def ban_user(username:str) -> tuple:
     room = state.receiver[2::]
     payload = ( (state.client_codes['room_ban'], (room, username)), state.msgTypes['system'])
     return ('send', payload)
+
+'''Unban User from Room'''
+def unban_user(username: str) -> tuple:
+    state.log(f"Running room:unban {username}")
+    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+
+    room = state.receiver[2::]
+    payload = ( (state.client_codes['room_unban'], (room, username)), state.msgTypes['system'])
+    return ('send', payload)

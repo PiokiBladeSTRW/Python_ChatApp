@@ -24,7 +24,7 @@ def encode_payload(command:int=None, content=None,  sender: str = None) -> str:
 
 def modify_room(room:str, operation: tuple, clientSock:object =None, uuid:str =None ) -> None:
     '''Types of Operation: (CREATE, N_JOIN, INVITE, R_INVITE, ADMIN, KICK, BAN)
-    clientSock: Person using Command ;  uuid: Person on receiving End of Command'''
+    clientSock: Person using Command ;  uuid: Person on receiving End of Command'''    
 
     # Ran By Person Creating Server
     if('CREATE' in operation):
@@ -58,10 +58,16 @@ def modify_room(room:str, operation: tuple, clientSock:object =None, uuid:str =N
 
         state.sock_rooms[state.uuid_sock[uuid]].remove(room)
         state.room_sock[room].remove(state.uuid_sock[uuid])
-
+    
     # Ran by Admin Targetted to Member
     if('BAN' in operation):
         state.roomsFile[room]['bans'].append(uuid)
+    
+    # Ran by Admin Targetted to Member
+    if('UNBAN' in operation):    
+        print(f"\n>>{state.roomsFile[room]['bans']}")  
+        state.roomsFile[room]['bans'].remove(uuid)
+        print(state.roomsFile[room]['bans'])
 
 '''----------------------------------------------'''
 
@@ -88,7 +94,6 @@ def room_list() -> tuple:
 '''# Gives user a list of room members [/room members]'''
 def room_members(response: dict) -> tuple:    
     member_data = '\n'.join([state.uuid_user(x) for x in state.roomsFile[response['content']]['members']])
-
     return ('/s', encode_payload(content = member_data))
 
 '''============================='''
@@ -141,7 +146,7 @@ def room_invite(response:dict) -> tuple:
     
     # Modify and Send  
     uuid = state.uuidsFile[username]
-    modify_room(room, ('INVITE'), uuid= uuid)
+    modify_room(room, ('INVITE',), uuid= uuid)
     return (uuid, encode_payload(state.system_codes['room_invite'], sender= f'/r{room}'))
 
 '''# Makes someone an Admin of Room [/room admin]'''
@@ -158,7 +163,7 @@ def room_admin(response:dict) -> tuple:
  
     # Modify and Send
     uuid = state.uuidsFile[username]
-    modify_room(room, ('ADMIN'), uuid= uuid)          
+    modify_room(room, ('ADMIN',), uuid= uuid)          
     return (f'/r{room}',
             encode_payload( state.system_codes['member_admin'],[username], f'/r{room}'))
 
@@ -176,7 +181,7 @@ def room_kick(response:dict) -> tuple:
     
     # Modify and Send
     uuid = state.uuidsFile[username]
-    modify_room(room, ('KICK'), uuid= uuid)          
+    modify_room(room, ('KICK',), uuid= uuid)          
     return (
         (f'/r{room}', encode_payload( state.system_codes['member_kick'], [username], f'/r{room}')),
         (uuid, encode_payload( state.system_codes['got_kicked'], [username], f'/r{room}'))
@@ -200,4 +205,26 @@ def room_ban(response:dict) -> tuple:
     return (
         (f'/r{room}', encode_payload( state.system_codes['member_ban'],  [username], f'/r{room}')),
         (uuid, encode_payload( state.system_codes['got_banned'], [username], f'/r{room}'))
+        )
+
+'''# Unban someone from the Room [/room unban]'''
+def room_unban(response:dict) -> tuple:    
+    room, username = response['content'][0], response['content'][1]    
+    print(f"\n>>{state.roomsFile[room]['bans']}") 
+
+    #Catch Errors
+    possible_errors = {
+        'er_Invalid_user':  (username not in state.uuidsFile, [username]),
+        'er_Not_admin':     (response['sender'] not in state.roomsFile[room]['admins'], None),
+        'er_Member_not_ban': (state.uuidsFile.get(username) not in state.roomsFile[room]['bans'], None)
+    }
+    if(data := errors.multiple_error_handle(possible_errors)): return data
+    
+    print(f"\n>>{state.roomsFile[room]['bans']}") 
+
+    # Modify and Send
+    uuid = state.uuidsFile[username]    
+    modify_room(room, ('UNBAN',), uuid= uuid)          
+    return (
+        (f'/r{room}', encode_payload( state.system_codes['member_unban'],  [username], f'/r{room}'))
         )

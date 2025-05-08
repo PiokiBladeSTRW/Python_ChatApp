@@ -82,6 +82,7 @@ def room(args:list) -> tuple:
         case "admin": data = room_cmd.admin_user(args[1])
         case "kick": data = room_cmd.kick_user(args[1])
         case "ban": data = room_cmd.ban_user(args[1])
+        case "unban": data = room_cmd.unban_user(args[1])
         case "members": data = room_cmd.members()
         case _: return errors.error_handle("Invalid Command!")
 
