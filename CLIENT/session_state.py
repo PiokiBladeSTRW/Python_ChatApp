@@ -77,9 +77,9 @@ class ClientState:
             209 : "The room doesn't exist",
             210 : "The Member isn't in Room"            
         }
-        self.sys_format = (101,104,105,106,107)
-        self.receiver_change_codes = (101,208)
-        self.receiver_force_change_codes = (204, 205, 209)
+        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113)
+        self.change_codes = (101,208, 112, 113)
+        self.force_change_codes = (204, 205, 209)
         self.special_commands = (109,)
 
         self.client_codes ={

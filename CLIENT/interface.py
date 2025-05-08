@@ -59,7 +59,8 @@ def system(response:dict):
     
 
     ''' Handle Different Types of Sys Commands. More Dynamic (& confusing) than other modules'''
-    #Special Commands
+
+    #Special Commands [aka Return]
     if(response['command'] in state.special_commands):
         
         # Force Kick
@@ -81,6 +82,14 @@ def system(response:dict):
 
         if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
+        # If Have to Change
+        if(response['command'] in state.change_codes and state.receiver == f"/r{args[0]}"):
+            state.receiver_change('', False)
+        
+        # If Removed from Room
+        if(response['command'] in (state.system_codes['got_kicked'], state.system_codes['got_banned'])):
+            state.clientRoomsFile.remove(args[0])
+
         data = ('', f"[{args[0]}] {{System}}", disp_msg)
         print(formatting.format(data, ('s', 'cl', 'c')))
         return
@@ -94,10 +103,10 @@ def system(response:dict):
     if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
     # Change Receiver if currently in contact or by force 
-    if(response['command'] in state.receiver_change_codes and state.receiver == args[0]):
+    if(response['command'] in state.change_codes and state.receiver == args[0]):
         state.receiver_change('', False)
     
-    elif(response['command'] in state.receiver_change_codes):
+    elif(response['command'] in state.force_change_codes):
         state.receiver_change('', False)
 
     data = ('', "{System}", disp_msg)
