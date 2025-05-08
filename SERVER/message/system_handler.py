@@ -78,13 +78,18 @@ def online_list(response:dict) -> tuple:
     user_data = (state.uuid_user(x) for x in uuid_data) 
     data = '\n'.join(user_data)    
 
-    return ('/s', encode_payload(conetnt= data))
+    return ('/s', encode_payload(content= data))
 
 '''# Gives user a list of rooms [/rooms]'''
 def room_list() -> tuple:
     data = '\n'.join(state.room_sock.keys())
     return ('/s', encode_payload(content= data))
 
+'''# Gives user a list of room members [/room members]'''
+def room_members(response: dict) -> tuple:    
+    member_data = '\n'.join([state.uuid_user(x) for x in state.roomsFile[response['content']]['members']])
+
+    return ('/s', encode_payload(content = member_data))
 
 '''============================='''
 
@@ -185,8 +190,7 @@ def room_ban(response:dict) -> tuple:
     possible_errors = {
         'er_Invalid_user':  (username not in state.uuidsFile, [username]),
         'er_Not_admin':     (response['sender'] not in state.roomsFile[room]['admins'], None),
-        'er_Not_in_room':   (state.uuidsFile[username] not in state.roomsFile[room]['members'], None),
-        'member_ban' :       (state.uuidsFile[username] in state.roomsFile[room]['bans'], [username])
+        'er_Not_in_room':   (state.uuidsFile[username] not in state.roomsFile[room]['members'], None)
     }
     if(data := errors.multiple_error_handle(possible_errors)): return data
     

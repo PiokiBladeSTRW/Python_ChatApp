@@ -14,7 +14,12 @@ def join_room(room_name:str) -> tuple:
     state.log(f"Running room:join {room_name}")
     state.receiver_change('/r'+room_name)
     payload = ((state.client_codes['room_join'], room_name), state.msgTypes['system'])
-    return ('send', payload)    
+    return ('send', payload)  
+
+'''Members in Room'''  
+def members() -> tuple: 
+    payload = ((state.client_codes['room_members'], state.receiver[2::]), state.msgTypes['system'])    
+    return ('send', payload)
 
 '''Create a Room'''
 def create_room(room_name:str) -> tuple: 

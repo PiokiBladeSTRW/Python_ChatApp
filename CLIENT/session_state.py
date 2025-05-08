@@ -91,7 +91,8 @@ class ClientState:
             'room_invite': 6,
             'room_admin' : 7,
             'room_kick' : 8,
-            'room_ban' : 9
+            'room_ban' : 9,
+            'room_members' : 10
         }
 
 
