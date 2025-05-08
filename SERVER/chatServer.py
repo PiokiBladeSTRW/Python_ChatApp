@@ -195,9 +195,9 @@ class ChatServer:
             state.log(f"\nDATA: {state.uuid_sock} \n{state.room_sock}")
             #Open and store data to each file
             with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
-                json.dump(state.accountsFile, accountHandle)         
-                json.dump(state.uuidsFile, uuidHandle)                
-                json.dump(state.roomsFile, roomHandle)
+                json.dump(state.accountsFile, accountHandle, indent=4)         
+                json.dump(state.uuidsFile, uuidHandle, indent=4)                
+                json.dump(state.roomsFile, roomHandle, indent=4)
 
             await asyncio.sleep(self.fileIOFrequency)
 
