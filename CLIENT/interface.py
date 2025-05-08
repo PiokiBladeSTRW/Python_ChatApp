@@ -85,6 +85,10 @@ def system(response:dict):
         # If Have to Change
         if(response['command'] in state.change_codes and state.receiver == f"/r{args[0]}"):
             state.receiver_change('', False)
+
+        # Add to Room
+        if(response['command'] in (state.system_codes['room_live'], state.system_codes['room_invite'])):
+            state.clientRoomsFile.append(args[0])
         
         # If Removed from Room
         if(response['command'] in (state.system_codes['got_kicked'], state.system_codes['got_banned'])):

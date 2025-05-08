@@ -84,7 +84,7 @@ class ClientState:
         self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114)
         self.change_codes = (101,208, 112, 113)
         self.force_change_codes = (204, 205, 209)
-        self.special_commands = (109,)
+        self.special_commands = (109,)        
 
         self.client_codes ={
             'user_exit': 1,
@@ -144,6 +144,9 @@ class ClientState:
             #payload[0] = (command_code, arguments)
             data["command"] = payload[0][0]
             data["content"] = payload[0][1]
+
+            if(self.receiver.startswith('/r')): data['receiver'] = self.receiver            
+            if(data['content'] == ''): data.pop('content')
 
         '''
         Message Format: {"sender": <username>, 
