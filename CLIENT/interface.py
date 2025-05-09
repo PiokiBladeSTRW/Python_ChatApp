@@ -88,7 +88,7 @@ def system(response:dict):
         if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
         # If Have to Change
-        if(response['command'] in state.change_codes and state.receiver_id == f"/r{args[0]}"):
+        if(response['command'] in state.change_codes and state.receiver_id == response['sender_id']):
             state.receiver_id_change('', False)
 
         # # Add to Room
