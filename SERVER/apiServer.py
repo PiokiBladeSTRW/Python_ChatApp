@@ -26,9 +26,8 @@ def register(credentials: authPayload) -> dict:
 # System
 
 
-@chatApp.get("/uuid_to_user/{uuid}")
-def uuid_to_user(uuid: str) -> dict:
-
+@chatApp.get("/uuid_to_name/{uuid}")
+def uuid_to_name(uuid: str) -> dict:    
     if(uuid in state.accountsFile):
             username = state.accountsFile[uuid]['username']
             return {"content": username}

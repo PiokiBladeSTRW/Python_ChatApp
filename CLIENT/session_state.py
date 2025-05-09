@@ -201,6 +201,7 @@ class ClientState:
         logger.opt(depth=1).info(msg)
 
     def name_uuid(self, name: str) -> str:
+        state.log(f"Converting {name} to UUID")
         if(name in state.name_uuid_dict): 
             return state.name_uuid_dict[name]
         else:
@@ -209,15 +210,18 @@ class ClientState:
                 print("Account/Room of such Name doesn't Exist")
                 return 0
             
+            state.log(f"Updated UUIDs file with {uuid}:{name}")
             state.uuidsFile[uuid] = name
             return uuid
         
     def uuid_name(self, uuid: str) -> str:
+        state.log(f"Converting {uuid} to Name")
         if(uuid in state.uuidsFile): 
             return state.uuidsFile[uuid]
         else:
             name = requests.get(f"http://127.0.0.1:8000/uuid_to_name/{uuid}").json()['content']
 
+            state.log(f"Updated UUIDs file with {uuid}:{name}")
             state.uuidsFile[uuid] = name
             return name
 

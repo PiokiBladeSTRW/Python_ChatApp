@@ -9,7 +9,8 @@ from session_state import state
 '''Handle Default Messages'''
 def incoming_message(response:dict):
     def dms(): 
-        data = (response['timestamp'], response['sender_id'], response['content'])
+        username = state.uuid_name(response['sender_id'])
+        data = (response['timestamp'], username, response['content'])
 
         # Direct Message : [Time] > Message
         if(data[1] == state.receiver_id): 
@@ -20,13 +21,14 @@ def incoming_message(response:dict):
             print(formatting.format(data, ('s', 'cl', 'c', 'A')))
 
     def rooms():
-        room, username =response['sender_id'][0], response['sender_id'][1]
-        if(room not in state.clientRoomsFile['room']): state.clientRoomsFile['room'].append(room)
-
-        data = (response['timestamp'], f"[{room}] {username}", response['content'])
+        room_uuid, user_uuid =response['sender_id'][0], response['sender_id'][1]
+        #if(room_uuid not in state.clientRoomsFile['room']): state.clientRoomsFile['room'].append(room_uuid)
+        
+        room_name, username = state.uuid_name(room_uuid), state.uuid_name(user_uuid)
+        data = (response['timestamp'], f"[{room_name}] {username}", response['content'])
 
         # Direct Room Broadcast
-        if(room == state.receiver_id[2::]):
+        if(room_uuid == state.receiver_id):
             print(formatting.format(data, ('bt', 's', 'cl', 'c')))
 
         # Incoming Room Broadcast
@@ -34,14 +36,15 @@ def incoming_message(response:dict):
             print(formatting.format(data, ('s', 'cl', 'c', 'A')))
 
     # Check whether the message is a DM or Room Message
-    if( type(response['sender_id']) == list):        
+    if( type(response['sender_id']) == list):         
         rooms()        
     else:
         dms()
 
 '''Handle User Loggings'''
 def online_user(response:dict):
-    data = ('', response['sender_id'], "is ONLINE")
+    username = state.uuid_name(response['sender_id'])
+    data = ('', username, "is ONLINE")
 
     # OUTPUT : [sender_id 'is Online'
     print(formatting.format(data, ('s', 'c', 'S')))
