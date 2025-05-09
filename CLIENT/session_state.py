@@ -132,9 +132,9 @@ class ClientState:
         with open(f"client_data/uuid_map/{state.clientProfile}.json", 'r') as uuidHandle:
             self.uuidsFile: dict = json.load(uuidHandle)
         
-        self.name_uuid=  {}
+        self.name_uuid_dict=  {}
         for uuid in self.uuidsFile:
-            self.name_uuid[self.uuidsFile[uuid]] = uuid
+            self.name_uuid_dict[self.uuidsFile[uuid]] = uuid
 
     '''Encode the data'''
     def encode(self, payload:tuple):
@@ -200,9 +200,9 @@ class ClientState:
     def log(self, msg):
         logger.opt(depth=1).info(msg)
 
-    def name_uuid(name: str) -> str:
-        if(name in state.name_uuid): 
-            return state.name_uuid[name]
+    def name_uuid(self, name: str) -> str:
+        if(name in state.name_uuid_dict): 
+            return state.name_uuid_dict[name]
         else:
             uuid = requests.get(f"http://127.0.0.1:8000/name_to_uuid/{name}").json()['content']
             if(uuid == 0):
@@ -212,7 +212,7 @@ class ClientState:
             state.uuidsFile[uuid] = name
             return uuid
         
-    def uuid_name(uuid: str) -> str:
+    def uuid_name(self, uuid: str) -> str:
         if(uuid in state.uuidsFile): 
             return state.uuidsFile[uuid]
         else:

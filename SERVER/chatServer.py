@@ -44,7 +44,7 @@ class ChatServer:
         try:
             await asyncio.gather(self.receive(clientSock))
         except websockets.exceptions.ConnectionClosed:
-            self.disconnectionPending.put(clientSock)
+            await self.disconnectionPending.put(clientSock)
             print("Closed")   
 
 
@@ -191,7 +191,7 @@ class ChatServer:
         while True:  
             state.log("Server Files Reupdated")            
             #Open and store data to each file
-            with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
+            with open("accounts.json", 'w') as accountHandle, open("acc_uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
                 json.dump(state.accountsFile, accountHandle, indent=4)         
                 json.dump(state.uuidsFile, uuidHandle, indent=4)                
                 json.dump(state.roomsFile, roomHandle, indent=4)

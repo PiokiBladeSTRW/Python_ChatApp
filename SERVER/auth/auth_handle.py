@@ -7,7 +7,7 @@ from server_state import state
 
 def login(credentials: object) -> dict: 
     '''Verify the credentials sent are Valid'''
-    if(credentials.username in state.uuidsFile):
+    if(credentials.username in state.username_uuid):
         #Hash password
         user_uuid = state.user_uuid(credentials.username)
         salt = state.accountsFile[user_uuid]['salt']
@@ -24,7 +24,7 @@ def register(credentials: object) -> dict:
     '''Create an account with given credentials if username isn't conflicting'''
     
     #Ensure Username Doesn't Exist Already
-    if(credentials.username in state.uuidsFile):        
+    if(credentials.username in state.username_uuid):        
         return {"content": "The Username is Taken"}
 
     #Secure the Data   
