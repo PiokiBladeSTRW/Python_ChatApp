@@ -180,13 +180,13 @@ class ClientState:
         return json.dumps(data)
     
     '''Change receiver_ids'''
-    def receiver_id_change(self, receiver, update_past = True):           
+    def receiver_id_change(self, receiver, update_past = True, is_uuid =True):           
         if(update_past): 
             self.preceiver_id = self.receiver_id
         self.receiver_id = receiver       
         
         if(receiver==''): receiver = 'No One'
-        else : receiver = state.uuidsFile[receiver]
+        elif(is_uuid) : receiver = state.uuidsFile[receiver]
 
         self.log(f"Changed receiver_id to {receiver}")
         

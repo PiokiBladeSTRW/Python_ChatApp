@@ -12,7 +12,7 @@ def every(clientSock):
 
 '''Room Broadcasts'''
 def room(clientSock, destination:str): 
-    rC = list(state.room_sock[destination[2::]])
+    rC = list(state.room_sock[destination])
     rC.remove(clientSock)    
 
     return tuple(rC)
