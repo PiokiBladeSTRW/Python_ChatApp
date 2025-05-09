@@ -26,17 +26,30 @@ def register(credentials: authPayload) -> dict:
 # System
 
 
-@chatApp.get("/who_is/{uuid}")
-def who_is(uuid: str) -> dict:
+@chatApp.get("/uuid_to_user/{uuid}")
+def uuid_to_user(uuid: str) -> dict:
+
     if(uuid in state.accountsFile):
-        username = state.accountsFile[uuid]['username']
-        return {"content": username, "type":"sys"}
+            username = state.accountsFile[uuid]['username']
+            return {"content": username}
     
     elif(uuid in state.roomsFile):
         room_name = state.roomsFile[uuid]['name']
-        return {"content": room_name, "type":"sys"}
+        return {"content": room_name}
     
     raise HTTPException(404, f"Invalid UUID {uuid}")
+
+@chatApp.get("/name_to_uuid/{name}")
+def name_to_uuid(name: str) -> dict:
+    
+    if(name in state.username_uuid):
+        return {"content": state.username_uuid[name]}
+    
+    if(name in state.roomName_roomUuid)    :
+        return {"content": state.roomName_roomUuid[name]}
+    
+    return {"content": 0}
+     
 
 
 # Check for Server being online
