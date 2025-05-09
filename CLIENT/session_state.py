@@ -207,5 +207,9 @@ class ClientState:
             if(uuid == 0):
                 print("Account/Room of such Name doesn't Exist")
                 return 0
+            
+            state.uuidsFile[uuid] = name
+            return uuid
+
 
 state = ClientState()
