@@ -26,7 +26,7 @@ def connect(clientSock:object, response:dict) -> tuple:
         state.room_sock[room].append(clientSock)                
         state.sock_rooms[clientSock].append(room)
 
-    return ('/.', json.dumps({"sender_id":state.uuid_user(user_uuid),"type": "con" }))
+    return ('/.', json.dumps({"sender_id": user_uuid,"type": "con" }))
 
 '''Handle regular old messages'''
 def handle_messages(clientSock:object, response:dict) -> tuple: 

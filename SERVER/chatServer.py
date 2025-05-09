@@ -161,10 +161,7 @@ class ChatServer:
         while True:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
-            if(leavingClient):   
-                state.log(f"SOCK UUID: {state.sock_uuid}")  
-                state.log(f"UUID {state.sock_uuid[leavingClient]} disconnected")   
-
+            if(leavingClient):                   
                 #Remove Client from Rooms
                 if(leavingClient in state.sock_rooms):
                     for room in state.sock_rooms[leavingClient]:
@@ -175,12 +172,12 @@ class ChatServer:
                 #Room user from Global Variables
                 uuid = state.sock_uuid.pop(leavingClient)
                 state.uuid_sock.pop(uuid)
+                state.timeout.pop(leavingClient)    
 
-                state.timeout.pop(leavingClient)                
-                username = state.uuid_user(uuid)
+                state.log(f"UUID {uuid} disconnected")              
                 
                 #Broadcast others that User is Offline                
-                payload = json.dumps({"command": state.system_codes['user_exit'], "content": [username], "type":"sys"})                
+                payload = json.dumps({"command": state.system_codes['user_exit'], "content": [uuid], "type":"sys"})                
                 await self.broadcast(leavingClient, '/.', payload)
 
                 await leavingClient.close()

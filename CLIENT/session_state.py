@@ -81,6 +81,7 @@ class ClientState:
             211 : "The Member isn't Banned"          
         }
         self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114)
+        self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)
         self.change_codes = (101,208, 112, 113)
         self.force_change_codes = (204, 205, 209)
         self.special_commands = (109,)        
