@@ -157,7 +157,7 @@ class ClientState:
             data["command"] = payload[0][0]
             data["content"] = payload[0][1]
 
-            if(self.receiver_id.startswith('/r')): data['receiver_id'] = self.receiver_id            
+            if(self.receiver_id.startswith('room_')): data['receiver_id'] = self.receiver_id            
             if(data['content'] == ''): data.pop('content')
 
         '''   
@@ -190,7 +190,7 @@ class ClientState:
 
         self.log(f"Changed receiver_id to {receiver}")
         
-        if(receiver.startswith('/r')):
+        if(receiver.startswith('room_')):
             print('', "="*25, f"Now Chatting in {receiver[2::]}", "="*25, sep='\n')
             return
 

@@ -91,7 +91,7 @@ class ChatServer:
             return
                   
         #If no Receiving Clients but not an Error case
-        if(destination.startswith('/r') or destination == '/.'): return
+        if(destination.startswith('room_') or destination == '/.'): return
         
         #If receiving client does not exist
         payload = json.dumps({"command":state.system_codes['user_exit'], "content": destination, "type":"sys"})

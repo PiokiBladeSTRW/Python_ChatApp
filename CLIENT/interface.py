@@ -80,7 +80,7 @@ def system(response:dict):
         # Format: [0] = Room ; [1] =  Username        
         args = list(state.uuid_name(response['sender_id']))
         if(response.get('content')):             
-            username = state.uuid_name(response['content'])
+            username = state.name_uuid(response['content'])
             args += username
         
         disp_msg = state.sys_code_msg[response['command']]        
