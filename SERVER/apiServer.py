@@ -23,6 +23,15 @@ def login(credentials: authPayload) -> dict:
 def register(credentials: authPayload) -> dict: 
     return auth_handle.register(credentials)
 
+# System
+
+
+@chatApp.get("/who_is/{uuid}")
+def who_is(uuid: str) -> dict:
+    username = state.accountsFile[uuid]['username']
+    return {"content": username, "type":"sys"}
+
+
 # Check for Server being online
 @chatApp.get("/")
 def online() -> bool:

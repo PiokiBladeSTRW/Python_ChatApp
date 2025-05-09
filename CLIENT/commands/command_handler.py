@@ -80,10 +80,6 @@ def profile(args:list) -> tuple:
 
         case _: return errors.error_handle("Invalid Command!")
 
-def who_is(args:list) -> tuple:
-    payload = ( (state.client_codes['who_is'], args[0]), state.msgTypes['system'])
-    return ('send', payload)
-
 
 '''========================== type : none'''
 
@@ -147,9 +143,7 @@ commands = {
 
     "/room": room,
 
-    "/profile": profile,
-
-    "/who_is": who_is
+    "/profile": profile
 }
 
 

@@ -85,8 +85,7 @@ class ServerState:
             'profile_get': 12,
             'profile_set': 13,
             'room_desc': 14,
-            'room_info': 15,
-            'who_is': 100
+            'room_info': 15
         }
 
 

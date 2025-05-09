@@ -142,12 +142,6 @@ def profile_set(response:dict) -> tuple:
 
     return('*', None)   
 
-def who_is(response:dict) ->tuple:
-    if(response['content'] in state.accountsFile):
-        return ('/s', encode_payload(content = state.accountsFile[response['content']]['username']))
-    return ('/s', encode_payload(content= "invalid uuid"))
-
-
 '''============================='''
 
 
