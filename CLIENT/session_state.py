@@ -183,9 +183,10 @@ class ClientState:
     def receiver_change(self, receiver, update_past = True):           
         if(update_past): 
             self.pReceiver = self.receiver
-        self.receiver = receiver        
+        self.receiver = receiver       
         
         if(receiver==''): receiver = 'No One'
+        else : receiver = state.uuidsFile[receiver]
 
         self.log(f"Changed Receiver to {receiver}")
         
