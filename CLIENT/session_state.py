@@ -136,7 +136,7 @@ class ClientState:
 
         # Data always to be sent regardless of Type
         data = {
-                "sender": self.clientUUID,                      
+                "sender_id": self.clientUUID,                      
                 "content": payload[0], 
                 "type": payload[1]
             }
@@ -156,7 +156,7 @@ class ClientState:
 
         '''   
         Message Fields:
-            senderID    = UUID of Sender
+            sender_idID    = UUID of sender_id
             receiverID  = UUID of Receiver
             receiver    = Name of Receiver [Used in case of 'First Contact']
             command     = Command Code

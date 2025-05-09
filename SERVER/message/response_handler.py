@@ -11,7 +11,7 @@ def heartbeats(clientSock:object, response:dict) -> tuple:
 
 '''Handle connecting User to server'''
 def connect(clientSock:object, response:dict) -> tuple:
-    user_uuid = response['sender']
+    user_uuid = response['sender_id']
 
     if(user_uuid in state.uuid_sock):
         state.log(f"User Relogging: {user_uuid}")
@@ -26,7 +26,7 @@ def connect(clientSock:object, response:dict) -> tuple:
         state.room_sock[room].append(clientSock)                
         state.sock_rooms[clientSock].append(room)
 
-    return ('/.', json.dumps({"sender":state.uuid_user(user_uuid),"type": "con" }))
+    return ('/.', json.dumps({"sender_id":state.uuid_user(user_uuid),"type": "con" }))
 
 '''Handle regular old messages'''
 def handle_messages(clientSock:object, response:dict) -> tuple: 

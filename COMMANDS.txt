@@ -28,7 +28,7 @@ The Rest of Client Commands: The command isn't sent to Server, only the payload 
 SERVER:
 
 *CODES (Command Substituent):
-101 : To notify users when a client goes offline, Disconnecting Client being the Sender
+101 : To notify users when a client goes offline, Disconnecting Client being the sender_id
 102 : To notify users to wait while Server closes their old session
 103 : To notify users that process is finished and they have relogged
 104 : To notify users that a new member has joined the room
@@ -49,7 +49,7 @@ SERVER:
 
 *Types
 1. sys: System Message, returns Errors & Instructions [ like commands ]
-2. auth: Confirmation of User's attempt to log on; Presence of 'sender' key makes it a [is Online] msg
+2. auth: Confirmation of User's attempt to log on; Presence of 'sender_id' key makes it a [is Online] msg
 
 *Destinations
 1. /. : Every Online Client
@@ -60,15 +60,15 @@ SERVER:
 
 
 DATA FIELDS:
-sender ; receiver ; content ; command ; timestamp ; type
+sender_id ; receiver ; content ; command ; timestamp ; type
 
-Client To Server -> Always Present: Sender, Content, Type 
+Client To Server -> Always Present: sender_id, Content, Type 
                         Receiver (Present for msg)
                         Command (Present for sys)                        
                         Timestamp (Present for msg)
 
 Server To Client -> Always Present: Type
-                        Sender (Present for msg)
+                        sender_id (Present for msg)
                         Receiver (Present for None)
                         Command (Present for sys)
                         Content (Present always except for Solo Commands)

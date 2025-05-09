@@ -10,7 +10,7 @@ errors = CatchError()
 def room_handle(response:dict) -> tuple:
     room = response['receiver'][2::]
     response.pop('receiver')    
-    response['sender'] = (room, state.uuid_user(response['sender']))
+    response['sender_id'] = (room, state.uuid_user(response['sender_id']))
     
     return (f'/r{room}', json.dumps(response))
 
@@ -27,8 +27,8 @@ def dm_handle(response:dict) -> tuple:
     
     if(data := errors.multiple_error_handle(possible_errors)): return data
 
-    #Sender: UUID->USERNAME  ; Receiver: USERNAME->UUID
-    response['sender'] = state.uuid_user(response['sender'])    
+    #sender_id: UUID->USERNAME  ; Receiver: USERNAME->UUID
+    response['sender_id'] = state.uuid_user(response['sender_id'])    
     receiver = state.user_uuid(response.pop('receiver'))
 
     return (receiver, json.dumps(response))

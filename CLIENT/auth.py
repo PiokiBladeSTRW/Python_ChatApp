@@ -72,8 +72,8 @@ def start_auth() -> str:
         if(not authRes): continue
 
         # Succesful Log-In
-        if(authRes.get('sender_id')):        
-            return authRes['sender_id']
+        if(authRes.get('sender_id_id')):        
+            return authRes['sender_id_id']
 
         # Server Side Fail
         print(authRes['content'])

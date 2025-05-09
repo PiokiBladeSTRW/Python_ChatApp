@@ -73,7 +73,7 @@ class ChatServer:
                 match payload:
                     case '/exit': await self.disconnectionPending.put(clientSock)
                     case '/hbp': state.timeout[clientSock] = time.time()
-                    case '/relog': await self.relog(response['sender'], clientSock)
+                    case '/relog': await self.relog(response['sender_id'], clientSock)
                 continue
             
             await self.broadcast(clientSock, destination, payload)
@@ -152,7 +152,7 @@ class ChatServer:
 
         # Let user and others know
         username = state.accountsFile[uuid]['username']
-        await self.broadcast(clientSock,  '/.', json.dumps({"sender":username,"type": "con" }))
+        await self.broadcast(clientSock,  '/.', json.dumps({"sender_id":username,"type": "con" }))
 
         await self.send(clientSock, json.dumps({"command": state.system_codes['relog_finish'], "type": "sys"}))
         return

@@ -9,18 +9,18 @@ from session_state import state
 '''Handle Default Messages'''
 def incoming_message(response:dict):
     def dms(): 
-        data = (response['timestamp'], response['sender'], response['content'])
+        data = (response['timestamp'], response['sender_id'], response['content'])
 
         # Direct Message : [Time] > Message
         if(data[1] == state.receiver): 
             print(formatting.format(data, ('bt', 'a', 'c')))  
             
-        # Incoming Message : < Sender : Message >
+        # Incoming Message : < sender_id : Message >
         else:
             print(formatting.format(data, ('s', 'cl', 'c', 'A')))
 
     def rooms():
-        room, username =response['sender'][0], response['sender'][1]
+        room, username =response['sender_id'][0], response['sender_id'][1]
         if(room not in state.clientRoomsFile['room']): state.clientRoomsFile['room'].append(room)
 
         data = (response['timestamp'], f"[{room}] {username}", response['content'])
@@ -34,16 +34,16 @@ def incoming_message(response:dict):
             print(formatting.format(data, ('s', 'cl', 'c', 'A')))
 
     # Check whether the message is a DM or Room Message
-    if( type(response['sender']) == list):        
+    if( type(response['sender_id']) == list):        
         rooms()        
     else:
         dms()
 
 '''Handle User Loggings'''
 def online_user(response:dict):
-    data = ('', response['sender'], "is ONLINE")
+    data = ('', response['sender_id'], "is ONLINE")
 
-    # OUTPUT : [Sender 'is Online'
+    # OUTPUT : [sender_id 'is Online'
     print(formatting.format(data, ('s', 'c', 'S')))
 
 '''Handle System Messages'''
@@ -70,12 +70,12 @@ def system(response:dict):
             return 'kick'
 
     # Room Based System Message
-    if(response.get('sender')):
+    if(response.get('sender_id')):
         '''
-        As of now, only room has sender tag, in case of future aversion, add within if-else
+        As of now, only room has sender_id tag, in case of future aversion, add within if-else
         '''
         # Format: [0] = Room ; [1] =  Username
-        args = [response['sender'][2::]]
+        args = [response['sender_id'][2::]]
         if(response.get('content')): args += response['content']
         
         disp_msg = state.sys_code_msg[response['command']]        
