@@ -2,7 +2,7 @@ from server_state import state
 import auth.auth_handle as auth_handle
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 
@@ -28,8 +28,15 @@ def register(credentials: authPayload) -> dict:
 
 @chatApp.get("/who_is/{uuid}")
 def who_is(uuid: str) -> dict:
-    username = state.accountsFile[uuid]['username']
-    return {"content": username, "type":"sys"}
+    if(uuid in state.accountsFile):
+        username = state.accountsFile[uuid]['username']
+        return {"content": username, "type":"sys"}
+    
+    elif(uuid in state.roomsFile):
+        room_name = state.roomsFile[uuid]['name']
+        return {"content": room_name, "type":"sys"}
+    
+    raise HTTPException(404, f"Invalid UUID {uuid}")
 
 
 # Check for Server being online
