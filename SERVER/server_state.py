@@ -17,13 +17,13 @@ class ServerState:
         self.roomName_roomUuid = {}     # Room Name : Room UUID [Stored Only in Memory]
         
         with open("accounts.json", 'r') as fileHandle:
-            self.accountsFile = json.load(fileHandle)
+            self.accountsFile: dict = json.load(fileHandle)
             
         with open("acc_uuids.json", 'r') as fileHandle:
-            self.uuidsFile = json.load(fileHandle)
+            self.uuidsFile: dict = json.load(fileHandle)
 
         with open ("rooms.json", 'r') as fileHandle:
-            self.roomsFile = json.load(fileHandle)    
+            self.roomsFile: dict = json.load(fileHandle)    
 
         for room in self.roomsFile:
             self.room_sock[room] = []
@@ -102,6 +102,9 @@ class ServerState:
 
     def uuid_user(self, uuid:str):
         return self.accountsFile.get(uuid)['username']
+    
+    def user_uuid(self, username:str):
+        return self.username_uuid.get(username)
     
     def log(self, msg:str):
         logger.opt(depth=1).info(msg)
