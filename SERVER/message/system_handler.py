@@ -34,13 +34,14 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object =None, user_u
         room_uuid = 'room_' + str(uuid.uuid4())
 
         state.room_sock[room_uuid] = []
+        state.roomName_roomUuid[room_name] = room_uuid
         state.roomsFile[room_uuid] = {'name': room_name,
                                       'members': [], 
                                       'admins': [], 
                                       'invites': [], 
                                       'bans': [],
                                       'creation': time.strftime("%D", time.localtime()),
-                                      'desc': ""}  
+                                      'desc': ""}          
         return room_uuid
 
     # Ran by Person joining Server
@@ -170,7 +171,7 @@ def room_create(clientSock:object, response:dict) -> tuple:
 
     room_uuid = modify_room(None, ('CREATE',), clientSock, room_name=room_name)
 
-    modify_room(room_uuid, ('N_JOIN', 'ADMIN'), clientSock, state.sock_uuid[clientSock])
+    modify_room(room_uuid, ('N_JOIN', 'ADMIN'), clientSock, state.sock_uuid[clientSock])    
 
     return ('/s', encode_payload(state.system_codes['room_live'], sender_id= room_uuid))
 
