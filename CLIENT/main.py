@@ -26,7 +26,7 @@ async def entry():
         if(no_uuid):
             try:
                 requests.get("http://127.0.0.1:8000/")
-                user_uuid = auth.start_auth()
+                user_uuid, username = auth.start_auth()                
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")
                 attempt += 1
@@ -36,6 +36,7 @@ async def entry():
             no_uuid = False
             state.log(f"UUID OBTAINED: {user_uuid}")
             state.clientUUID = user_uuid
+            state.uuidsFile[user_uuid] = username
 
         try:
             await client.connectClient()
