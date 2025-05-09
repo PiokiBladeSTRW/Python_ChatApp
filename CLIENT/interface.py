@@ -12,7 +12,7 @@ def incoming_message(response:dict):
         data = (response['timestamp'], response['sender_id'], response['content'])
 
         # Direct Message : [Time] > Message
-        if(data[1] == state.receiver): 
+        if(data[1] == state.receiver_id): 
             print(formatting.format(data, ('bt', 'a', 'c')))  
             
         # Incoming Message : < sender_id : Message >
@@ -26,7 +26,7 @@ def incoming_message(response:dict):
         data = (response['timestamp'], f"[{room}] {username}", response['content'])
 
         # Direct Room Broadcast
-        if(room == state.receiver[2::]):
+        if(room == state.receiver_id[2::]):
             print(formatting.format(data, ('bt', 's', 'cl', 'c')))
 
         # Incoming Room Broadcast
@@ -83,8 +83,8 @@ def system(response:dict):
         if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
         # If Have to Change
-        if(response['command'] in state.change_codes and state.receiver == f"/r{args[0]}"):
-            state.receiver_change('', False)
+        if(response['command'] in state.change_codes and state.receiver_id == f"/r{args[0]}"):
+            state.receiver_id_change('', False)
 
         # Add to Room
         if(response['command'] in (state.system_codes['room_live'], state.system_codes['room_invite'])):
@@ -106,12 +106,12 @@ def system(response:dict):
 
     if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
-    # Change Receiver if currently in contact or by force 
-    if(response['command'] in state.change_codes and state.receiver == args[0]):
-        state.receiver_change('', False)
+    # Change receiver_id if currently in contact or by force 
+    if(response['command'] in state.change_codes and state.receiver_id == args[0]):
+        state.receiver_id_change('', False)
     
     elif(response['command'] in state.force_change_codes):
-        state.receiver_change('', False)
+        state.receiver_id_change('', False)
 
     data = ('', "{System}", disp_msg)
     print(formatting.format(data, ('s', 'cl', 'c')))

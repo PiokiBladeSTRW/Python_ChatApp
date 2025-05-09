@@ -9,8 +9,8 @@ from loguru import logger
 class ClientState:
     def __init__(self):
         self.clientUUID = ''
-        self.receiver = ''
-        self.pReceiver = ''
+        self.receiver_id = ''
+        self.preceiver_id = ''
         self.clientSock = None        
         self.clientProfile = ''
 
@@ -149,7 +149,7 @@ class ClientState:
         
         # Additional Data Entries
         if(data['type'] in ('msg')):
-            data['receiver'] = self.receiver
+            data['receiver_id'] = self.receiver_id
             data['timestamp'] = str(time.time())
         
         elif(data['type'] == 'sys'):
@@ -157,14 +157,14 @@ class ClientState:
             data["command"] = payload[0][0]
             data["content"] = payload[0][1]
 
-            if(self.receiver.startswith('/r')): data['receiver'] = self.receiver            
+            if(self.receiver_id.startswith('/r')): data['receiver_id'] = self.receiver_id            
             if(data['content'] == ''): data.pop('content')
 
         '''   
         Message Fields:
             sender_idID    = UUID of sender_id
-            receiverID  = UUID of Receiver
-            receiver    = Name of Receiver [Used in case of 'First Contact']
+            receiver_idID  = UUID of receiver_id
+            receiver_id    = Name of receiver_id [Used in case of 'First Contact']
             command     = Command Code
             content     = Command Arguments in case of Command
             timestamp   = Epoch timestamp
@@ -179,16 +179,16 @@ class ClientState:
 
         return json.dumps(data)
     
-    '''Change Receivers'''
-    def receiver_change(self, receiver, update_past = True):           
+    '''Change receiver_ids'''
+    def receiver_id_change(self, receiver, update_past = True):           
         if(update_past): 
-            self.pReceiver = self.receiver
-        self.receiver = receiver       
+            self.preceiver_id = self.receiver_id
+        self.receiver_id = receiver       
         
         if(receiver==''): receiver = 'No One'
         else : receiver = state.uuidsFile[receiver]
 
-        self.log(f"Changed Receiver to {receiver}")
+        self.log(f"Changed receiver_id to {receiver}")
         
         if(receiver.startswith('/r')):
             print('', "="*25, f"Now Chatting in {receiver[2::]}", "="*25, sep='\n')

@@ -1,14 +1,14 @@
 '''Handle Commands used by Client: Bring Changes and parse message for server if needed
 
 Commands and Actions
-    /dm <username> <msg>    : Initiates a DM with given Username as Receiver
-    /#                      : Removes Receiver, that is closing a DM
+    /dm <username> <msg>    : Initiates a DM with given Username as receiver_id
+    /#                      : Removes receiver_id, that is closing a DM
     /exit                   : Exit                                            [Parsed as /e]
     /online                 : Online List                                     [Parsed as /o]        
     /create <room>          : Create a Room                                   [Parsed as /c+<room>]
-    /join <room> <msg>      : Initiates messaging with Room as Receiver        
+    /join <room> <msg>      : Initiates messaging with Room as receiver_id        
     /rooms                  : List of Rooms                                   [Parsed as /r]
-    /b                      : Backtracks Receiver to Swap
+    /b                      : Backtracks receiver_id to Swap
 '''
 # Header
 import requests
@@ -29,7 +29,7 @@ def handle_dm(args:list) -> tuple:
     uuid = state.name_uuid(args[0])
     if(uuid == 0): return (None, None)
 
-    state.receiver_change(uuid)
+    state.receiver_id_change(uuid)
     payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload)
 
@@ -91,14 +91,14 @@ def profile(args:list) -> tuple:
 '''========================== type : none'''
 
 
-'''Reset Receiver'''
+'''Reset receiver_id'''
 def reset_rec(args:list) -> tuple: 
-    state.receiver_change('')
+    state.receiver_id_change('')
     return (None, None)
     
-'''Backtrack Receiver'''
+'''Backtrack receiver_id'''
 def back_rec(args:list) -> tuple: 
-    state.receiver_change(state.pReceiver)
+    state.receiver_id_change(state.preceiver_id)
     return (None, None)
 
 '''Display Help'''

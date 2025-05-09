@@ -104,12 +104,12 @@ def room_list() -> tuple:
 
 '''# Gives user a list of room members [/room members]'''
 def room_members(response: dict) -> tuple:    
-    member_data = '\n'.join([state.uuid_user(x) for x in state.roomsFile[response['receiver']]['members']])
+    member_data = '\n'.join([state.uuid_user(x) for x in state.roomsFile[response['receiver_id']]['members']])
     return ('/s', encode_payload(content = member_data))
 
 '''# Gives user a detailed info on room [/room info]'''
 def room_info(response:dict) -> tuple:
-    room = response['receiver']
+    room = response['receiver_id']
 
     desc, created = state.roomsFile[room]['desc'], state.roomsFile[room]['creation']
     info_data = f"\nRoom Name: {room} \nDescription: {desc} \nCreated On: {created}"
@@ -117,7 +117,7 @@ def room_info(response:dict) -> tuple:
 
 '''# Sets Room's Description [/room desc]'''
 def room_desc(response:dict) -> tuple:
-    room_uuid = response['receiver']
+    room_uuid = response['receiver_id']
 
     if(data := errors.error_handle(response['sender'] not in state.roomsFile[room_uuid]['admins'], 'er_Not_admin')): 
         return data
@@ -148,7 +148,7 @@ def profile_set(response:dict) -> tuple:
 
 '''# Join a Room [/room join]'''
 def room_join(clientSock:object, response:dict) -> tuple:    
-    room_uuid = response['receiver']
+    room_uuid = response['receiver_id']
 
     #ERROR HANDLING [NOT DONE BY ERROR CLASS DUE TO SECOND CONDITION BEING MASSING AND DEPENDENT ON FIRST]
     if(data := errors.error_handle(room_uuid not in state.roomsFile, 'er_Invalid_room')): return data
@@ -166,7 +166,7 @@ def room_join(clientSock:object, response:dict) -> tuple:
 
 '''# Creates a new room [/room create]'''
 def room_create(clientSock:object, response:dict) -> tuple:
-    room_name = response['receiver'].split('_')[1]    
+    room_name = response['receiver_id'].split('_')[1]    
 
     room_uuid = modify_room(None, ('CREATE',), clientSock, room_name=room_name)
 
@@ -176,7 +176,7 @@ def room_create(clientSock:object, response:dict) -> tuple:
 
 '''# Invites someone to a room [/room invite]'''
 def room_invite(response:dict) -> tuple:    
-    room_uuid, user_uuid = response['receiver'], response['content']
+    room_uuid, user_uuid = response['receiver_id'], response['content']
 
     #Catch Errors
     possible_errors = {
@@ -197,7 +197,7 @@ def room_invite(response:dict) -> tuple:
 
 '''# Makes someone an Admin of Room [/room admin]'''
 def room_admin(response:dict) -> tuple:    
-    room_uuid, user_uuid = response['receiver'], response['content']
+    room_uuid, user_uuid = response['receiver_id'], response['content']
 
     #Catch Errors
     possible_errors = {
@@ -214,7 +214,7 @@ def room_admin(response:dict) -> tuple:
 
 '''# Kick someone from the Room [/room kick]'''
 def room_kick(response:dict) -> tuple:
-    room_uuid, user_uuid = response['receiver'], response['content'] 
+    room_uuid, user_uuid = response['receiver_id'], response['content'] 
 
     #Catch Errors
     possible_errors = {
@@ -233,7 +233,7 @@ def room_kick(response:dict) -> tuple:
 
 '''# Ban someone from the Room [/room ban]'''
 def room_ban(response:dict) -> tuple:
-    room_uuid, user_uuid = response['receiver'], response['content']  
+    room_uuid, user_uuid = response['receiver_id'], response['content']  
 
     #Catch Errors
     possible_errors = {
@@ -253,7 +253,7 @@ def room_ban(response:dict) -> tuple:
 
 '''# Unban someone from the Room [/room unban]'''
 def room_unban(response:dict) -> tuple:    
-    room_uuid, user_uuid = response['receiver'], response['content']  
+    room_uuid, user_uuid = response['receiver_id'], response['content']  
 
     #Catch Errors
     possible_errors = {

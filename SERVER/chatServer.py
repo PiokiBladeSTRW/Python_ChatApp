@@ -81,7 +81,7 @@ class ChatServer:
     async def broadcast(self, clientSock:websockets.ClientConnection, destination:str, payload:str) -> None:
         state.log(f"Sending data {payload} to {destination} \n")
 
-        #Obtain list of Receivers
+        #Obtain list of receiver_ids
         receivingClients = routing.parse_destination(clientSock, destination)
 
         #Send to receiving clients

@@ -79,7 +79,7 @@ class ChatClient:
                     case None: pass              
                     case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
-            elif(state.receiver):
+            elif(state.receiver_id):
                 self.exit_code = await self.sendPayload( (msgInput, state.msgTypes['message']) )
 
             else:

@@ -31,7 +31,7 @@ def connect(clientSock:object, response:dict) -> tuple:
 '''Handle regular old messages'''
 def handle_messages(clientSock:object, response:dict) -> tuple: 
     # Seperately Handle Room and Normal Messages
-    if(response['receiver'].startswith('room_')):
+    if(response['receiver_id'].startswith('room_')):
         return message_handle.room_handle(response)    
     else:
         return message_handle.dm_handle(response) 
@@ -81,7 +81,7 @@ types ={
 
 '''
 RETURN FORMAT: (DESTINATION, PAYLOAD, STATE)
-    RECEIVER: 
+    receiver_id: 
         '/.'     : All Online
         '/r--'  : All in a Room        
         '/s'    : User Alert   

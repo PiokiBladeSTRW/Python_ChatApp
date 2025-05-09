@@ -32,7 +32,7 @@ def direct(destination:str):
 '''-------------------------------------'''
 
 
-'''Parse Destination to determine Receivers'''
+'''Parse Destination to determine receiver_ids'''
 def parse_destination(clientSock, destination:str):
     if(destination[:2] in dest):
         data = dest[destination[:2]](clientSock, destination)
