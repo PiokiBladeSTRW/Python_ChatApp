@@ -13,7 +13,7 @@ def incoming_message(response:dict):
         data = (response['timestamp'], username, response['content'])
 
         # Direct Message : [Time] > Message
-        if(data[1] == state.receiver_id): 
+        if(response['sender_id'] == state.receiver_id): 
             print(formatting.format(data, ('bt', 'a', 'c')))  
             
         # Incoming Message : < sender_id : Message >
