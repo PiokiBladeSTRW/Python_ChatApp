@@ -101,6 +101,8 @@ class ClientState:
             'profile_set': 13,
             'room_desc': 14,
             'room_info': 15,
+
+            'who_is': 100,
         }
 
 
@@ -127,7 +129,7 @@ class ClientState:
         with open(f"client_data/rooms/{clientProfile}.json", 'r') as roomsHandler:
             self.clientRoomsFile = json.load(roomsHandler)
 
-        with open(f"client_data/uuid_mapping/{state.clientProfile}.json", 'w') as uuidHandle:
+        with open(f"client_data/uuid_map/{state.clientProfile}.json", 'r') as uuidHandle:
             self.uuidsFile = json.load(uuidHandle)
 
     '''Encode the data'''

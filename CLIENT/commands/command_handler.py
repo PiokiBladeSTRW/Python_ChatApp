@@ -80,6 +80,10 @@ def profile(args:list) -> tuple:
 
         case _: return errors.error_handle("Invalid Command!")
 
+def who_is(args:list) -> tuple:
+    payload = ( (state.client_codes['who_is'], args[0]), state.msgTypes['system'])
+    return ('send', payload)
+
 
 '''========================== type : none'''
 
@@ -98,11 +102,6 @@ def back_rec(args:list) -> tuple:
 def chat_help(args:list) -> tuple:
     import help
     return (None, None)
-
-
-'''========================== type : sys'''
-
-
 
 
 
@@ -129,8 +128,7 @@ def parse_command(input_cmd:str) -> tuple:
     # Execute Command
     if cmd in commands: 
         state.log(f"Running Command: {cmd}")       
-        return commands[cmd](args)
-        return data
+        return commands[cmd](args)        
     
     return errors.error_handle("Invalid Command!")
     
@@ -149,7 +147,9 @@ commands = {
 
     "/room": room,
 
-    "/profile": profile
+    "/profile": profile,
+
+    "/who_is": who_is
 }
 
 

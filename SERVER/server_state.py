@@ -16,7 +16,7 @@ class ServerState:
         with open("accounts.json", 'r') as fileHandle:
             self.accountsFile = json.load(fileHandle)
             
-        with open("uuids.json", 'r') as fileHandle:
+        with open("acc_uuids.json", 'r') as fileHandle:
             self.uuidsFile = json.load(fileHandle)
 
         with open ("rooms.json", 'r') as fileHandle:
@@ -86,6 +86,7 @@ class ServerState:
             'profile_set': 13,
             'room_desc': 14,
             'room_info': 15,
+            'who_is': 100
         }
 
 
