@@ -12,6 +12,9 @@ class ServerState:
         self.sock_rooms = {}            # socket : [rooms]                  -Auth
         self.room_sock= {}             # room name : [sockets]             -State
         self.timeout= {}                # socket: last heartbeat  
+
+        self.username_uuid = {}             # Username : UUID [Stored only in Memory]
+        self.roomName_roomUuid = {}     # Room Name : Room UUID [Stored Only in Memory]
         
         with open("accounts.json", 'r') as fileHandle:
             self.accountsFile = json.load(fileHandle)
@@ -20,10 +23,18 @@ class ServerState:
             self.uuidsFile = json.load(fileHandle)
 
         with open ("rooms.json", 'r') as fileHandle:
-            self.roomsFile = json.load(fileHandle)            
+            self.roomsFile = json.load(fileHandle)    
 
         for room in self.roomsFile:
             self.room_sock[room] = []
+
+
+        for uuid in self.accountsFile:
+            self.username_uuid[self.accountsFile[uuid]['username']] = uuid
+
+        for room_uuid in self.roomsFile:
+            self.roomName_roomUuid[self.roomsFile[room_uuid]['name']] = room_uuid
+
 
         logger.remove()
         log_format = (
@@ -91,9 +102,6 @@ class ServerState:
 
     def uuid_user(self, uuid:str):
         return self.accountsFile.get(uuid)['username']
-    
-    def user_uuid(self, user:str):        
-        return self.uuidsFile.get(user)['uuid']
     
     def log(self, msg:str):
         logger.opt(depth=1).info(msg)
