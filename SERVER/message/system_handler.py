@@ -26,7 +26,8 @@ def encode_payload(command:int=None, content=None,  sender_id: str = None) -> st
 
 def modify_room(room_uuid:str, operation: tuple, clientSock:object =None, user_uuid:str =None, room_name: str = None):
     '''Types of Operation: (CREATE, N_JOIN, INVITE, R_INVITE, ADMIN, KICK, BAN)
-    clientSock: Person using Command ;  uuid: Person on receiving End of Command'''    
+    clientSock: Person using Command ;  uuid: Person on receiving End of Command
+    Returning Operations: (CREATE,)'''    
 
     # Ran By Person Creating Server
     if('CREATE' in operation):        
@@ -40,7 +41,7 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object =None, user_u
                                       'bans': [],
                                       'creation': time.strftime("%D", time.localtime()),
                                       'desc': ""}  
-        state.room_uuidsFile[room_name] = room_uuid
+        return room_uuid
 
     # Ran by Person joining Server
     if('N_JOIN' in operation):
@@ -146,9 +147,8 @@ def profile_set(response:dict) -> tuple:
 
 
 '''# Join a Room [/room join]'''
-def room_join(clientSock:object, response:dict) -> tuple:
-    room_name = response['receiver'].split('_')[1]
-    room_uuid = state.roomName_roomUuid.get(room_name)
+def room_join(clientSock:object, response:dict) -> tuple:    
+    room_uuid = response['receiver']
 
     #ERROR HANDLING [NOT DONE BY ERROR CLASS DUE TO SECOND CONDITION BEING MASSING AND DEPENDENT ON FIRST]
     if(data := errors.error_handle(room_uuid not in state.roomsFile, 'er_Invalid_room')): return data
@@ -168,109 +168,103 @@ def room_join(clientSock:object, response:dict) -> tuple:
 def room_create(clientSock:object, response:dict) -> tuple:
     room_name = response['receiver'].split('_')[1]    
 
-    modify_room(None, ('CREATE',), clientSock, room_name=room_name)
+    room_uuid = modify_room(None, ('CREATE',), clientSock, room_name=room_name)
 
-    room_uuid = state.roomName_roomUuid[room_name]    
     modify_room(room_uuid, ('N_JOIN', 'ADMIN'), clientSock, state.sock_uuid[clientSock])
 
     return ('/s', encode_payload(state.system_codes['room_live'], sender_id= room_uuid))
 
 '''# Invites someone to a room [/room invite]'''
 def room_invite(response:dict) -> tuple:    
-    room_uuid, username = response['receiver'], response['content']
+    room_uuid, user_uuid = response['receiver'], response['content']
 
     #Catch Errors
     possible_errors = {
-        'er_Invalid_user':  (username not in state.uuidsFile, [username]),
-        'user_exit':        (state.user_uuid(username) not in state.uuid_sock, [username]),
+        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
+        'user_exit':        (user_uuid not in state.uuid_sock, [user_uuid]),
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
         'er_Member_in_room':(
-            state.uuid_sock.get(state.user_uuid(username)) in state.room_sock[room_uuid] or 
-            state.uuidsFile.get(username) in state.roomsFile[room_uuid]['invites'], None),
-        'member_ban' :       (state.user_uuid(username) in state.roomsFile[room_uuid]['bans'], [room_uuid, username])
+            state.uuid_sock.get(user_uuid) in state.room_sock[room_uuid] or 
+            user_uuid in state.roomsFile[room_uuid]['invites'], None),
+        'member_ban' :       (user_uuid in state.roomsFile[room_uuid]['bans'], [room_uuid, user_uuid])
     }
     
     if(data := errors.multiple_error_handle(possible_errors)): return data
     
-    # Modify and Send  
-    uuid = state.user_uuid(username)
-    modify_room(room_uuid, ('INVITE',), uuid= uuid)
+    # Modify and Send      
+    modify_room(room_uuid, ('INVITE',), uuid= user_uuid)
     return (uuid, encode_payload(state.system_codes['room_invite'], sender_id= room_uuid))
 
 '''# Makes someone an Admin of Room [/room admin]'''
 def room_admin(response:dict) -> tuple:    
-    room_uuid, username = response['receiver'], response['content']
+    room_uuid, user_uuid = response['receiver'], response['content']
 
     #Catch Errors
     possible_errors = {
-        'er_Invalid_user':  (username not in state.uuidsFile, [username]),
+        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Member_is_admin':(state.user_uuid(username) in state.roomsFile[room_uuid]['admins'], None)
+        'er_Member_is_admin':(user_uuid in state.roomsFile[room_uuid]['admins'], None)
     }
     if(data := errors.multiple_error_handle(possible_errors)): return data
  
     # Modify and Send
-    uuid = state.user_uuid(username)
-    modify_room(room_uuid, ('ADMIN',), uuid= uuid)          
+    modify_room(room_uuid, ('ADMIN',), uuid= user_uuid)          
     return (room_uuid,
-            encode_payload( state.system_codes['member_admin'],[username], room_uuid))
+            encode_payload( state.system_codes['member_admin'],[user_uuid], room_uuid))
 
 '''# Kick someone from the Room [/room kick]'''
 def room_kick(response:dict) -> tuple:
-    room_uuid, username = response['receiver'], response['content'] 
+    room_uuid, user_uuid = response['receiver'], response['content'] 
 
     #Catch Errors
     possible_errors = {
-        'er_Invalid_user':  (username not in state.uuidsFile, [username]),
+        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Not_in_room':   (state.user_uuid(username) not in state.roomsFile[room_uuid]['members'], None)
+        'er_Not_in_room':   (user_uuid not in state.roomsFile[room_uuid]['members'], None)
     }
     if(data := errors.multiple_error_handle(possible_errors)): return data
     
     # Modify and Send
-    uuid = state.user_uuid(username)
-    modify_room(room_uuid, ('KICK',), uuid= uuid)          
+    modify_room(room_uuid, ('KICK',), uuid= user_uuid)          
     return (
-        (room_uuid, encode_payload( state.system_codes['member_kick'], [username], room_uuid)),
-        (uuid, encode_payload( state.system_codes['got_kicked'], [username], room_uuid))
+        (room_uuid, encode_payload( state.system_codes['member_kick'], [user_uuid], room_uuid)),
+        (uuid, encode_payload( state.system_codes['got_kicked'], [user_uuid], room_uuid))
         )
 
 '''# Ban someone from the Room [/room ban]'''
 def room_ban(response:dict) -> tuple:
-    room_uuid, username = response['receiver'], response['content']  
+    room_uuid, user_uuid = response['receiver'], response['content']  
 
     #Catch Errors
     possible_errors = {
-        'er_Invalid_user':  (username not in state.uuidsFile, [username]),
+        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Not_in_room':   (state.user_uuid(username) not in state.roomsFile[room_uuid]['members'], None),
-        'member_ban' :       (state.uuidsFile.get(username) in state.roomsFile[room_uuid]['bans'], [room_uuid, username])
+        'er_Not_in_room':   (user_uuid not in state.roomsFile[room_uuid]['members'], None),
+        'member_ban' :       (user_uuid in state.roomsFile[room_uuid]['bans'], [room_uuid, user_uuid])
     }
     if(data := errors.multiple_error_handle(possible_errors)): return data
     
     # Modify and Send
-    uuid = state.user_uuid(username)
-    modify_room(room_uuid, ('BAN', 'KICK'), uuid= uuid)          
+    modify_room(room_uuid, ('BAN', 'KICK'), uuid= user_uuid)          
     return (
-        (room_uuid, encode_payload( state.system_codes['member_ban'],  [username], room_uuid)),
-        (uuid, encode_payload( state.system_codes['got_banned'], [username], room_uuid))
+        (room_uuid, encode_payload( state.system_codes['member_ban'],  [user_uuid], room_uuid)),
+        (uuid, encode_payload( state.system_codes['got_banned'], [user_uuid], room_uuid))
         )
 
 '''# Unban someone from the Room [/room unban]'''
 def room_unban(response:dict) -> tuple:    
-    room_uuid, username = response['receiver'], response['content']  
+    room_uuid, user_uuid = response['receiver'], response['content']  
 
     #Catch Errors
     possible_errors = {
-        'er_Invalid_user':  (username not in state.uuidsFile, [username]),
+        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Member_not_ban': (state.uuidsFile.get(username) not in state.roomsFile[room_uuid]['bans'], None)
+        'er_Member_not_ban': (user_uuid not in state.roomsFile[room_uuid]['bans'], None)
     }
     if(data := errors.multiple_error_handle(possible_errors)): return data
 
     # Modify and Send
-    uuid = state.user_uuid(username) 
-    modify_room(room_uuid, ('UNBAN',), uuid= uuid)          
+    modify_room(room_uuid, ('UNBAN',), uuid= user_uuid)          
     return (
-        (room_uuid, encode_payload( state.system_codes['member_unban'],  [username], room_uuid))
+        (room_uuid, encode_payload( state.system_codes['member_unban'],  [user_uuid], room_uuid))
         )

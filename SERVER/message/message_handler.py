@@ -8,11 +8,11 @@ errors = CatchError()
 '''----------------------------------------------'''
 
 def room_handle(response:dict) -> tuple:
-    room = response['receiver'][2::]
+    room_uuid = response['receiver']
     response.pop('receiver')    
-    response['sender_id'] = (room, response['sender_id'])
+    response['sender_id'] = (room_uuid, response['sender_id'])
     
-    return (f'/r{room}', json.dumps(response))
+    return (room_uuid, json.dumps(response))
 
 '''----------------------------------------------'''
 
@@ -21,13 +21,13 @@ def dm_handle(response:dict) -> tuple:
 
     # Handle Errors
     possible_errors = {
-        'er_Invalid_user':  (response['receiver'] not in state.uuidsFile, [response['receiver']]),
-        'user_exit':        (state.user_uuid(response['receiver']) not in state.uuid_sock, [response['receiver']])
+        'er_Invalid_user':  (response['receiver'] not in state.accountsFile, [response['receiver']]),
+        'user_exit':        (response['receiver'] not in state.uuid_sock, [response['receiver']])
     }
     
     if(data := errors.multiple_error_handle(possible_errors)): return data
 
     #sender_id: UUID->USERNAME  ; Receiver: USERNAME->UUID       
-    receiver = state.user_uuid(response.pop('receiver'))
+    receiver = response.pop('receiver')
 
     return (receiver, json.dumps(response))

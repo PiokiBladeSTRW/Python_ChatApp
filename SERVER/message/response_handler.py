@@ -31,7 +31,7 @@ def connect(clientSock:object, response:dict) -> tuple:
 '''Handle regular old messages'''
 def handle_messages(clientSock:object, response:dict) -> tuple: 
     # Seperately Handle Room and Normal Messages
-    if(response['receiver'].startswith('/r')):
+    if(response['receiver'].startswith('room_')):
         return message_handle.room_handle(response)    
     else:
         return message_handle.dm_handle(response) 
