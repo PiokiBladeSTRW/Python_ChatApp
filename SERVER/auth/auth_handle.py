@@ -16,7 +16,7 @@ def login(credentials: object) -> dict:
 
         #Match Password
         if(passwd == state.accountsFile[user_uuid]['passwd']):  
-            return {"sender_id_id": user_uuid}
+            return {"sender_id": user_uuid}
         
     return {"content": "Invalid Username or Password"}
 
@@ -47,4 +47,4 @@ def register(credentials: object) -> dict:
         'profile': ''
     }    
 
-    return {"sender_id_id": user_uuid}
+    return {"sender_id": user_uuid}
