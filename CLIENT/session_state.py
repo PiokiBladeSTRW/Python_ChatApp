@@ -10,8 +10,7 @@ class ClientState:
         self.clientUUID = ''
         self.receiver = ''
         self.pReceiver = ''
-        self.clientSock = None
-        self.clientRoomsFile = []
+        self.clientSock = None        
         self.clientProfile = ''
 
         logger.remove()
@@ -125,9 +124,11 @@ class ClientState:
         )
 
         #Room Handling setup
-        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
-            data = json.load(roomsHandler)
-            self.clientRoomsFile = data['rooms']
+        with open(f"client_data/rooms/{clientProfile}.json", 'r') as roomsHandler:
+            self.clientRoomsFile = json.load(roomsHandler)
+
+        with open(f"client_data/uuid_mapping/{state.clientProfile}.json", 'w') as uuidHandle:
+            self.uuidsFile = json.load(uuidHandle)
 
     '''Encode the data'''
     def encode(self, payload:tuple):

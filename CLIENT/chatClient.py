@@ -140,7 +140,7 @@ class ChatClient:
 
             #Seperate for Now as 'MAYBE' both will be merged later, hence for readability
             with open(f"client_data/rooms/{state.clientProfile}.json", 'w') as roomHandle:
-                json.dump({"rooms": list(state.clientRoomsFile)}, roomHandle)
+                json.dump(state.clientRoomsFile, roomHandle)
 
             with open(f"client_data/uuid_mapping/{state.clientProfile}.json", 'w') as uuidHandle:
                 json.dump(state.uuidsFile, uuidHandle)
