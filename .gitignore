@@ -6,5 +6,6 @@ logs/
 plans.txt
 SERVER/accounts.json
 SERVER/rooms.json
-SERVER/uuids.json
+SERVER/acc_uuids.json
+SERVER/room_uuids.json
 CLIENT/rooms/
