@@ -131,6 +131,7 @@ class ClientState:
 
     '''Encode the data'''
     def encode(self, payload:tuple):
+        #Payload = (Content, Type) [or ( (Command, Arguments+), Type)]
 
         # Data always to be sent regardless of Type
         data = {
@@ -152,13 +153,15 @@ class ClientState:
             if(self.receiver.startswith('/r')): data['receiver'] = self.receiver            
             if(data['content'] == ''): data.pop('content')
 
-        '''
-        Message Format: {"sender": <username>, 
-                        "receiver": <username>,
-                        "command" : <command_code>,
-                        "content": '--', 
-                        "type": 'msg/..',
-                        "timestamp": "[Hour:Minute]"}     
+        '''   
+        Message Fields:
+            senderID    = UUID of Sender
+            receiverID  = UUID of Receiver
+            receiver    = Name of Receiver [Used in case of 'First Contact']
+            command     = Command Code
+            content     = Command Arguments in case of Command
+            timestamp   = Epoch timestamp
+            type        = Distinguishing different forms of Data
 
         Types:
         ->msg: Default String Message

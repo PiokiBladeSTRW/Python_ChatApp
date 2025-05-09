@@ -23,9 +23,7 @@ class ChatClient:
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"     
-        self.exit_code = None    
-            
-                
+        self.exit_code = None               
         
     async def connectClient(self) -> None: 
         self.clientSock = await websockets.connect(self.serverAddress)
@@ -139,8 +137,13 @@ class ChatClient:
         while True:   
             state.log("Client Files Reupdated")
             #Open and store data to each file
-            with open(f"rooms/{state.clientProfile}.json", 'w') as roomHandle:
+
+            #Seperate for Now as 'MAYBE' both will be merged later, hence for readability
+            with open(f"client_data/rooms/{state.clientProfile}.json", 'w') as roomHandle:
                 json.dump({"rooms": list(state.clientRoomsFile)}, roomHandle)
+
+            with open(f"client_data/uuid_mapping/{state.clientProfile}.json", 'w') as uuidHandle:
+                json.dump(state.uuidsFile, uuidHandle)
             
             await asyncio.sleep(self.fileIOFrequency)
 
