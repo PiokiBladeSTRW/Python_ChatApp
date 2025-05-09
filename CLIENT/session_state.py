@@ -211,6 +211,15 @@ class ClientState:
             
             state.uuidsFile[uuid] = name
             return uuid
+        
+    def uuid_name(uuid: str) -> str:
+        if(uuid in state.uuidsFile): 
+            return state.uuidsFile[uuid]
+        else:
+            name = requests.get(f"http://127.0.0.1:8000/uuid_to_name/{uuid}").json()['content']
+
+            state.uuidsFile[uuid] = name
+            return name
 
 
 state = ClientState()

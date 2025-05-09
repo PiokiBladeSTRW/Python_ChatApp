@@ -74,9 +74,11 @@ def system(response:dict):
         '''
         As of now, only room has sender_id tag, in case of future aversion, add within if-else
         '''
-        # Format: [0] = Room ; [1] =  Username
-        args = [response['sender_id'][2::]]
-        if(response.get('content')): args += response['content']
+        # Format: [0] = Room ; [1] =  Username        
+        args = list(state.uuid_name(response['sender_id']))
+        if(response.get('content')):             
+            username = state.uuid_name(response['content'])
+            args += username
         
         disp_msg = state.sys_code_msg[response['command']]        
 
@@ -86,22 +88,31 @@ def system(response:dict):
         if(response['command'] in state.change_codes and state.receiver_id == f"/r{args[0]}"):
             state.receiver_id_change('', False)
 
-        # Add to Room
-        if(response['command'] in (state.system_codes['room_live'], state.system_codes['room_invite'])):
-            state.clientRoomsFile['room'].append(args[0])
+        # # Add to Room
+        # if(response['command'] in (state.system_codes['room_live'], state.system_codes['room_invite'])):
+        #     state.clientRoomsFile['room'].append(args[0])
         
-        # If Removed from Room
-        if(response['command'] in (state.system_codes['got_kicked'], state.system_codes['got_banned'])):
-            state.clientRoomsFile['room'].remove(args[0])
+        # # If Removed from Room
+        # if(response['command'] in (state.system_codes['got_kicked'], state.system_codes['got_banned'])):
+        #     state.clientRoomsFile['room'].remove(args[0])
 
         data = ('', f"[{args[0]}] {{System}}", disp_msg)
         print(formatting.format(data, ('s', 'cl', 'c')))
         return
     
 
-    '''Normal System Prompts'''
-    
-    if(response.get('content')): args = list(response.get('content'))        
+    '''Normal System Prompts'''   
+    if(response.get('content')): args = list(response.get('content'))
+
+    if(response['command'] in state.sys_uuid_format):
+        data= []
+        for arg in args:
+            if(arg.startswith('user_') or arg.startswith('room_')):
+                data.append(state.uuid_name(arg))
+            else:
+                data.append(arg)
+        args = data
+
     disp_msg = state.sys_code_msg[response['command']]
 
     if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
