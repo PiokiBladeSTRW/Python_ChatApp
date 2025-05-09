@@ -151,8 +151,7 @@ class ChatServer:
             state.sock_rooms[clientSock].append(room)
 
         # Let user and others know
-        username = state.accountsFile[uuid]['username']
-        await self.broadcast(clientSock,  '/.', json.dumps({"sender_id":username,"type": "con" }))
+        await self.broadcast(clientSock,  '/.', json.dumps({"sender_id":uuid,"type": "con" }))
 
         await self.send(clientSock, json.dumps({"command": state.system_codes['relog_finish'], "type": "sys"}))
         return
