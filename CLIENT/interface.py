@@ -78,10 +78,11 @@ def system(response:dict):
         As of now, only room has sender_id tag, in case of future aversion, add within if-else
         '''
         # Format: [0] = Room ; [1] =  Username        
-        args = list(state.uuid_name(response['sender_id']))
+        args = []
+        args.append(state.uuid_name(response['sender_id']))
         if(response.get('content')):             
             username = state.name_uuid(response['content'])
-            args += username
+            args.append(username)
         
         disp_msg = state.sys_code_msg[response['command']]        
 

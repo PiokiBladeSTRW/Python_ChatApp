@@ -191,7 +191,7 @@ class ClientState:
         self.log(f"Changed receiver_id to {receiver}")
         
         if(receiver.startswith('room_')):
-            print('', "="*25, f"Now Chatting in {receiver[2::]}", "="*25, sep='\n')
+            print('', "="*25, f"Now Chatting in {receiver.split("_")[1]}", "="*25, sep='\n')
             return
 
         print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
