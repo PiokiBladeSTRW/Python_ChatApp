@@ -11,6 +11,7 @@ Commands and Actions
     /b                      : Backtracks Receiver to Swap
 '''
 # Header
+import requests
 from session_state import state
 import commands.room_cmd as room_cmd
 import commands.error_handle as errors
@@ -25,7 +26,10 @@ def handle_dm(args:list) -> tuple:
     if(len(args)<2): return errors.error_handle("Invalid Arguments!")
 
     '''Args[0]= Username, Args[1::]= Message''' 
-    state.receiver_change(args[0])
+    uuid = state.name_uuid(args[0])
+    if(uuid == 0): return (None, None)
+
+    state.receiver_change(uuid)
     payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('send', payload)
 
@@ -72,7 +76,10 @@ def profile(args:list) -> tuple:
 
     match args[0]:
         case "get": 
-            payload = ((state.client_codes['profile_get'], args[1]), state.msgTypes['system'])
+            uuid = state.name_uuid(args[0])
+            if(uuid == 0): return (None, None)
+
+            payload = ((state.client_codes['profile_get'], uuid), state.msgTypes['system'])
             return ('send', payload)
         case "set": 
             payload = ((state.client_codes['profile_set'], ' '.join(args[1::])), state.msgTypes['system'])

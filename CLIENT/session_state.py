@@ -3,6 +3,7 @@
 # Header
 import time
 import json
+import requests
 from loguru import logger
 
 class ClientState:
@@ -126,10 +127,14 @@ class ClientState:
 
         #Room Handling setup
         with open(f"client_data/rooms/{clientProfile}.json", 'r') as roomsHandler:
-            self.clientRoomsFile = json.load(roomsHandler)
+            self.clientRoomsFile: dict = json.load(roomsHandler)
 
         with open(f"client_data/uuid_map/{state.clientProfile}.json", 'r') as uuidHandle:
-            self.uuidsFile = json.load(uuidHandle)
+            self.uuidsFile: dict = json.load(uuidHandle)
+        
+        self.name_uuid=  {}
+        for uuid in self.uuidsFile:
+            self.name_uuid[self.uuidsFile[uuid]] = uuid
 
     '''Encode the data'''
     def encode(self, payload:tuple):
@@ -193,5 +198,14 @@ class ClientState:
     '''Log Something'''
     def log(self, msg):
         logger.opt(depth=1).info(msg)
+
+    def name_uuid(name: str) -> str:
+        if(name in state.name_uuid): 
+            return state.name_uuid[name]
+        else:
+            uuid = requests.get(f"http://127.0.0.1:8000/name_to_uuid/{name}").json()['content']
+            if(uuid == 0):
+                print("Account/Room of such Name doesn't Exist")
+                return 0
 
 state = ClientState()
