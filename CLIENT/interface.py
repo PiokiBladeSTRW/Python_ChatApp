@@ -82,7 +82,7 @@ def system(response:dict):
         args.append(state.uuid_name(response['sender_id']))
         if(response.get('content')):
             #Not Looped due to there being only 1 parameter yet Transferred as list for consistency
-            username = state.name_uuid(response['content'][0])
+            username = state.uuid_name(response['content'][0])
             args.append(username)
         
         disp_msg = state.sys_code_msg[response['command']]        

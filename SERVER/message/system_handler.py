@@ -128,13 +128,13 @@ def room_desc(response:dict) -> tuple:
 
 '''# Gives user the profile of Asked Individual [/profile get]'''
 def profile_get(response:dict) -> tuple:    
-    username  = response['content']
+    user_uuid  = response['content']
 
-    if(data := errors.error_handle(username not in state.uuidsFile, 'er_Invalid_user')): return data
+    if(data := errors.error_handle(user_uuid not in state.accountsFile, 'er_Invalid_user')): return data
 
-    profile = state.uuidsFile[username]['profile']   
+    profile = state.uuidsFile[user_uuid]['profile']   
     
-    data = f"{username}> {profile}"
+    data = f"{user_uuid}> {profile}"
     return ('/s', encode_payload(content= data))
 
 '''# Allows user to modify their profile [/profile set]'''
