@@ -105,8 +105,8 @@ def room_list() -> tuple:
 
 '''# Gives user a list of room members [/room members]'''
 def room_members(response: dict) -> tuple:    
-    member_data = '\n'.join([state.uuid_user(x) for x in state.roomsFile[response['receiver_id']]['members']])
-    return ('/s', encode_payload(content = member_data))
+    member_data = [x for x in state.roomsFile[response['receiver_id']]['members']]
+    return ('/s', encode_payload(state.system_codes['room_members'], member_data, response['receiver_id']))
 
 '''# Gives user a detailed info on room [/room info]'''
 def room_info(response:dict) -> tuple:
@@ -158,9 +158,11 @@ def room_join(clientSock:object, response:dict) -> tuple:
         return ('/s', encode_payload(state.system_codes['er_Not_room_member']))  
     
     if(state.sock_uuid[clientSock] in state.roomsFile[room_uuid]['invites']): 
-        modify_room(room_uuid, ('N_JOIN', 'R_INVITE'), clientSock)    
-        return (room_uuid, encode_payload(state.system_codes['new_room_member'],
-                [response['sender_id']], room_uuid))
+        modify_room(room_uuid, ('N_JOIN', 'R_INVITE'), clientSock)   
+        members = [x for x in state.roomsFile[room_uuid]['members']].remove(response['sender_id'])
+        return (
+            (room_uuid, encode_payload(state.system_codes['new_room_member'],[response['sender_id']], room_uuid)),
+            ('/s', encode_payload(state.system_codes['no_display'], members, room_uuid)))
     else:         
         return ('*', None)  
 

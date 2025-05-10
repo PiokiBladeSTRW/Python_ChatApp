@@ -77,17 +77,20 @@ def system(response:dict):
         '''
         As of now, only room has sender_id tag, in case of future aversion, add within if-else
         '''
-        # Format: [0] = Room ; [1] =  Username        
+        # Format: [0] = Room ; [1] usually Username
         args = []
         args.append(state.uuid_name(response['sender_id']))
         if(response.get('content')):
-            #Not Looped due to there being only 1 parameter yet Transferred as list for consistency
-            username = state.uuid_name(response['content'][0])
-            args.append(username)
-        
-        disp_msg = state.sys_code_msg[response['command']]        
+            data= []
+            for argument in response['content']:
+                if(argument.startswith('user_') or argument.startswith('room_')):
+                    data.append(state.uuid_name(argument))
+                else:
+                    data.append(argument)
+            args += data    
 
-        if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
+        if(response['command'] == state.system_codes['no_display']):            
+            return
 
         # If Room was created and UUID is available, Join
         if(response['command'] == state.system_codes['room_live']):
@@ -96,6 +99,15 @@ def system(response:dict):
         # If Have to Change
         if(response['command'] in state.change_codes and state.receiver_id == response['sender_id']):
             state.receiver_id_change('', False)
+
+        disp_msg = state.sys_code_msg[response['command']]   
+
+        if(response['command'] in state.sys_format): 
+            #LINEAR-DISPLAY
+            if(disp_msg == '0'):                
+                disp_msg = '\n'.join(args[1::])               
+            else:
+                disp_msg = disp_msg.format(*args)
 
         # # Add to Room
         # if(response['command'] in (state.system_codes['room_live'], state.system_codes['room_invite'])):
@@ -122,9 +134,7 @@ def system(response:dict):
                 data.append(arg)
         args = data
 
-    disp_msg = state.sys_code_msg[response['command']]
-
-    if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
+    if(response['command'] == state.system_codes['no_display']): return
 
     # Change receiver_id if currently in contact or by force 
     if(response['command'] in state.change_codes and state.receiver_id == args[0]):
@@ -132,6 +142,16 @@ def system(response:dict):
     
     elif(response['command'] in state.force_change_codes):
         state.receiver_id_change('', False)
+
+    disp_msg = state.sys_code_msg[response['command']]
+
+
+    if(response['command'] in state.sys_format): 
+        #LINEAR-DISPLAY
+        if(disp_msg == '0'):                
+            disp_msg = '\n'.join(args[1::])               
+        else:
+            disp_msg = disp_msg.format(*args)
 
     data = ('', "{System}", disp_msg)
     print(formatting.format(data, ('s', 'cl', 'c')))

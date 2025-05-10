@@ -63,10 +63,11 @@ class ServerState:
             "account_risk": 108,
             "session_active": 109,
             "member_kick": 110,
-            "member_ban": 111,
+            "member_ban" : 111,
             "got_kicked": 112,
             "got_banned": 113,
             "member_unban":114,
+            "room_members":115,            
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -78,7 +79,9 @@ class ServerState:
             "er_Invalid_user": 208,
             'er_Invalid_room': 209,
             'er_Not_in_room': 210, 
-            'er_Member_not_ban' : 211
+            'er_Member_not_ban' : 211,
+
+            'no_display': 300
         }
 
         self.client_codes ={

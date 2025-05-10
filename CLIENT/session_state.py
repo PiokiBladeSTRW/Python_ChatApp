@@ -39,6 +39,7 @@ class ClientState:
             "got_kicked": 112,
             "got_banned": 113,
             "member_unban":114,
+            "room_members":115,            
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -50,7 +51,9 @@ class ClientState:
             "er_Invalid_user": 208,
             'er_Invalid_room': 209,
             'er_Not_in_room': 210, 
-            'er_Member_not_ban' : 211      
+            'er_Member_not_ban' : 211,
+
+            'no_display': 300
         }
         
         self.sys_code_msg={
@@ -68,6 +71,7 @@ class ClientState:
             112 : "You were Kicked from {0} by {1}",
             113 : "You were Banned from {0} by {1}",
             114 : "{1} has been Unbanned",
+            115 : "0",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
@@ -79,9 +83,11 @@ class ClientState:
             208 : "The user doesn't exist",
             209 : "The room doesn't exist",
             210 : "The Member isn't in Room",
-            211 : "The Member isn't Banned"          
+            211 : "The Member isn't Banned",
+
+            300 : ""
         }
-        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114)
+        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115)
         self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)
         self.change_codes = (101,208, 112, 113)
         self.force_change_codes = (204, 205, 209)
