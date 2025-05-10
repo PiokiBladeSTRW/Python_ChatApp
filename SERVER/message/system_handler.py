@@ -120,7 +120,7 @@ def room_info(response:dict) -> tuple:
 def room_desc(response:dict) -> tuple:
     room_uuid = response['receiver_id']
 
-    if(data := errors.error_handle(response['sender'] not in state.roomsFile[room_uuid]['admins'], 'er_Not_admin')): 
+    if(data := errors.error_handle(response['sender_id'] not in state.roomsFile[room_uuid]['admins'], 'er_Not_admin')): 
         return data
 
     state.roomsFile[room_uuid]['desc'] = response['content']
@@ -160,14 +160,14 @@ def room_join(clientSock:object, response:dict) -> tuple:
     if(state.sock_uuid[clientSock] in state.roomsFile[room_uuid]['invites']): 
         modify_room(room_uuid, ('N_JOIN', 'R_INVITE'), clientSock)    
         return (room_uuid, encode_payload(state.system_codes['new_room_member'],
-                [state.uuid_user(response['sender'])], room_uuid))
+                response['sender_id'], room_uuid))
     else:         
         return ('*', None)  
 
 
 '''# Creates a new room [/room create]'''
 def room_create(clientSock:object, response:dict) -> tuple:
-    room_name = response['receiver_id'].split('_')[1]    
+    room_name = response['content'][0]
 
     room_uuid = modify_room(None, ('CREATE',), clientSock, room_name=room_name)
 
@@ -193,8 +193,8 @@ def room_invite(response:dict) -> tuple:
     if(data := errors.multiple_error_handle(possible_errors)): return data
     
     # Modify and Send      
-    modify_room(room_uuid, ('INVITE',), uuid= user_uuid)
-    return (uuid, encode_payload(state.system_codes['room_invite'], sender_id= room_uuid))
+    modify_room(room_uuid, ('INVITE',), user_uuid= user_uuid)
+    return (user_uuid, encode_payload(state.system_codes['room_invite'], sender_id= room_uuid))
 
 '''# Makes someone an Admin of Room [/room admin]'''
 def room_admin(response:dict) -> tuple:    
@@ -209,7 +209,7 @@ def room_admin(response:dict) -> tuple:
     if(data := errors.multiple_error_handle(possible_errors)): return data
  
     # Modify and Send
-    modify_room(room_uuid, ('ADMIN',), uuid= user_uuid)          
+    modify_room(room_uuid, ('ADMIN',), user_uuid= user_uuid)          
     return (room_uuid,
             encode_payload( state.system_codes['member_admin'],[user_uuid], room_uuid))
 
@@ -226,10 +226,10 @@ def room_kick(response:dict) -> tuple:
     if(data := errors.multiple_error_handle(possible_errors)): return data
     
     # Modify and Send
-    modify_room(room_uuid, ('KICK',), uuid= user_uuid)          
+    modify_room(room_uuid, ('KICK',), user_uuid= user_uuid)          
     return (
         (room_uuid, encode_payload( state.system_codes['member_kick'], [user_uuid], room_uuid)),
-        (uuid, encode_payload( state.system_codes['got_kicked'], [user_uuid], room_uuid))
+        (user_uuid, encode_payload( state.system_codes['got_kicked'], [user_uuid], room_uuid))
         )
 
 '''# Ban someone from the Room [/room ban]'''
@@ -246,10 +246,10 @@ def room_ban(response:dict) -> tuple:
     if(data := errors.multiple_error_handle(possible_errors)): return data
     
     # Modify and Send
-    modify_room(room_uuid, ('BAN', 'KICK'), uuid= user_uuid)          
+    modify_room(room_uuid, ('BAN', 'KICK'), user_uuid= user_uuid)          
     return (
         (room_uuid, encode_payload( state.system_codes['member_ban'],  [user_uuid], room_uuid)),
-        (uuid, encode_payload( state.system_codes['got_banned'], [user_uuid], room_uuid))
+        (user_uuid, encode_payload( state.system_codes['got_banned'], [user_uuid], room_uuid))
         )
 
 '''# Unban someone from the Room [/room unban]'''
@@ -265,7 +265,7 @@ def room_unban(response:dict) -> tuple:
     if(data := errors.multiple_error_handle(possible_errors)): return data
 
     # Modify and Send
-    modify_room(room_uuid, ('UNBAN',), uuid= user_uuid)          
+    modify_room(room_uuid, ('UNBAN',), user_uuid= user_uuid)          
     return (
         (room_uuid, encode_payload( state.system_codes['member_unban'],  [user_uuid], room_uuid))
         )
