@@ -88,6 +88,10 @@ def system(response:dict):
 
         if(response['command'] in state.sys_format): disp_msg = disp_msg.format(*args)
 
+        # If Room was created and UUID is available, Join
+        if(response['command'] == state.system_codes['room_live']):
+            state.receiver_id_change(response['sender_id'])
+
         # If Have to Change
         if(response['command'] in state.change_codes and state.receiver_id == response['sender_id']):
             state.receiver_id_change('', False)

@@ -36,10 +36,9 @@ def info() -> tuple:
 def create_room(room_name:str) -> tuple: 
     state.log(f"Running room:create {room_name}")
 
-    #if(room_name in state.clientRoomsFile['room']): return errors.error_handle("Room Already Exists")        
-
-    state.receiver_id_change(f"room_{room_name}", False, False) 
-    payload = ((state.client_codes['room_create'], ''), state.msgTypes['system'])
+    #if(room_name in state.clientRoomsFile['room']): return errors.error_handle("Room Already Exists")      
+    
+    payload = ((state.client_codes['room_create'], [room_name]), state.msgTypes['system'])
     return ('send', payload)
 
 '''Set Room Description'''
