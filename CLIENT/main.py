@@ -36,7 +36,10 @@ async def entry():
             no_uuid = False
             state.log(f"UUID OBTAINED: {user_uuid}")
             state.clientUUID = user_uuid
-            state.uuidsFile[user_uuid] = username
+            # If Username is returned, i.e, Registration
+            if(username):
+                state.uuidsFile[user_uuid] = username
+                state.name_uuid_dict[username] = user_uuid
 
         try:
             await client.connectClient()
