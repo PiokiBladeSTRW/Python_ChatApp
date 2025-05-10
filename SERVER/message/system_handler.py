@@ -160,7 +160,7 @@ def room_join(clientSock:object, response:dict) -> tuple:
     if(state.sock_uuid[clientSock] in state.roomsFile[room_uuid]['invites']): 
         modify_room(room_uuid, ('N_JOIN', 'R_INVITE'), clientSock)    
         return (room_uuid, encode_payload(state.system_codes['new_room_member'],
-                response['sender_id'], room_uuid))
+                [response['sender_id']], room_uuid))
     else:         
         return ('*', None)  
 

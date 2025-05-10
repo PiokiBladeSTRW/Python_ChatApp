@@ -208,6 +208,7 @@ class ClientState:
             
             state.log(f"Updated UUIDs file with {uuid}:{name}")
             state.uuidsFile[uuid] = name
+            state.name_uuid_dict[name] = uuid
             return uuid
         
     def uuid_name(self, uuid: str) -> str:
@@ -217,8 +218,9 @@ class ClientState:
         else:
             name = requests.get(f"http://127.0.0.1:8000/uuid_to_name/{uuid}").json()['content']
 
-            state.log(f"Updated UUIDs file with {uuid}:{name}")
+            state.log(f"Updated UUIDs file with {uuid}:{name}")            
             state.uuidsFile[uuid] = name
+            state.name_uuid_dict[name] = uuid
             return name
 
 

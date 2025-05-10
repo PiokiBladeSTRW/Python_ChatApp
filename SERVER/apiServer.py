@@ -29,8 +29,8 @@ def register(credentials: authPayload) -> dict:
 @chatApp.get("/uuid_to_name/{uuid}")
 def uuid_to_name(uuid: str) -> dict:    
     if(uuid in state.accountsFile):
-            username = state.accountsFile[uuid]['username']
-            return {"content": username}
+        username = state.accountsFile[uuid]['username']
+        return {"content": username}
     
     elif(uuid in state.roomsFile):
         room_name = state.roomsFile[uuid]['name']

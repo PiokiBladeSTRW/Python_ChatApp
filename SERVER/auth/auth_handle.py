@@ -32,7 +32,7 @@ def register(credentials: object) -> dict:
     salted_pass = credentials.password + salt
     passwd = hashlib.sha256(salted_pass.encode()).hexdigest()
     print(passwd)
-    user_uuid = str(uuid.uuid4())
+    user_uuid = 'user_' + str(uuid.uuid4())
 
     #Store the Data
     state.accountsFile[user_uuid] = {
