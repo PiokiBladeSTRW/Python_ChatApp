@@ -31,7 +31,7 @@ def handle_dm(args:list) -> tuple:
 
     state.receiver_id_change(uuid)
     payload = (' '.join(args[1::]), state.msgTypes['message'])
-    return ('send', payload)
+    return ('ws_send', payload)
 
 '''========================== type : sys'''
    
@@ -39,12 +39,12 @@ def handle_dm(args:list) -> tuple:
 '''List of every Online Client'''
 def online_list(args:list) -> tuple: 
     payload = ((state.client_codes['online_list'], ''), state.msgTypes['system'])    
-    return ('send', payload)
+    return ('ws_send', payload)
 
 '''List of every Online Room'''    
 def rooms_list(args:list) -> tuple: 
     payload = ((state.client_codes['rooms_list'], ''), state.msgTypes['system'])
-    return ('send', payload)
+    return ('ws_send', payload)
 
 '''Exit Program'''
 def close(args:list) -> tuple: 
@@ -83,10 +83,10 @@ def profile(args:list) -> tuple:
             if(uuid == 0): return (None, None)
 
             payload = ((state.client_codes['profile_get'], uuid), state.msgTypes['system'])
-            return ('send', payload)
+            return ('ws_send', payload)
         case "set": 
             payload = ((state.client_codes['profile_set'], ' '.join(args[1::])), state.msgTypes['system'])
-            return ('send', payload)
+            return ('ws_send', payload)
 
         case _: return errors.error_handle("Invalid Command!")
 

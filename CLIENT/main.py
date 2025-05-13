@@ -103,7 +103,9 @@ async def user_input():
             
             # Check what to do to Payload
             match action:
-                case 'send': chat_client.exit_code = await chat_client.sendPayload(payload)
+                case 'ws_send': chat_client.exit_code = await chat_client.sendPayload(payload)
+                case 'ap_send': pass
+
                 case 'exit': 
                     chat_client.exit_code = await chat_client.sendPayload(
                         ((state.client_codes['user_exit'], ''), state.msgTypes['system']) )                        
