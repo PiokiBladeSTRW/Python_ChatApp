@@ -19,11 +19,10 @@ async def entry():
 
     # Connect & Reconnect Mechanism
     recon_attempt = 20
-    attempt = 0
-    no_uuid = True    
+    attempt = 0      
     while attempt < recon_attempt:
         print("Connecting to Server... ")
-        if(no_uuid):
+        if(not user_uuid):
             try:
                 requests.get("http://127.0.0.1:8000/")
                 user_uuid, username = auth.start_auth()                
@@ -31,9 +30,8 @@ async def entry():
                 state.log(f"API Server Failed; Reconnecting")
                 attempt += 1
                 await asyncio.sleep(5)
-                continue
+                continue            
             
-            no_uuid = False
             state.log(f"UUID OBTAINED: {user_uuid}")
             state.clientUUID = user_uuid
             # If Username is returned, i.e, Registration
