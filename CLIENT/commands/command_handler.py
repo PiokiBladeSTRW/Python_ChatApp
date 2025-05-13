@@ -56,6 +56,9 @@ def room(args:list) -> tuple:
     
     if(len(args)<2 and args[0] not in ('members', 'info')): return errors.error_handle("Invalid Arguments!")
 
+    if(args[0] not in ('create', 'join') and not state.receiver_id.startswith('room_')): 
+        return errors.error_handle("Invalid Room")
+
     match args[0]:
         case "join": return room_cmd.join_room(args[1])
         case "create": return room_cmd.create_room(args[1])

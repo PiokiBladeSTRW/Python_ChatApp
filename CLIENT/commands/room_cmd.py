@@ -52,8 +52,7 @@ def set_desc(description: list) -> tuple:
 
 '''Invite user to Room'''
 def invite_user(username:str) -> tuple:  
-    state.log(f"Running room:invite {username}")  
-    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
+    state.log(f"Running room:invite {username}")      
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)    
@@ -63,8 +62,7 @@ def invite_user(username:str) -> tuple:
 
 '''Make user an Admin'''
 def admin_user(username:str) -> tuple:
-    state.log(f"Running room:adming {username}")
-    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
+    state.log(f"Running room:adming {username}")    
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
@@ -74,8 +72,7 @@ def admin_user(username:str) -> tuple:
 
 '''Kick User from Room'''
 def kick_user(username:str) -> tuple:
-    state.log(f"Running room:kick {username}")
-    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
+    state.log(f"Running room:kick {username}")    
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
@@ -85,8 +82,7 @@ def kick_user(username:str) -> tuple:
 
 '''Ban User from Room'''
 def ban_user(username:str) -> tuple:
-    state.log(f"Running room:ban {username}")
-    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
+    state.log(f"Running room:ban {username}")    
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
@@ -96,8 +92,7 @@ def ban_user(username:str) -> tuple:
 
 '''Unban User from Room'''
 def unban_user(username: str) -> tuple:
-    state.log(f"Running room:unban {username}")
-    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
+    state.log(f"Running room:unban {username}")    
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
