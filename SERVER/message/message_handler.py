@@ -8,8 +8,7 @@ errors = CatchError()
 '''----------------------------------------------'''
 
 def room_handle(response:dict) -> tuple:
-    room_uuid = response['receiver_id']
-    response.pop('receiver_id')    
+    room_uuid = response.pop('receiver_id')        
     response['sender_id'] = (room_uuid, response['sender_id'])
     
     return (room_uuid, json.dumps(response))
