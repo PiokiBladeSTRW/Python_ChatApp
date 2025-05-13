@@ -146,7 +146,7 @@ class ChatServer:
         state.sock_uuid[clientSock] = uuid
         state.sock_rooms[clientSock] = []
 
-        for room in state.accountsFile[uuid]['rooms']:
+        for room in state.uuidsFile[uuid]['rooms']:
             state.room_sock[room].append(clientSock)
             state.sock_rooms[clientSock].append(room)
 
