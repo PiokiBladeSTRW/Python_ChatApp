@@ -136,12 +136,8 @@ class ChatClient:
     async def fileHandle(self) -> None:
         while True:   
             state.log("Client Files Reupdated")
-            #Open and store data to each file
-
-            #Seperate for Now as 'MAYBE' both will be merged later, hence for readability
-            with open(f"client_data/rooms/{state.clientProfile}.json", 'w') as roomHandle:
-                json.dump(state.clientRoomsFile, roomHandle)
-                
+            
+            #Open and store data to each file                            
             with open(f"client_data/uuid_map/{state.clientProfile}.json", 'w') as uuidHandle:
                 json.dump(state.uuidsFile, uuidHandle)
             

@@ -21,8 +21,7 @@ def incoming_message(response:dict):
             print(formatting.format(data, ('s', 'cl', 'c', 'A')))
 
     def rooms():
-        room_uuid, user_uuid =response['sender_id'][0], response['sender_id'][1]
-        #if(room_uuid not in state.clientRoomsFile['room']): state.clientRoomsFile['room'].append(room_uuid)
+        room_uuid, user_uuid =response['sender_id'][0], response['sender_id'][1]        
         
         room_name, username = state.uuid_name(room_uuid), state.uuid_name(user_uuid)
         data = (response['timestamp'], f"[{room_name}] {username}", response['content'])
@@ -108,14 +107,6 @@ def system(response:dict):
                 disp_msg = '\n'.join(args[1::])               
             else:
                 disp_msg = disp_msg.format(*args)
-
-        # # Add to Room
-        # if(response['command'] in (state.system_codes['room_live'], state.system_codes['room_invite'])):
-        #     state.clientRoomsFile['room'].append(args[0])
-        
-        # # If Removed from Room
-        # if(response['command'] in (state.system_codes['got_kicked'], state.system_codes['got_banned'])):
-        #     state.clientRoomsFile['room'].remove(args[0])
 
         data = ('', f"[{args[0]}] {{System}}", disp_msg)
         print(formatting.format(data, ('s', 'cl', 'c')))
