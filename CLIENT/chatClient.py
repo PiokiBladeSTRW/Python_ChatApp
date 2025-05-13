@@ -1,10 +1,8 @@
 # Header
 import json
 import asyncio
-import aioconsole
 import websockets
 
-import commands.command_handler as command_handler
 import interface
 from session_state import state
 
@@ -32,29 +30,6 @@ class ChatClient:
 
         asyncio.create_task(self.fileHandle())        
         print("Connected to Server! ")        
-
-    async def start_methods(self) -> None:
-        tasks = [
-            asyncio.create_task(self.message()),
-            asyncio.create_task(self.receive()),
-            asyncio.create_task(self.heartbeat())
-        ]
-        state.log(f"Starting Co-routines")
-        #Remove var later
-        useless_var = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-
-        state.log("Program Exited")     
-        await self.clientSock.close()
-
-        # Cancel The
-        for task in asyncio.all_tasks():            
-            if(task != asyncio.current_task()):
-                task.cancel()
-                try: await task
-                except asyncio.CancelledError: pass
-        
-        return self.exit_code
-
 
     '''------------------------------------------------'''
 
