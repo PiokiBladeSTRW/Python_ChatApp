@@ -44,7 +44,7 @@ class ChatServer:
         try:
             await asyncio.gather(self.receive(clientSock))
         except websockets.exceptions.ConnectionClosed:
-            self.disconnectionPending.put(clientSock)
+            await self.disconnectionPending.put(clientSock)
             print("Closed")   
 
 
@@ -73,7 +73,7 @@ class ChatServer:
                 match payload:
                     case '/exit': await self.disconnectionPending.put(clientSock)
                     case '/hbp': state.timeout[clientSock] = time.time()
-                    case '/relog': await self.relog(response['sender'], clientSock)
+                    case '/relog': await self.relog(response['sender_id'], clientSock)
                 continue
             
             await self.broadcast(clientSock, destination, payload)
@@ -81,7 +81,7 @@ class ChatServer:
     async def broadcast(self, clientSock:websockets.ClientConnection, destination:str, payload:str) -> None:
         state.log(f"Sending data {payload} to {destination} \n")
 
-        #Obtain list of Receivers
+        #Obtain list of receiver_ids
         receivingClients = routing.parse_destination(clientSock, destination)
 
         #Send to receiving clients
@@ -91,7 +91,7 @@ class ChatServer:
             return
                   
         #If no Receiving Clients but not an Error case
-        if(destination.startswith('/r') or destination == '/.'): return
+        if(destination.startswith('room_') or destination == '/.'): return
         
         #If receiving client does not exist
         payload = json.dumps({"command":state.system_codes['user_exit'], "content": destination, "type":"sys"})
@@ -151,8 +151,7 @@ class ChatServer:
             state.sock_rooms[clientSock].append(room)
 
         # Let user and others know
-        username = state.accountsFile[uuid]['username']
-        await self.broadcast(clientSock,  '/.', json.dumps({"sender":username,"type": "con" }))
+        await self.broadcast(clientSock,  '/.', json.dumps({"sender_id":uuid,"type": "con" }))
 
         await self.send(clientSock, json.dumps({"command": state.system_codes['relog_finish'], "type": "sys"}))
         return
@@ -161,10 +160,7 @@ class ChatServer:
         while True:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
-            if(leavingClient):   
-                state.log(f"SOCK UUID: {state.sock_uuid}")  
-                state.log(f"UUID {state.sock_uuid[leavingClient]} disconnected")   
-
+            if(leavingClient):                   
                 #Remove Client from Rooms
                 if(leavingClient in state.sock_rooms):
                     for room in state.sock_rooms[leavingClient]:
@@ -175,12 +171,12 @@ class ChatServer:
                 #Room user from Global Variables
                 uuid = state.sock_uuid.pop(leavingClient)
                 state.uuid_sock.pop(uuid)
+                state.timeout.pop(leavingClient)    
 
-                state.timeout.pop(leavingClient)                
-                username = state.uuid_user(uuid)
+                state.log(f"UUID {uuid} disconnected")              
                 
                 #Broadcast others that User is Offline                
-                payload = json.dumps({"command": state.system_codes['user_exit'], "content": [username], "type":"sys"})                
+                payload = json.dumps({"command": state.system_codes['user_exit'], "content": [uuid], "type":"sys"})                
                 await self.broadcast(leavingClient, '/.', payload)
 
                 await leavingClient.close()
@@ -194,7 +190,7 @@ class ChatServer:
         while True:  
             state.log("Server Files Reupdated")            
             #Open and store data to each file
-            with open("accounts.json", 'w') as accountHandle, open("uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
+            with open("accounts.json", 'w') as accountHandle, open("acc_uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
                 json.dump(state.accountsFile, accountHandle, indent=4)         
                 json.dump(state.uuidsFile, uuidHandle, indent=4)                
                 json.dump(state.roomsFile, roomHandle, indent=4)

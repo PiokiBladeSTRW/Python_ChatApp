@@ -5,7 +5,7 @@ import time
 time_format = "%H:%M"
 
 def format(data:tuple, tags:tuple) -> str:   
-    '''DATA: (timestamp, sender, content)'''
+    '''DATA: (timestamp, sender_id, content)'''
 
     # Make timestamp Readable as originally it is time.time()
     if(data[0]): timestamp = time.strftime(time_format, time.localtime( float( data[0] ) ))
@@ -35,7 +35,7 @@ def format(data:tuple, tags:tuple) -> str:
 TAGS:
 
 t: TimeStamp
-s: Sender
+s: sender_id
 c: Content
 
 bt: Bracketed Timestamp []

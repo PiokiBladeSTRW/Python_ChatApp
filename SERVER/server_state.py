@@ -12,18 +12,29 @@ class ServerState:
         self.sock_rooms = {}            # socket : [rooms]                  -Auth
         self.room_sock= {}             # room name : [sockets]             -State
         self.timeout= {}                # socket: last heartbeat  
+
+        self.username_uuid = {}             # Username : UUID [Stored only in Memory]
+        self.roomName_roomUuid = {}     # Room Name : Room UUID [Stored Only in Memory]
         
         with open("accounts.json", 'r') as fileHandle:
-            self.accountsFile = json.load(fileHandle)
+            self.accountsFile: dict = json.load(fileHandle)
             
-        with open("uuids.json", 'r') as fileHandle:
-            self.uuidsFile = json.load(fileHandle)
+        with open("acc_uuids.json", 'r') as fileHandle:
+            self.uuidsFile: dict = json.load(fileHandle)
 
         with open ("rooms.json", 'r') as fileHandle:
-            self.roomsFile = json.load(fileHandle)            
+            self.roomsFile: dict = json.load(fileHandle)    
 
         for room in self.roomsFile:
             self.room_sock[room] = []
+
+
+        for uuid in self.accountsFile:
+            self.username_uuid[self.accountsFile[uuid]['username']] = uuid
+
+        for room_uuid in self.roomsFile:
+            self.roomName_roomUuid[self.roomsFile[room_uuid]['name']] = room_uuid
+
 
         logger.remove()
         log_format = (
@@ -52,10 +63,11 @@ class ServerState:
             "account_risk": 108,
             "session_active": 109,
             "member_kick": 110,
-            "member_ban": 111,
+            "member_ban" : 111,
             "got_kicked": 112,
             "got_banned": 113,
             "member_unban":114,
+            "room_members":115,            
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -67,7 +79,9 @@ class ServerState:
             "er_Invalid_user": 208,
             'er_Invalid_room': 209,
             'er_Not_in_room': 210, 
-            'er_Member_not_ban' : 211
+            'er_Member_not_ban' : 211,
+
+            'no_display': 300
         }
 
         self.client_codes ={
@@ -85,15 +99,15 @@ class ServerState:
             'profile_get': 12,
             'profile_set': 13,
             'room_desc': 14,
-            'room_info': 15,
+            'room_info': 15
         }
 
 
     def uuid_user(self, uuid:str):
         return self.accountsFile.get(uuid)['username']
     
-    def user_uuid(self, user:str):        
-        return self.uuidsFile.get(user)['uuid']
+    def user_uuid(self, username:str):
+        return self.username_uuid.get(username)
     
     def log(self, msg:str):
         logger.opt(depth=1).info(msg)

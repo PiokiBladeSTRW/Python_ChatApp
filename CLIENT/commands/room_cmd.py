@@ -12,7 +12,11 @@ import commands.error_handle as errors
 '''Join a Room'''
 def join_room(room_name:str) -> tuple:    
     state.log(f"Running room:join {room_name}")
-    state.receiver_change('/r'+room_name)
+
+    uuid = state.name_uuid(room_name)
+    if(uuid == 0): return (None, None)
+    state.receiver_id_change(uuid)
+
     payload = ((state.client_codes['room_join'], ''), state.msgTypes['system'])
     return ('send', payload)  
 
@@ -32,10 +36,9 @@ def info() -> tuple:
 def create_room(room_name:str) -> tuple: 
     state.log(f"Running room:create {room_name}")
 
-    if(room_name in state.clientRoomsFile): return errors.error_handle("Room Already Exists")        
-
-    state.receiver_change('/r'+room_name)                
-    payload = ((state.client_codes['room_create'], ''), state.msgTypes['system'])
+    #if(room_name in state.clientRoomsFile['room']): return errors.error_handle("Room Already Exists")      
+    
+    payload = ((state.client_codes['room_create'], [room_name]), state.msgTypes['system'])
     return ('send', payload)
 
 '''Set Room Description'''
@@ -50,39 +53,54 @@ def set_desc(description: list) -> tuple:
 '''Invite user to Room'''
 def invite_user(username:str) -> tuple:  
     state.log(f"Running room:invite {username}")  
-    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
+
+    uuid = state.name_uuid(username)
+    if(uuid == 0): return (None, None)    
     
-    payload = ((state.client_codes['room_invite'],  username), state.msgTypes['system'])
+    payload = ((state.client_codes['room_invite'],  uuid), state.msgTypes['system'])
     return ('send', payload)
 
 '''Make user an Admin'''
 def admin_user(username:str) -> tuple:
     state.log(f"Running room:adming {username}")
-    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
+
+    uuid = state.name_uuid(username)
+    if(uuid == 0): return (None, None)
     
-    payload = ((state.client_codes['room_admin'], username), state.msgTypes['system'])
+    payload = ((state.client_codes['room_admin'], uuid), state.msgTypes['system'])
     return ('send', payload)
 
 '''Kick User from Room'''
 def kick_user(username:str) -> tuple:
     state.log(f"Running room:kick {username}")
-    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
+
+    uuid = state.name_uuid(username)
+    if(uuid == 0): return (None, None)
     
-    payload = ( (state.client_codes['room_kick'], username), state.msgTypes['system'])
+    payload = ( (state.client_codes['room_kick'], uuid), state.msgTypes['system'])
     return ('send', payload)
 
 '''Ban User from Room'''
 def ban_user(username:str) -> tuple:
     state.log(f"Running room:ban {username}")
-    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
+
+    uuid = state.name_uuid(username)
+    if(uuid == 0): return (None, None)
     
-    payload = ( (state.client_codes['room_ban'], username), state.msgTypes['system'])
+    payload = ( (state.client_codes['room_ban'], uuid), state.msgTypes['system'])
     return ('send', payload)
 
 '''Unban User from Room'''
 def unban_user(username: str) -> tuple:
     state.log(f"Running room:unban {username}")
-    if(not state.receiver.startswith('/r')): return errors.error_handle("Invalid Room")
+    if(not state.receiver_id.startswith('room_')): return errors.error_handle("Invalid Room")
 
-    payload = ( (state.client_codes['room_unban'], username), state.msgTypes['system'])
+    uuid = state.name_uuid(username)
+    if(uuid == 0): return (None, None)
+
+    payload = ( (state.client_codes['room_unban'], uuid), state.msgTypes['system'])
     return ('send', payload)

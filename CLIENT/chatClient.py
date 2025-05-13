@@ -23,13 +23,11 @@ class ChatClient:
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
         self.serverAddress = "ws://localhost:8765"     
-        self.exit_code = None    
-            
-                
+        self.exit_code = None               
         
     async def connectClient(self) -> None: 
         self.clientSock = await websockets.connect(self.serverAddress)
-        await self.clientSock.send(json.dumps({"sender": state.clientUUID, "type":"con"}))    
+        await self.clientSock.send(json.dumps({"sender_id": state.clientUUID, "type":"con"}))    
         state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")     
 
         asyncio.create_task(self.fileHandle())        
@@ -81,7 +79,7 @@ class ChatClient:
                     case None: pass              
                     case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
-            elif(state.receiver):
+            elif(state.receiver_id):
                 self.exit_code = await self.sendPayload( (msgInput, state.msgTypes['message']) )
 
             else:
@@ -139,8 +137,13 @@ class ChatClient:
         while True:   
             state.log("Client Files Reupdated")
             #Open and store data to each file
-            with open(f"rooms/{state.clientProfile}.json", 'w') as roomHandle:
-                json.dump({"rooms": list(state.clientRoomsFile)}, roomHandle)
+
+            #Seperate for Now as 'MAYBE' both will be merged later, hence for readability
+            with open(f"client_data/rooms/{state.clientProfile}.json", 'w') as roomHandle:
+                json.dump(state.clientRoomsFile, roomHandle)
+                
+            with open(f"client_data/uuid_map/{state.clientProfile}.json", 'w') as uuidHandle:
+                json.dump(state.uuidsFile, uuidHandle)
             
             await asyncio.sleep(self.fileIOFrequency)
 

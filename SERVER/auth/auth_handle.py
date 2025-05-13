@@ -1,5 +1,4 @@
 #Header
-import json
 import secrets
 import hashlib
 import uuid
@@ -8,7 +7,7 @@ from server_state import state
 
 def login(credentials: object) -> dict: 
     '''Verify the credentials sent are Valid'''
-    if(credentials.username in state.uuidsFile):
+    if(credentials.username in state.username_uuid):
         #Hash password
         user_uuid = state.user_uuid(credentials.username)
         salt = state.accountsFile[user_uuid]['salt']
@@ -25,7 +24,7 @@ def register(credentials: object) -> dict:
     '''Create an account with given credentials if username isn't conflicting'''
     
     #Ensure Username Doesn't Exist Already
-    if(credentials.username in state.uuidsFile):        
+    if(credentials.username in state.username_uuid):        
         return {"content": "The Username is Taken"}
 
     #Secure the Data   
@@ -33,7 +32,7 @@ def register(credentials: object) -> dict:
     salted_pass = credentials.password + salt
     passwd = hashlib.sha256(salted_pass.encode()).hexdigest()
     print(passwd)
-    user_uuid = str(uuid.uuid4())
+    user_uuid = 'user_' + str(uuid.uuid4())
 
     #Store the Data
     state.accountsFile[user_uuid] = {
@@ -44,9 +43,10 @@ def register(credentials: object) -> dict:
         "rooms": []                                     
         }
     
-    state.uuidsFile[credentials.username] ={
-        'uuid': user_uuid,
+    state.uuidsFile[user_uuid] ={        
         'profile': ''
     }    
+    
+    state.username_uuid[credentials.username] = user_uuid
 
     return {"sender_id": user_uuid}

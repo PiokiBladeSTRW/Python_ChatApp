@@ -8,4 +8,4 @@ SERVER/accounts.json
 SERVER/rooms.json
 SERVER/acc_uuids.json
 SERVER/room_uuids.json
-CLIENT/rooms/
+CLIENT/client_data/

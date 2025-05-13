@@ -13,7 +13,7 @@ documentation =  '''
 
                     /#          -> Stop Texting anyone Specifically
 
-                    /b          -> Swap between your last and current receiver
+                    /b          -> Swap between your last and current receiver_id
 
                     /exit           -> Exit Program
 

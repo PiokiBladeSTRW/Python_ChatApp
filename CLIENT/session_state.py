@@ -3,15 +3,15 @@
 # Header
 import time
 import json
+import requests
 from loguru import logger
 
 class ClientState:
     def __init__(self):
         self.clientUUID = ''
-        self.receiver = ''
-        self.pReceiver = ''
-        self.clientSock = None
-        self.clientRoomsFile = []
+        self.receiver_id = ''
+        self.preceiver_id = ''
+        self.clientSock = None        
         self.clientProfile = ''
 
         logger.remove()
@@ -39,6 +39,7 @@ class ClientState:
             "got_kicked": 112,
             "got_banned": 113,
             "member_unban":114,
+            "room_members":115,            
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -50,7 +51,9 @@ class ClientState:
             "er_Invalid_user": 208,
             'er_Invalid_room': 209,
             'er_Not_in_room': 210, 
-            'er_Member_not_ban' : 211      
+            'er_Member_not_ban' : 211,
+
+            'no_display': 300
         }
         
         self.sys_code_msg={
@@ -68,6 +71,7 @@ class ClientState:
             112 : "You were Kicked from {0} by {1}",
             113 : "You were Banned from {0} by {1}",
             114 : "{1} has been Unbanned",
+            115 : "0",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
@@ -79,9 +83,12 @@ class ClientState:
             208 : "The user doesn't exist",
             209 : "The room doesn't exist",
             210 : "The Member isn't in Room",
-            211 : "The Member isn't Banned"          
+            211 : "The Member isn't Banned",
+
+            300 : ""
         }
-        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114)
+        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115)
+        self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)
         self.change_codes = (101,208, 112, 113)
         self.force_change_codes = (204, 205, 209)
         self.special_commands = (109,)        
@@ -101,7 +108,7 @@ class ClientState:
             'profile_get': 12,
             'profile_set': 13,
             'room_desc': 14,
-            'room_info': 15,
+            'room_info': 15
         }
 
 
@@ -125,23 +132,30 @@ class ClientState:
         )
 
         #Room Handling setup
-        with open(f"rooms/{clientProfile}.json", 'r') as roomsHandler:
-            data = json.load(roomsHandler)
-            self.clientRoomsFile = data['rooms']
+        with open(f"client_data/rooms/{clientProfile}.json", 'r') as roomsHandler:
+            self.clientRoomsFile: dict = json.load(roomsHandler)
+
+        with open(f"client_data/uuid_map/{state.clientProfile}.json", 'r') as uuidHandle:
+            self.uuidsFile: dict = json.load(uuidHandle)
+        
+        self.name_uuid_dict=  {}
+        for uuid in self.uuidsFile:
+            self.name_uuid_dict[self.uuidsFile[uuid]] = uuid
 
     '''Encode the data'''
     def encode(self, payload:tuple):
+        #Payload = (Content, Type) [or ( (Command, Arguments+), Type)]
 
         # Data always to be sent regardless of Type
         data = {
-                "sender": self.clientUUID,                      
+                "sender_id": self.clientUUID,                      
                 "content": payload[0], 
                 "type": payload[1]
             }
         
         # Additional Data Entries
         if(data['type'] in ('msg')):
-            data['receiver'] = self.receiver
+            data['receiver_id'] = self.receiver_id
             data['timestamp'] = str(time.time())
         
         elif(data['type'] == 'sys'):
@@ -149,16 +163,18 @@ class ClientState:
             data["command"] = payload[0][0]
             data["content"] = payload[0][1]
 
-            if(self.receiver.startswith('/r')): data['receiver'] = self.receiver            
+            if(self.receiver_id.startswith('room_')): data['receiver_id'] = self.receiver_id            
             if(data['content'] == ''): data.pop('content')
 
-        '''
-        Message Format: {"sender": <username>, 
-                        "receiver": <username>,
-                        "command" : <command_code>,
-                        "content": '--', 
-                        "type": 'msg/..',
-                        "timestamp": "[Hour:Minute]"}     
+        '''   
+        Message Fields:
+            sender_idID    = UUID of sender_id
+            receiver_idID  = UUID of receiver_id
+            receiver_id    = Name of receiver_id [Used in case of 'First Contact']
+            command     = Command Code
+            content     = Command Arguments in case of Command
+            timestamp   = Epoch timestamp
+            type        = Distinguishing different forms of Data
 
         Types:
         ->msg: Default String Message
@@ -169,24 +185,49 @@ class ClientState:
 
         return json.dumps(data)
     
-    '''Change Receivers'''
-    def receiver_change(self, receiver, update_past = True):           
+    '''Change receiver_ids'''
+    def receiver_id_change(self, receiver, update_past = True):           
         if(update_past): 
-            self.pReceiver = self.receiver
-        self.receiver = receiver        
+            self.preceiver_id = self.receiver_id
+        self.receiver_id = receiver       
         
         if(receiver==''): receiver = 'No One'
+        else : receiver = state.uuidsFile[receiver]
 
-        self.log(f"Changed Receiver to {receiver}")
-        
-        if(receiver.startswith('/r')):
-            print('', "="*25, f"Now Chatting in {receiver[2::]}", "="*25, sep='\n')
-            return
+        self.log(f"Changed receiver_id to {receiver}")        
 
         print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
 
     '''Log Something'''
     def log(self, msg):
         logger.opt(depth=1).info(msg)
+
+    def name_uuid(self, name: str) -> str:
+        state.log(f"Converting {name} to UUID")
+        if(name in state.name_uuid_dict): 
+            return state.name_uuid_dict[name]
+        else:
+            uuid = requests.get(f"http://127.0.0.1:8000/name_to_uuid/{name}").json()['content']
+            if(uuid == 0):
+                print("Account/Room of such Name doesn't Exist")
+                return 0
+            
+            state.log(f"Updated UUIDs file with {uuid}:{name}")
+            state.uuidsFile[uuid] = name
+            state.name_uuid_dict[name] = uuid
+            return uuid
+        
+    def uuid_name(self, uuid: str) -> str:
+        state.log(f"Converting {uuid} to Name")
+        if(uuid in state.uuidsFile): 
+            return state.uuidsFile[uuid]
+        else:
+            name = requests.get(f"http://127.0.0.1:8000/uuid_to_name/{uuid}").json()['content']
+
+            state.log(f"Updated UUIDs file with {uuid}:{name}")            
+            state.uuidsFile[uuid] = name
+            state.name_uuid_dict[name] = uuid
+            return name
+
 
 state = ClientState()

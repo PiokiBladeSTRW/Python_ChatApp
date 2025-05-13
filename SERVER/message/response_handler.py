@@ -11,7 +11,7 @@ def heartbeats(clientSock:object, response:dict) -> tuple:
 
 '''Handle connecting User to server'''
 def connect(clientSock:object, response:dict) -> tuple:
-    user_uuid = response['sender']
+    user_uuid = response['sender_id']
 
     if(user_uuid in state.uuid_sock):
         state.log(f"User Relogging: {user_uuid}")
@@ -26,12 +26,12 @@ def connect(clientSock:object, response:dict) -> tuple:
         state.room_sock[room].append(clientSock)                
         state.sock_rooms[clientSock].append(room)
 
-    return ('/.', json.dumps({"sender":state.uuid_user(user_uuid),"type": "con" }))
+    return ('/.', json.dumps({"sender_id": user_uuid,"type": "con" }))
 
 '''Handle regular old messages'''
 def handle_messages(clientSock:object, response:dict) -> tuple: 
     # Seperately Handle Room and Normal Messages
-    if(response['receiver'].startswith('/r')):
+    if(response['receiver_id'].startswith('room_')):
         return message_handle.room_handle(response)    
     else:
         return message_handle.dm_handle(response) 
@@ -54,7 +54,7 @@ def system(clientSock:object, response:dict) -> tuple:
     if (command == state.client_codes['profile_get']):  return system_handler.profile_get(response)
     if (command == state.client_codes['profile_set']):  return system_handler.profile_set(response)
     if (command == state.client_codes['room_desc']):    return system_handler.room_desc(response)
-    if (command == state.client_codes['room_info']):    return system_handler.room_info(response)
+    if (command == state.client_codes['room_info']):    return system_handler.room_info(response)    
 
     raise ValueError(f"●→INVALID COMMAND RECEIVED: {command}")
 
@@ -81,7 +81,7 @@ types ={
 
 '''
 RETURN FORMAT: (DESTINATION, PAYLOAD, STATE)
-    RECEIVER: 
+    receiver_id: 
         '/.'     : All Online
         '/r--'  : All in a Room        
         '/s'    : User Alert   
