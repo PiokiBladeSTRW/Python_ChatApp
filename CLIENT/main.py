@@ -2,9 +2,9 @@ import asyncio
 import argparse
 import requests
 import websockets
-import auth
 
-from chatClient import client
+from apiClient import apiClient
+from chatClient import chatClient
 from session_state import state
 
 async def entry():
@@ -22,6 +22,8 @@ async def entry():
     attempt = 0      
     while attempt < recon_attempt:
         print("Connecting to Server... ")
+
+        # Handle User Authentication
         if(not user_uuid):
             try:
                 requests.get("http://127.0.0.1:8000/")
@@ -40,21 +42,23 @@ async def entry():
                 state.name_uuid_dict[username] = user_uuid
 
         try:
-            await client.connectClient()
-            exit_code = await client.start_methods()
-            state.log(f"Exited Program with Exit Code {exit_code}")
 
-            # Client Close
-            if(exit_code==0): break
 
-            # Other Issues [Add Edge cases in cases of other forms of crash instead of Server Crash]       
-            client.exit_code =None     
-            attempt = 0
-            print("Server Down. Attempting Retry [NOTE: Next message typed isn't responsive]")
-            await asyncio.sleep(3)
-            continue
+            # await client.connectClient()
+            # exit_code = await client.start_methods()
+            # state.log(f"Exited Program with Exit Code {exit_code}")
+
+            # # Client Close
+            # if(exit_code==0): break
+
+            # # Other Issues [Add Edge cases in cases of other forms of crash instead of Server Crash]       
+            # client.exit_code =None     
+            # attempt = 0
+            # print("Server Down. Attempting Retry [NOTE: Next message typed isn't responsive]")
+            # await asyncio.sleep(3)
+            # continue
                     
-        except ConnectionRefusedError:            
+        except (ConnectionRefusedError, websockets.exceptions.ConnectionClosedError):            
             state.log(f"Chat Server Failed; Reconnecting")
             attempt += 1
             await asyncio.sleep(5)
