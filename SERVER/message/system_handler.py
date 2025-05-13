@@ -50,7 +50,7 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object =None, user_u
         state.sock_rooms[clientSock].append(room_uuid)       
 
         state.roomsFile[room_uuid]['members'].append(state.sock_uuid[clientSock])
-        state.accountsFile[state.sock_uuid[clientSock]]['rooms'].append(room_uuid)      
+        state.uuidsFile[state.sock_uuid[clientSock]]['rooms'].append(room_uuid)      
     
     # Ran by Admin Targetted to Invitee
     if('INVITE' in operation):
@@ -67,7 +67,7 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object =None, user_u
     # Ran by Admin Targetted to Member
     if('KICK' in operation):
         state.roomsFile[room_uuid]['members'].remove(user_uuid)
-        state.accountsFile[user_uuid]['rooms'].remove(room_uuid)
+        state.uuidsFile[user_uuid]['rooms'].remove(room_uuid)
 
         state.sock_rooms[state.uuid_sock[user_uuid]].remove(room_uuid)
         state.room_sock[room_uuid].remove(state.uuid_sock[user_uuid])

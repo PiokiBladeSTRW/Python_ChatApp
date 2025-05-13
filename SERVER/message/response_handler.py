@@ -22,7 +22,7 @@ def connect(clientSock:object, response:dict) -> tuple:
     state.sock_uuid[clientSock] = user_uuid
     state.sock_rooms[clientSock] = []
 
-    for room in state.accountsFile[user_uuid]['rooms']:
+    for room in state.uuidsFile[user_uuid]['rooms']:
         state.room_sock[room].append(clientSock)                
         state.sock_rooms[clientSock].append(room)
 
