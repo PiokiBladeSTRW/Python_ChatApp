@@ -58,37 +58,6 @@ class ChatClient:
 
     '''------------------------------------------------'''
 
-
-    async def message(self) -> None:    
-        state.log(f"Message Up & Running")
-        while True:            
-            msgInput = await aioconsole.ainput()            
-            
-            if(command_handler.is_command(msgInput)):
-                action, payload = command_handler.parse_command(msgInput)
-                '''Action: send, exit, None
-                  Payload Format: (content, type)'''
-                
-                # Check what to do to Payload
-                match action:
-                    case 'send': self.exit_code = await self.sendPayload(payload)
-                    case 'exit': 
-                        self.exit_code = await self.sendPayload(
-                            ((state.client_codes['user_exit'], ''), state.msgTypes['system']) )                        
-                        self.exit_code = 0                        
-                    case None: pass              
-                    case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
-
-            elif(state.receiver_id):
-                self.exit_code = await self.sendPayload( (msgInput, state.msgTypes['message']) )
-
-            else:
-                print("[!!ERROR: No Destination Chosen]")       
-            
-            if(self.exit_code): return
-
-            print()
-
     async def receive(self) -> None:
         state.log(f"Receive Up & Running")
         try:
@@ -144,4 +113,4 @@ class ChatClient:
             await asyncio.sleep(self.fileIOFrequency)
 
 #__MAIN__
-client = ChatClient()
+chat_client = ChatClient()
