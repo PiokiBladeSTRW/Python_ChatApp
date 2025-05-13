@@ -96,7 +96,7 @@ def system(response:dict):
             state.receiver_id_change(response['sender_id'])
 
         # If Have to Change
-        if(response['command'] in state.change_codes and state.receiver_id == response['sender_id']):
+        if(response['command'] in state.change_codes and state.receiver_id == args[0]):
             state.receiver_id_change('', False)
 
         disp_msg = state.sys_code_msg[response['command']]   
@@ -128,7 +128,7 @@ def system(response:dict):
     if(response['command'] == state.system_codes['no_display']): return
 
     # Change receiver_id if currently in contact or by force 
-    if(response['command'] in state.change_codes and state.receiver_id == args[0]):
+    if(response['command'] in state.change_codes and state.receiver_id == response['sender_id']):
         state.receiver_id_change('', False)
     
     elif(response['command'] in state.force_change_codes):
