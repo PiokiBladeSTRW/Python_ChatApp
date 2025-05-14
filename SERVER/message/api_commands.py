@@ -48,9 +48,11 @@ def room_desc(response: dict) -> tuple:
         return data
 
     state.roomsFile[room_uuid]['desc'] = response['content']
-    return False  
+    return {"content": 0}  
 
 '''# Allows user to modify their profile [/profile set]'''
 def profile_set(response:dict) -> tuple:
     profile = response['content']
     state.uuidsFile[state.uuid_user(response['sender_id'])]['profile'] = profile
+    
+    return {"content": 0}

@@ -66,8 +66,7 @@ def room_info(room_id: str):
 
 @chatApp.get("/profile_get/{user_id}")
 def profile_get(user_id: str):
-    data = api_cmd.profile_get(user_id)
-    if(data): return data
+    return api_cmd.profile_get(user_id)    
 
 @chatApp.get("/room_members/{room_id}")
 def room_members(room_id: str):
@@ -80,7 +79,7 @@ def room_desc(payload: cmdPayload):
 
 @chatApp.post("/profile_set")
 def profile_set(payload: cmdPayload):
-    api_cmd.profile_set(payload)    
+    return api_cmd.profile_set(payload)    
 
 
 # Check for Server being online
