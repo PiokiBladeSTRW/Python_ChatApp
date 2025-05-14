@@ -4,9 +4,9 @@ from server_state import state
 
 
 '''# Gives user a list of online members [/online]'''
-def online_list(response:dict) -> tuple:
+def online_list(sender_id: str) -> tuple:
     uuid_data = list(state.uuid_sock)
-    uuid_data.remove(response['sender_id'])
+    uuid_data.remove(sender_id)
     
     user_data = [state.uuid_user(x) for x in uuid_data]
     data = '\n'.join(user_data)    
@@ -19,20 +19,18 @@ def room_list() -> tuple:
     return ('/s', utility.encode_payload(content= data))
 
 '''# Gives user a list of room members [/room members]'''
-def room_members(response: dict) -> tuple:    
-    member_data = [x for x in state.roomsFile[response['receiver_id']]['members']]
-    return ('/s', utility.encode_payload(state.system_codes['room_members'], member_data, response['receiver_id']))
+def room_members(room_id: str) -> tuple:    
+    member_data = [x for x in state.roomsFile[room_id]['members']]
+    return ('/s', utility.encode_payload(state.system_codes['room_members'], member_data, room_id))
 
 '''# Gives user a detailed info on room [/room info]'''
-def room_info(response:dict) -> tuple:
-    room = response['receiver_id']
-
-    desc, created = state.roomsFile[room]['desc'], state.roomsFile[room]['creation']
-    info_data = f"\nRoom Name: {room} \nDescription: {desc} \nCreated On: {created}"
+def room_info(room_id: str) -> tuple:
+    desc, created = state.roomsFile[room_id]['desc'], state.roomsFile[room_id]['creation']
+    info_data = f"\nRoom Name: {state.roomsFile[room_id]['name']} \nDescription: {desc} \nCreated On: {created}"
     return ('/s', utility.encode_payload(content=info_data))
 
 '''# Sets Room's Description [/room desc]'''
-def room_desc(response:dict) -> tuple:
+def room_desc(response: dict) -> tuple:
     room_uuid = response['receiver_id']
 
     if(data := utility.error_handle(response['sender_id'] not in state.roomsFile[room_uuid]['admins'], 'er_Not_admin')): 
@@ -42,9 +40,7 @@ def room_desc(response:dict) -> tuple:
     return ('*', None)  
 
 '''# Gives user the profile of Asked Individual [/profile get]'''
-def profile_get(response:dict) -> tuple:    
-    user_uuid  = response['content']
-
+def profile_get(user_uuid: str) -> tuple:    
     if(data := utility.error_handle(user_uuid not in state.accountsFile, 'er_Invalid_user')): return data
 
     profile = state.uuidsFile[user_uuid]['profile']   

@@ -23,7 +23,6 @@ def register(credentials: authPayload) -> dict:
     return auth_handle.register(credentials)
 
 # System
-
 @chatApp.get("/uuid_to_name/{uuid}")
 def uuid_to_name(uuid: str) -> dict:    
     if(uuid in state.accountsFile):
@@ -48,7 +47,35 @@ def name_to_uuid(name: str) -> dict:
     return {"content": 0}
 
 # Commands
-     
+@chatApp.get("/online_list/{sender_id}")
+def online_list(sender_id: str):
+    return api_cmd.online_list(sender_id)
+
+@chatApp.get("/rooms_list")
+def rooms_list():
+    return api_cmd.room_list()
+
+@chatApp.get("/room_members/{room_id}")
+def room_members(room_id: str):
+    return api_cmd.room_members(room_id)
+
+@chatApp.get("/room_info/{room_id}")
+def room_info(room_id: str):
+    return api_cmd.room_info(room_id)
+
+@chatApp.get("/room_desc/{packet}")
+def room_desc(packet: dict):
+    #packet: {sender: sender_id, receiver: room_id, content: description}
+    return api_cmd.room_desc(packet)
+
+@chatApp.get("/profile_get/{user_id}")
+def profile_get(user_id: str):
+    return api_cmd.profile_get(user_id)
+
+@chatApp.get("/profile_set/{packet}")
+def profile_set(packet: dict):
+    return api_cmd.profile_set(packet)
+
 
 
 # Check for Server being online
