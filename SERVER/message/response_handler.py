@@ -45,9 +45,10 @@ def system(clientSock:object, response:dict) -> tuple:
     if (command == state.client_codes['room_create']):  return system_handler.room_create(clientSock, response)
     if (command == state.client_codes['room_invite']):  return system_handler.room_invite(response)
     if (command == state.client_codes['room_admin']):   return system_handler.room_admin(response)
+    if (command == state.client_codes['room_demote']):  return system_handler.room_demote(response)
     if (command == state.client_codes['room_kick']):    return system_handler.room_kick(response)
     if (command == state.client_codes['room_ban']):     return system_handler.room_ban(response)    
-    if (command == state.client_codes['room_unban']):   return system_handler.room_unban(response)
+    if (command == state.client_codes['room_unban']):   return system_handler.room_unban(response)    
 
     raise ValueError(f"●→INVALID COMMAND RECEIVED: {command}")
 

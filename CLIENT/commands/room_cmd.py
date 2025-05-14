@@ -38,12 +38,22 @@ def invite_user(username:str) -> tuple:
 
 '''Make user an Admin'''
 def admin_user(username:str) -> tuple:
-    state.log(f"Running room:adming {username}")    
+    state.log(f"Running room:admin {username}")    
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
     
     payload = ((state.client_codes['room_admin'], uuid), state.msgTypes['system'])
+    return ('ws_send', payload)
+
+'''Make user no longer Admin'''
+def demote_user(username:str) -> tuple:
+    state.log(f"Running room:demote {username}")    
+
+    uuid = state.name_uuid(username)
+    if(uuid == 0): return (None, None)
+    
+    payload = ((state.client_codes['room_demote'], uuid), state.msgTypes['system'])
     return ('ws_send', payload)
 
 '''Kick User from Room'''

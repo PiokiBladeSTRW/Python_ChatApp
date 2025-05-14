@@ -80,6 +80,7 @@ def room(args:list) -> tuple:
         case "create": return room_cmd.create_room(args[1])
         case "invite": return room_cmd.invite_user(args[1])
         case "admin": return room_cmd.admin_user(args[1])
+        case "demote": return room_cmd.demote_user(args[1])
         case "kick": return room_cmd.kick_user(args[1])
         case "ban": return room_cmd.ban_user(args[1])
         case "unban": return room_cmd.unban_user(args[1])

@@ -39,7 +39,8 @@ class ClientState:
             "got_kicked": 112,
             "got_banned": 113,
             "member_unban":114,
-            "room_members":115,            
+            "room_members":115, 
+            "member_demote":116,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -52,6 +53,7 @@ class ClientState:
             'er_Invalid_room': 209,
             'er_Not_in_room': 210, 
             'er_Member_not_ban' : 211,
+            'er_Member_not_admin': 212,
 
             'no_display': 300
         }
@@ -72,6 +74,7 @@ class ClientState:
             113 : "You were Banned from {0} by {1}",
             114 : "{1} has been Unbanned",
             115 : "0",
+            116 : "Removed {1} as Admin",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
@@ -84,6 +87,7 @@ class ClientState:
             209 : "The room doesn't exist",
             210 : "The Member isn't in Room",
             211 : "The Member isn't Banned",
+            212 : "The Member isn't an Admin",
 
             300 : ""
         }
@@ -101,7 +105,8 @@ class ClientState:
             'room_admin' : 5,
             'room_kick' : 6,
             'room_ban' : 7,            
-            'room_unban' : 8,   
+            'room_unban' : 8, 
+            'room_demote': 9
         }
 
 
