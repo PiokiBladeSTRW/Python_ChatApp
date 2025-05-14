@@ -29,7 +29,7 @@ def profile_get(user_uuid: str) -> tuple:
 
     profile = state.uuidsFile[user_uuid]['profile']   
     
-    data = f"{user_uuid}> {profile}"
+    data = f"{state.accountsFile[user_uuid]['username']}> {profile}"
     return {"content": data}
 
 
