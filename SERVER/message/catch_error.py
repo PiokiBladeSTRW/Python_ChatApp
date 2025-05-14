@@ -3,7 +3,7 @@
 import json
 from server_state import state
 
-class CatchError:
+class ErrorHandle:
     def __init__(self):
         self.error_list = []
 

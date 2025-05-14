@@ -16,7 +16,7 @@ def login() -> str:
 
     # Password Entry
     password = maskpass.askpass(prompt="ENTER PASSWORD: ", mask='*')   
-     
+    
     # Server Request
     content = {"username": username, "password": password}
     authRes = requests.post("http://127.0.0.1:8000/login", json=content).json() 
@@ -54,9 +54,6 @@ def register() -> str:
     return authRes, username
 
 
-'''-------------------------------------'''
-
- 
 '''Start the Process by determining New or Old account'''
 def start_auth() -> str:
     ch = input("0: Login to Account\n1: Register an Account\n>")

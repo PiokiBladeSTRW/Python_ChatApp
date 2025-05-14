@@ -85,21 +85,14 @@ class ServerState:
         }
 
         self.client_codes ={
-            'user_exit': 1,
-            'online_list': 2,
-            'rooms_list': 3,
-            'room_join': 4,
-            'room_create': 5,
-            'room_invite': 6,
-            'room_admin' : 7,
-            'room_kick' : 8,
-            'room_ban' : 9,
-            "room_members" : 10,
-            'room_unban' : 11,
-            'profile_get': 12,
-            'profile_set': 13,
-            'room_desc': 14,
-            'room_info': 15
+            'user_exit': 1,           
+            'room_join': 2,
+            'room_create': 3,
+            'room_invite': 4,
+            'room_admin' : 5,
+            'room_kick' : 6,
+            'room_ban' : 7,            
+            'room_unban' : 8,   
         }
 
 

@@ -1,10 +1,8 @@
 # Header
 import json
 import asyncio
-import aioconsole
 import websockets
 
-import commands.command_handler as command_handler
 import interface
 from session_state import state
 
@@ -33,61 +31,7 @@ class ChatClient:
         asyncio.create_task(self.fileHandle())        
         print("Connected to Server! ")        
 
-    async def start_methods(self) -> None:
-        tasks = [
-            asyncio.create_task(self.message()),
-            asyncio.create_task(self.receive()),
-            asyncio.create_task(self.heartbeat())
-        ]
-        state.log(f"Starting Co-routines")
-        #Remove var later
-        useless_var = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-
-        state.log("Program Exited")     
-        await self.clientSock.close()
-
-        # Cancel The
-        for task in asyncio.all_tasks():            
-            if(task != asyncio.current_task()):
-                task.cancel()
-                try: await task
-                except asyncio.CancelledError: pass
-        
-        return self.exit_code
-
-
     '''------------------------------------------------'''
-
-
-    async def message(self) -> None:    
-        state.log(f"Message Up & Running")
-        while True:            
-            msgInput = await aioconsole.ainput()            
-            
-            if(command_handler.is_command(msgInput)):
-                action, payload = command_handler.parse_command(msgInput)
-                '''Action: send, exit, None
-                  Payload Format: (content, type)'''
-                
-                # Check what to do to Payload
-                match action:
-                    case 'send': self.exit_code = await self.sendPayload(payload)
-                    case 'exit': 
-                        self.exit_code = await self.sendPayload(
-                            ((state.client_codes['user_exit'], ''), state.msgTypes['system']) )                        
-                        self.exit_code = 0                        
-                    case None: pass              
-                    case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
-
-            elif(state.receiver_id):
-                self.exit_code = await self.sendPayload( (msgInput, state.msgTypes['message']) )
-
-            else:
-                print("[!!ERROR: No Destination Chosen]")       
-            
-            if(self.exit_code): return
-
-            print()
 
     async def receive(self) -> None:
         state.log(f"Receive Up & Running")
@@ -144,4 +88,4 @@ class ChatClient:
             await asyncio.sleep(self.fileIOFrequency)
 
 #__MAIN__
-client = ChatClient()
+chat_client = ChatClient()
