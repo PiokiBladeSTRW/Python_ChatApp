@@ -1,7 +1,9 @@
 #Header
 import json
 from server_state import state
-from message.utilities import utility
+from message.catch_error import ErrorHandle
+
+error = ErrorHandle()
 
 '''----------------------------------------------'''
 
@@ -22,7 +24,7 @@ def dm_handle(response:dict) -> tuple:
         'user_exit':        (response['receiver_id'] not in state.uuid_sock, [response['receiver_id']])
     }
     
-    if(data := utility.multiple_error_handle(possible_errors)): return data
+    if(data := error.multiple_error_handle(possible_errors)): return data
 
     #sender_id: UUID->USERNAME  ; receiver_id: USERNAME->UUID       
     receiver_id = response.pop('receiver_id')

@@ -16,7 +16,7 @@ Commands and their Arguments:
 
 error = ErrorHandle()
 
-def encode_payload(self, command:int=None, content=None,  sender_id: str = None) -> str:
+def encode_payload(command:int=None, content=None,  sender_id: str = None) -> str:
     data = {
         'command': command,
         'content': content,
@@ -25,7 +25,7 @@ def encode_payload(self, command:int=None, content=None,  sender_id: str = None)
     if(sender_id): data['sender_id'] = sender_id
     return json.dumps(data)
 
-def modify_room(self, room_uuid:str, operation: tuple, clientSock:object=None, user_uuid:str=None, room_name:str=None):
+def modify_room(room_uuid:str, operation: tuple, clientSock:object=None, user_uuid:str=None, room_name:str=None):
     '''Types of Operation: (CREATE, N_JOIN, INVITE, R_INVITE, ADMIN, KICK, BAN)
     clientSock: Person using Command ;  uuid: Person on receiving End of Command
     Returning Operations: (CREATE,)'''    

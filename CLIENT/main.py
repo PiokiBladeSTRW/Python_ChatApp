@@ -64,7 +64,8 @@ async def entry():
             attempt += 1
             await asyncio.sleep(5)
             continue
-
+    else:
+        print("\nServer taking too long, Try Later")
 
 async def start_methods():
     tasks = [
