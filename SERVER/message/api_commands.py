@@ -1,9 +1,5 @@
 #Solo File handling API data Request Parsing & Responding
-import json
-
-from message.utilities import utility
 from server_state import state
-
 
 '''# Gives user a list of online members [/online]'''
 def online_list(sender_id: str) -> tuple:
@@ -28,7 +24,8 @@ def room_info(room_id: str) -> tuple:
 
 '''# Gives user the profile of Asked Individual [/profile get]'''
 def profile_get(user_uuid: str) -> tuple:    
-    if(data := utility.error_handle(user_uuid not in state.accountsFile, 'er_Invalid_user')): return json.loads(data)
+    if(user_uuid not in state.accountsFile):
+        return {"command": state.system_codes['er_Invalid_user']}    
 
     profile = state.uuidsFile[user_uuid]['profile']   
     
@@ -39,15 +36,16 @@ def profile_get(user_uuid: str) -> tuple:
 '''# Gives user a list of room members [/room members]'''
 def room_members(room_id: str) -> tuple:    
     member_data = [x for x in state.roomsFile[room_id]['members']]
-    return json.loads(utility.encode_payload(state.system_codes['room_members'], member_data, room_id))
+    
+    return {"command": state.system_codes['room_members'], "content": member_data, "sender_id": room_id}
 
 
 '''# Sets Room's Description [/room desc]'''
 def room_desc(response: object) -> tuple:
     room_uuid = response.receiver_id
 
-    if(data := utility.error_handle(response.sender_id not in state.roomsFile[room_uuid]['admins'], 'er_Not_admin')): 
-        return json.loads(data)
+    if(response.sender_id not in state.roomsFile[room_uuid]['admins']):
+        return {"command": state.system_codes['er_Not_admin']}
 
     state.roomsFile[room_uuid]['desc'] = response.content
     return {"content": 0}  
