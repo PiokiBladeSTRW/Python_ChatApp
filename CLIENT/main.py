@@ -5,8 +5,8 @@ import requests
 import websockets
 
 import interface
+import auth
 import commands.command_handler as command_handler
-from apiClient import api_client
 from chatClient import chat_client
 from session_state import state
 
@@ -30,7 +30,7 @@ async def entry():
         if(not user_uuid):
             try:
                 requests.get(api_address)
-                user_uuid, username = api_client.start_auth()                
+                user_uuid, username = auth.start_auth()                
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")
                 attempt += 1
