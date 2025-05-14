@@ -11,7 +11,6 @@ from chatClient import chat_client
 from session_state import state
 
 async def entry():
-
     # Basic Setup
     parser = argparse.ArgumentParser()
     parser.add_argument('--profile', type=str, required=True)
@@ -30,7 +29,7 @@ async def entry():
         # Handle User Authentication
         if(not user_uuid):
             try:
-                requests.get("http://127.0.0.1:8000/")
+                requests.get(api_address)
                 user_uuid, username = api_client.start_auth()                
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")
@@ -108,12 +107,12 @@ async def user_input():
                 case 'ws_send': chat_client.exit_code = await chat_client.sendPayload(payload)
 
                 case 'ap_get': 
-                    response = requests.get(f"{payload[0]}/{payload[1]}").json()
+                    response = requests.get(f"{api_address}/{payload[0]}/{payload[1]}").json()
                     response['type'] = 'sys'
                     interface.parse_response(response)
 
                 case 'ap_post': 
-                    response = requests.post(payload[0], json= payload[1]).json()
+                    response = requests.post(f"{api_address}/{payload[0]}", json= payload[1]).json()
                     if(response['content'] != 0):
                         response['type'] = 'sys'
                         interface.parse_response(response)
@@ -135,6 +134,8 @@ async def user_input():
 
         print()
 
+
+api_address = "http://127.0.0.1:8000/"
 asyncio.run(entry())
 
 '''Entry Point to Client; Any Time Client Closes without Exit-Code 0, it'll keep retrying connection'''
