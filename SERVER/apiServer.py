@@ -56,7 +56,7 @@ class cmdPayload(BaseModel):
 def online_list(sender_id: str):
     return api_cmd.online_list(sender_id)
 
-@chatApp.get("/rooms_list")
+@chatApp.get("/rooms_list/")
 def rooms_list():
     return api_cmd.room_list()
 
