@@ -51,7 +51,7 @@ def profile(args:list) -> tuple:
 
     match args[0]:
         case "get": 
-            uuid = state.name_uuid(args[0])
+            uuid = state.name_uuid(args[1])
             if(uuid == 0): return (None, None)
             
             return ('ap_get', ('profile_get', uuid))

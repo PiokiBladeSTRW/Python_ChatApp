@@ -1,4 +1,6 @@
 #Solo File handling API data Request Parsing & Responding
+import json
+
 from message.utilities import utility
 from server_state import state
 
@@ -26,7 +28,7 @@ def room_info(room_id: str) -> tuple:
 
 '''# Gives user the profile of Asked Individual [/profile get]'''
 def profile_get(user_uuid: str) -> tuple:    
-    if(data := utility.error_handle(user_uuid not in state.accountsFile, 'er_Invalid_user')): return data
+    if(data := utility.error_handle(user_uuid not in state.accountsFile, 'er_Invalid_user')): return json.loads(data)
 
     profile = state.uuidsFile[user_uuid]['profile']   
     
@@ -37,22 +39,22 @@ def profile_get(user_uuid: str) -> tuple:
 '''# Gives user a list of room members [/room members]'''
 def room_members(room_id: str) -> tuple:    
     member_data = [x for x in state.roomsFile[room_id]['members']]
-    return utility.encode_payload(state.system_codes['room_members'], member_data, room_id)
+    return json.loads(utility.encode_payload(state.system_codes['room_members'], member_data, room_id))
 
 
 '''# Sets Room's Description [/room desc]'''
-def room_desc(response: dict) -> tuple:
-    room_uuid = response['receiver_id']
+def room_desc(response: object) -> tuple:
+    room_uuid = response.receiver_id
 
-    if(data := utility.error_handle(response['sender_id'] not in state.roomsFile[room_uuid]['admins'], 'er_Not_admin')): 
-        return data
+    if(data := utility.error_handle(response.sender_id not in state.roomsFile[room_uuid]['admins'], 'er_Not_admin')): 
+        return json.loads(data)
 
-    state.roomsFile[room_uuid]['desc'] = response['content']
+    state.roomsFile[room_uuid]['desc'] = response.content
     return {"content": 0}  
 
 '''# Allows user to modify their profile [/profile set]'''
-def profile_set(response:dict) -> tuple:
-    profile = response['content']
-    state.uuidsFile[state.uuid_user(response['sender_id'])]['profile'] = profile
+def profile_set(response: object) -> tuple:
+    profile = response.content
+    state.uuidsFile[response.sender_id]['profile'] = profile
     
     return {"content": 0}

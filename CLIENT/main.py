@@ -111,10 +111,10 @@ async def user_input():
                     response['type'] = 'sys'
                     interface.parse_response(response)
 
-                case 'ap_post': 
-                    data = state.encode(payload)
+                case 'ap_post':                     
+                    data = {"sender_id": state.clientUUID, "content": payload[1], "receiver_id": state.receiver_id}
                     response = requests.post(f"{api_address}/{payload[0]}", json= data).json()
-                    if(response['content'] != 0):
+                    if(response.get('content') != 0):
                         response['type'] = 'sys'
                         interface.parse_response(response)
 
