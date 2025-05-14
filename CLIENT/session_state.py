@@ -143,7 +143,7 @@ class ClientState:
             self.name_uuid_dict[self.uuidsFile[uuid]] = uuid
 
     '''Encode the data'''
-    def encode(self, payload:tuple):
+    def encode(self, payload:tuple, api: bool = False):
         #Payload = (Content, Type) [or ( (Command, Arguments+), Type)]
 
         # Data always to be sent regardless of Type
@@ -152,6 +152,7 @@ class ClientState:
                 "content": payload[0], 
                 "type": payload[1]
             }
+        
         
         # Additional Data Entries
         if(data['type'] in ('msg')):
@@ -165,6 +166,12 @@ class ClientState:
 
             if(self.receiver_id.startswith('room_')): data['receiver_id'] = self.receiver_id            
             if(data['content'] == ''): data.pop('content')
+        
+        elif(api):
+            data.pop("type")
+            data['content'] = payload[1]
+            data['receiver_id'] = self.receiver_id
+            return data
 
         '''   
         Message Fields:
