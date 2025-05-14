@@ -98,16 +98,25 @@ async def user_input():
         
         if(command_handler.is_command(msgInput)):
             action, payload = command_handler.parse_command(msgInput)
-            '''Action: ws_send, ap_send, exit, None
-                Websocket Payload Format: (content, type)
-                API Payload: (url, content)
+            '''Action: ws_send, ap_get, ap_post, exit, None
+                Websocket Payload Format: (content, type)  
+                API Format: (url, content)              
                 '''
             
             # Check what to do to Payload
             match action:
                 case 'ws_send': chat_client.exit_code = await chat_client.sendPayload(payload)
 
-                case 'ap_send': pass
+                case 'ap_get': 
+                    response = requests.get(f"{payload[0]}/{payload[1]}").json()
+                    response['type'] = 'sys'
+                    interface.parse_response(response)
+
+                case 'ap_post': 
+                    response = requests.post(payload[0], json= payload[1]).json()
+                    if(response['content'] != 0):
+                        response['type'] = 'sys'
+                        interface.parse_response(response)
 
                 case 'exit': 
                     chat_client.exit_code = await chat_client.sendPayload(

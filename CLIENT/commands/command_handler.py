@@ -163,7 +163,8 @@ ACTION : Describes action to do with the returned Payload
 PAYLOAD: Returned Data
 
 ACTION ->   'ws_send': Send Payload to chat server with pending encoding
-            'ap_send': Send Payload to api server with pending encoding
+            'ap_get': Send Payload to api server for GET
+            'ap_post': Send Payload to api server for POST
             'exit': Special Handling Disconnection
             None : Client need do nothing, work is done           
 '''
