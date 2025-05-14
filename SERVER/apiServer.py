@@ -1,6 +1,6 @@
 from server_state import state
 import auth.auth_handle as auth_handle
-import message.api_messages as api_messages
+import message.api_commands as api_cmd
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
