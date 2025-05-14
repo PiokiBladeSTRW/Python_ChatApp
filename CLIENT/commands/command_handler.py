@@ -11,7 +11,6 @@ Commands and Actions
     /b                      : Backtracks receiver_id to Swap
 '''
 # Header
-import requests
 from session_state import state
 import commands.room_cmd as room_cmd
 import commands.error_handle as errors
