@@ -37,14 +37,31 @@ def handle_dm(args:list) -> tuple:
    
 
 '''List of every Online Client'''
-def online_list(args:list) -> tuple: 
-    payload = ((state.client_codes['online_list'], ''), state.msgTypes['system'])    
-    return ('ws_send', payload)
+def online_list(args:list) -> tuple:    
+    return ('ap_get', ("online_list", state.clientUUID))
 
 '''List of every Online Room'''    
-def rooms_list(args:list) -> tuple: 
-    payload = ((state.client_codes['rooms_list'], ''), state.msgTypes['system'])
-    return ('ws_send', payload)
+def rooms_list(args:list) -> tuple:     
+    return ('ap_get', ('rooms_list', ''))
+
+'''Profile Management'''
+def profile(args:list) -> tuple:
+
+    if(len(args)<2): return errors.error_handle("Invalid Arguments!")
+
+    match args[0]:
+        case "get": 
+            uuid = state.name_uuid(args[0])
+            if(uuid == 0): return (None, None)
+            
+            return ('ap_get', ('profile_get', uuid))
+        
+        case "set": 
+            content= ' '.join(args[1::])
+            return ('ap_post', ('profile_set', content))
+
+        case _: return errors.error_handle("Invalid Command!")
+
 
 '''Exit Program'''
 def close(args:list) -> tuple: 
@@ -72,24 +89,6 @@ def room(args:list) -> tuple:
         case "members": return room_cmd.members()        
         case _: return errors.error_handle("Invalid Command!")
 
-'''Profile Management'''
-def profile(args:list) -> tuple:
-
-    if(len(args)<2): return errors.error_handle("Invalid Arguments!")
-
-    match args[0]:
-        case "get": 
-            uuid = state.name_uuid(args[0])
-            if(uuid == 0): return (None, None)
-
-            payload = ((state.client_codes['profile_get'], uuid), state.msgTypes['system'])
-            return ('ws_send', payload)
-        case "set": 
-            payload = ((state.client_codes['profile_set'], ' '.join(args[1::])), state.msgTypes['system'])
-            return ('ws_send', payload)
-
-        case _: return errors.error_handle("Invalid Command!")
-
 
 '''========================== type : none'''
 
@@ -108,7 +107,6 @@ def back_rec(args:list) -> tuple:
 def chat_help(args:list) -> tuple:
     import help
     return (None, None)
-
 
 
 '''-------------------------------------'''
