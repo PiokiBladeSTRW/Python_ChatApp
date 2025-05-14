@@ -37,6 +37,7 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object=None, user_uu
         state.room_sock[room_uuid] = []
         state.roomName_roomUuid[room_name] = room_uuid
         state.roomsFile[room_uuid] = {'name': room_name,
+                                    'owner': state.sock_uuid[clientSock],
                                     'members': [], 
                                     'admins': [], 
                                     'invites': [], 
@@ -169,7 +170,8 @@ def room_demote(response:dict) -> tuple:
     possible_errors = {
         'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Member_not_admin':(user_uuid not in state.roomsFile[room_uuid]['admins'], None)
+        'er_Member_not_admin':(user_uuid not in state.roomsFile[room_uuid]['admins'], None),
+        'er_Member_owner': (user_uuid == state.roomsFile[room_uuid]['owner'], None)
     }
     if(data := error.multiple_error_handle(possible_errors)): return data
  
@@ -186,7 +188,8 @@ def room_kick(response:dict) -> tuple:
     possible_errors = {
         'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Not_in_room':   (user_uuid not in state.roomsFile[room_uuid]['members'], None)
+        'er_Not_in_room':   (user_uuid not in state.roomsFile[room_uuid]['members'], None),
+        'er_Member_owner': (user_uuid == state.roomsFile[room_uuid]['owner'], None)
     }
     if(data := error.multiple_error_handle(possible_errors)): return data
     
@@ -206,7 +209,8 @@ def room_ban(response:dict) -> tuple:
         'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
         'er_Not_in_room':   (user_uuid not in state.roomsFile[room_uuid]['members'], None),
-        'member_ban' :       (user_uuid in state.roomsFile[room_uuid]['bans'], [room_uuid, user_uuid])
+        'member_ban' :       (user_uuid in state.roomsFile[room_uuid]['bans'], [room_uuid, user_uuid]),
+        'er_Member_owner': (user_uuid == state.roomsFile[room_uuid]['owner'], None)
     }
     if(data := error.multiple_error_handle(possible_errors)): return data
     

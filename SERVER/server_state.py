@@ -67,8 +67,8 @@ class ServerState:
             "got_kicked": 112,
             "got_banned": 113,
             "member_unban":114,
-            "room_members":115,   
-            "member_demote": 116,         
+            "room_members":115, 
+            "member_demote":116,            
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -82,6 +82,7 @@ class ServerState:
             'er_Not_in_room': 210, 
             'er_Member_not_ban' : 211,
             'er_Member_not_admin': 212,
+            'er_Member_owner' : 213,
 
             'no_display': 300
         }

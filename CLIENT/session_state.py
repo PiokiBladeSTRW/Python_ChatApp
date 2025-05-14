@@ -40,7 +40,7 @@ class ClientState:
             "got_banned": 113,
             "member_unban":114,
             "room_members":115, 
-            "member_demote":116,
+            "member_demote":116,            
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -54,6 +54,7 @@ class ClientState:
             'er_Not_in_room': 210, 
             'er_Member_not_ban' : 211,
             'er_Member_not_admin': 212,
+            'er_Member_owner' : 213,
 
             'no_display': 300
         }
@@ -88,6 +89,7 @@ class ClientState:
             210 : "The Member isn't in Room",
             211 : "The Member isn't Banned",
             212 : "The Member isn't an Admin",
+            213 : "The Member is the Room Owner",
 
             300 : ""
         }
