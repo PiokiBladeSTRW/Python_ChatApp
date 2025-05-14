@@ -11,23 +11,34 @@ def online_list(sender_id: str) -> tuple:
     user_data = [state.uuid_user(x) for x in uuid_data]
     data = '\n'.join(user_data)    
 
-    return ('/s', utility.encode_payload(content= data))
+    return {"content": data}
 
 '''# Gives user a list of rooms [/rooms]'''
 def room_list() -> tuple:
     data = '\n'.join(state.roomName_roomUuid)
-    return ('/s', utility.encode_payload(content= data))
-
-'''# Gives user a list of room members [/room members]'''
-def room_members(room_id: str) -> tuple:    
-    member_data = [x for x in state.roomsFile[room_id]['members']]
-    return ('/s', utility.encode_payload(state.system_codes['room_members'], member_data, room_id))
+    return {"content": data}
 
 '''# Gives user a detailed info on room [/room info]'''
 def room_info(room_id: str) -> tuple:
     desc, created = state.roomsFile[room_id]['desc'], state.roomsFile[room_id]['creation']
     info_data = f"\nRoom Name: {state.roomsFile[room_id]['name']} \nDescription: {desc} \nCreated On: {created}"
-    return ('/s', utility.encode_payload(content=info_data))
+    return {"content": info_data}
+
+'''# Gives user the profile of Asked Individual [/profile get]'''
+def profile_get(user_uuid: str) -> tuple:    
+    if(data := utility.error_handle(user_uuid not in state.accountsFile, 'er_Invalid_user')): return data
+
+    profile = state.uuidsFile[user_uuid]['profile']   
+    
+    data = f"{user_uuid}> {profile}"
+    return {"content": data}
+
+
+'''# Gives user a list of room members [/room members]'''
+def room_members(room_id: str) -> tuple:    
+    member_data = [x for x in state.roomsFile[room_id]['members']]
+    return utility.encode_payload(state.system_codes['room_members'], member_data, room_id)
+
 
 '''# Sets Room's Description [/room desc]'''
 def room_desc(response: dict) -> tuple:
@@ -37,20 +48,9 @@ def room_desc(response: dict) -> tuple:
         return data
 
     state.roomsFile[room_uuid]['desc'] = response['content']
-    return ('*', None)  
-
-'''# Gives user the profile of Asked Individual [/profile get]'''
-def profile_get(user_uuid: str) -> tuple:    
-    if(data := utility.error_handle(user_uuid not in state.accountsFile, 'er_Invalid_user')): return data
-
-    profile = state.uuidsFile[user_uuid]['profile']   
-    
-    data = f"{user_uuid}> {profile}"
-    return ('/s', utility.encode_payload(content= data))
+    return False  
 
 '''# Allows user to modify their profile [/profile set]'''
 def profile_set(response:dict) -> tuple:
     profile = response['content']
     state.uuidsFile[state.uuid_user(response['sender_id'])]['profile'] = profile
-
-    return('*', None)   

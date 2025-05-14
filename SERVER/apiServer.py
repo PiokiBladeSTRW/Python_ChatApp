@@ -47,6 +47,11 @@ def name_to_uuid(name: str) -> dict:
     return {"content": 0}
 
 # Commands
+class cmdPayload(BaseModel):
+    sender_id: str = ''
+    content: str = ''
+    receiver_id: str = ''
+
 @chatApp.get("/online_list/{sender_id}")
 def online_list(sender_id: str):
     return api_cmd.online_list(sender_id)
@@ -55,27 +60,27 @@ def online_list(sender_id: str):
 def rooms_list():
     return api_cmd.room_list()
 
-@chatApp.get("/room_members/{room_id}")
-def room_members(room_id: str):
-    return api_cmd.room_members(room_id)
-
 @chatApp.get("/room_info/{room_id}")
 def room_info(room_id: str):
     return api_cmd.room_info(room_id)
 
-@chatApp.get("/room_desc/{packet}")
-def room_desc(packet: dict):
-    #packet: {sender: sender_id, receiver: room_id, content: description}
-    return api_cmd.room_desc(packet)
-
 @chatApp.get("/profile_get/{user_id}")
 def profile_get(user_id: str):
-    return api_cmd.profile_get(user_id)
+    data = api_cmd.profile_get(user_id)
+    if(data): return data
 
-@chatApp.get("/profile_set/{packet}")
-def profile_set(packet: dict):
-    return api_cmd.profile_set(packet)
+@chatApp.get("/room_members/{room_id}")
+def room_members(room_id: str):
+    return api_cmd.room_members(room_id)
 
+
+@chatApp.post("/room_desc")
+def room_desc(payload: cmdPayload):    
+    return api_cmd.room_desc(payload)
+
+@chatApp.post("/profile_set")
+def profile_set(payload: cmdPayload):
+    api_cmd.profile_set(payload)    
 
 
 # Check for Server being online
