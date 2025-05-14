@@ -13,6 +13,9 @@ Commands and their Arguments:
 
 
 '''----------------------------------------------'''
+'''# Lets user close safely [/exit]'''
+def user_exit() -> tuple:
+    return ('*', '/exit')
 
 
 '''# Join a Room [/room join]'''

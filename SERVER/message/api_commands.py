@@ -2,9 +2,6 @@
 from message.utilities import utility
 from server_state import state
 
-'''# Lets user close safely [/exit]'''
-def user_exit() -> tuple:
-    return ('*', '/exit')
 
 '''# Gives user a list of online members [/online]'''
 def online_list(response:dict) -> tuple:

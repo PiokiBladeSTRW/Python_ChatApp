@@ -40,6 +40,7 @@ def handle_messages(clientSock:object, response:dict) -> tuple:
 def system(clientSock:object, response:dict) -> tuple: 
     # Obtain Command
     command = response['command']    
+    if (command == state.client_codes['user_exit']):    return system_handler.user_exit()
     if (command == state.client_codes['room_join']):    return system_handler.room_join(clientSock, response)
     if (command == state.client_codes['room_create']):  return system_handler.room_create(clientSock, response)
     if (command == state.client_codes['room_invite']):  return system_handler.room_invite(response)
