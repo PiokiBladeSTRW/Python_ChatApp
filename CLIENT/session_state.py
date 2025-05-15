@@ -4,6 +4,7 @@
 import time
 import json
 import requests
+import sqlite3
 from loguru import logger
 
 class ClientState:
@@ -140,12 +141,15 @@ class ClientState:
         with open(f"client_data/rooms/{clientProfile}.json", 'r') as roomsHandler:
             self.roomsFile: dict = json.load(roomsHandler)
 
-        with open(f"client_data/uuid_map/{state.clientProfile}.json", 'r') as uuidHandle:
+        with open(f"client_data/uuid_map/{clientProfile}.json", 'r') as uuidHandle:
             self.uuidsFile: dict = json.load(uuidHandle)
         
         self.name_uuid_dict=  {}
         for uuid in self.uuidsFile:
             self.name_uuid_dict[self.uuidsFile[uuid]] = uuid
+
+        self.sql_con = sqlite3.connect(f"client_data/history/{clientProfile}.db")
+        self.sql_cur = self.sql_con.cursor()
 
     '''Encode the data'''
     def encode(self, payload:tuple):
@@ -233,6 +237,21 @@ class ClientState:
             state.uuidsFile[uuid] = name
             state.name_uuid_dict[name] = uuid
             return name
+        
+    def sql_write(self, query:str, args:tuple =()):
+        if(args):
+            self.sql_cur.execute(query, args)
+        else:
+            self.sql_cur.execute(query)
 
+        self.sql_con.commit()
+
+    def sql_read(self, query:str, args:tuple=()):
+        if(args):
+            self.sql_cur.execute(query, args)
+        else:
+            self.sql_cur.execute(query)
+
+        return self.sql_cur.fetchall()
 
 state = ClientState()
