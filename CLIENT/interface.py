@@ -61,15 +61,11 @@ def system(response:dict):
     
 
     ''' Handle Different Types of Sys Commands. More Dynamic (& confusing) than other modules'''
-
-    #Special Commands [aka Return]
-    if(response['command'] in state.special_commands):
-        
-        # Force Kick
-        if(response['command'] == state.system_codes['session_active']): 
-            state.log(f"Tried Logging with an Active Session; Disconnecting")
-            print(formatting.format(('', '{System}', state.sys_code_msg[response['command']]), ('s', 'cl', 'c')))
-            return 'kick'
+    # Force Kick
+    if(response['command'] == state.system_codes['session_active']): 
+        state.log(f"Tried Logging with an Active Session; Disconnecting")
+        print(formatting.format(('', '{System}', state.sys_code_msg[response['command']]), ('s', 'cl', 'c')))
+        return 'kick'
 
     # Room Based System Message
     if(response.get('sender_id')):

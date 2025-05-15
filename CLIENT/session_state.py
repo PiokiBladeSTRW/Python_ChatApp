@@ -101,9 +101,10 @@ class ClientState:
         }
         self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115)
         self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)
-        self.change_codes = (101,208, 112, 113)
-        self.force_change_codes = (204, 205, 209)
-        self.special_commands = (109,)        
+        # self.change_codes = (101,208, 112, 113)
+        # self.force_change_codes = (204, 205, 209)
+        # self.special_commands = (109,)        
+        self.modify_codes = (101, 112, 113, 204, 205, 208, 209)
 
         self.client_codes ={
             'user_exit': 1,           
