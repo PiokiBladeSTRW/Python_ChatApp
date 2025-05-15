@@ -30,7 +30,17 @@ async def entry():
         if(not user_uuid):
             try:
                 requests.get(api_address)
-                user_uuid, username = auth.start_auth()                
+                user_uuid, username = auth.start_auth()
+
+                # Create a History.db if not existing already
+                sql_quer = '''CREATE TABLE IF NOT EXISTS msgHistory(
+                id INT PRIMARY KEY AUTO INCREMENT,
+                sender_id TEXT
+                room_id TEXT DEFAULT ''
+                content TEXT
+                timestamp INT)'''     
+                state.sql_write(sql_quer)              
+                
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")
                 attempt += 1
