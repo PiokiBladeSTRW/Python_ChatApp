@@ -6,6 +6,7 @@ import websockets
 
 import interface.routing as interface
 import auth
+import commands.history_view as history
 import commands.command_handler as command_handler
 from chatClient import chat_client
 from session_state import state
@@ -136,6 +137,10 @@ async def user_input():
                     chat_client.exit_code = await chat_client.sendPayload(
                         ((state.client_codes['user_exit'], ''), state.msgTypes['system']) )                        
                     chat_client.exit_code = 0                        
+
+                case 'view':
+                    await history.process_begin()
+                    
                 case None: pass              
                 case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
