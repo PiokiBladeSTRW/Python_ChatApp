@@ -88,8 +88,6 @@ class ClientState:
             205 : "This Room Already Exists",
             206 : "Member already in room",
             207 : "Member already admin",
-            
-            209 : "The room doesn't exist",
             210 : "The Member isn't in Room",
             211 : "The Member isn't Banned",
             212 : "The Member isn't an Admin",

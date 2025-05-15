@@ -79,7 +79,6 @@ class ServerState:
             "er_Room_exists": 205,
             "er_Member_in_room": 206,
             "er_Member_is_admin": 207,            
-            'er_Invalid_room': 209,
             'er_Not_in_room': 210, 
             'er_Member_not_ban' : 211,
             'er_Member_not_admin': 212,

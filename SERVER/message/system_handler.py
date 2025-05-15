@@ -110,9 +110,7 @@ def user_exit() -> tuple:
 def room_join(clientSock:object, response:dict) -> tuple:    
     room_uuid = response['receiver_id']
 
-    #ERROR HANDLING [NOT DONE BY ERROR CLASS DUE TO SECOND CONDITION BEING MASSING AND DEPENDENT ON FIRST]
-    if(data := error.error_handle(room_uuid not in state.roomsFile, 'er_Invalid_room')): return data
-
+    #ERROR HANDLING [NOT DONE BY ERROR CLASS DUE TO SECOND CONDITION BEING MASSING AND DEPENDENT ON FIRST]   
     if(not(clientSock in state.room_sock[room_uuid] or state.sock_uuid[clientSock] in state.roomsFile[room_uuid]['invites'])): 
         return ('/s', encode_payload(state.system_codes['er_Not_room_member']))  
     
