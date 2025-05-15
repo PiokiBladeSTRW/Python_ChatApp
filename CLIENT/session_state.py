@@ -20,8 +20,7 @@ class ClientState:
         self.msgTypes= {
             "message": "msg",            
             "system": "sys",
-            "heartbeat": "hbp",
-            "connect": "con"
+            "heartbeat": "hbp"
         }
 
         self.system_codes ={            
@@ -43,6 +42,7 @@ class ClientState:
             "member_demote":116,  
             'member_owner': 117,
             'new_owner': 118,
+            'user_join': 119,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -79,6 +79,7 @@ class ClientState:
             116 : "Removed {1} as Admin",
             117 : "You are the OWNER of the Room",
             118 : "{1} IS NOW THE OWNER OF ROOM",
+            119 : "{0} is ONLINE",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
@@ -111,7 +112,8 @@ class ClientState:
             'room_unban' : 8, 
             'room_demote': 9,
             'room_transfer': 10,
-            'room_leave': 11
+            'room_leave': 11,
+            'user_join': 12,
         }
 
 

@@ -105,6 +105,25 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object=None, user_uu
 def user_exit() -> tuple:
     return ('*', '/exit')
 
+def user_join(response:dict) -> tuple:
+    user_uuid = response['content']
+    clientSock = state.uuid_sock[user_uuid]
+
+    if(user_uuid in state.uuid_sock):
+        state.log(f"User Relogging: {user_uuid}")
+        return ('*', '/relog')
+
+    state.log(f"User Joined: {user_uuid}")
+    state.uuid_sock[user_uuid] = clientSock
+    state.sock_uuid[clientSock] = user_uuid
+    state.sock_rooms[clientSock] = []
+
+    for room in state.uuidsFile[user_uuid]['rooms']:
+        state.room_sock[room].append(clientSock)                
+        state.sock_rooms[clientSock].append(room)
+
+    return ('/.', json.dumps({"command":state.system_codes['user_join'],"content": [user_uuid],"type": "sys"}))
+
 
 '''# Join a Room [/room join]'''
 def room_join(clientSock:object, response:dict) -> tuple:    

@@ -39,13 +39,6 @@ def system(response:dict):
     sys.std(response)    
     
     
-'''Handle User Loggings'''
-def online_user(response:dict):
-    username = state.uuid_name(response['sender_id'])
-    data = ('', username, "is ONLINE")
-
-    # OUTPUT : [sender_id 'is Online'
-    print(formatting.format(data, ('s', 'c', 'S')))    
 
 '''-------------------------------------'''
 
@@ -63,7 +56,6 @@ def parse_response(response:dict):
 
 '''Response Types'''
 types ={
-    "msg": incoming_message,
-    "con": online_user,
+    "msg": incoming_message,    
     "sys": system
 }
