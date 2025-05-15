@@ -141,7 +141,7 @@ class ClientState:
 
         #Room Handling setup
         with open(f"client_data/rooms/{clientProfile}.json", 'r') as roomsHandler:
-            self.clientRoomsFile: dict = json.load(roomsHandler)
+            self.roomsFile: dict = json.load(roomsHandler)
 
         with open(f"client_data/uuid_map/{state.clientProfile}.json", 'r') as uuidHandle:
             self.uuidsFile: dict = json.load(uuidHandle)

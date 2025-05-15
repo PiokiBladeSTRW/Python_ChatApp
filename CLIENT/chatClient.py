@@ -83,7 +83,10 @@ class ChatClient:
             
             #Open and store data to each file                            
             with open(f"client_data/uuid_map/{state.clientProfile}.json", 'w') as uuidHandle:
-                json.dump(state.uuidsFile, uuidHandle)
+                json.dump(state.uuidsFile, uuidHandle, indent=4)
+
+            with open(f"client_data/rooms/{state.clientProfile}.json", 'w') as roomHandle:
+                json.dump(state.roomsFile, roomHandle, indent=4)
             
             await asyncio.sleep(self.fileIOFrequency)
 
