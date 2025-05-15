@@ -35,6 +35,11 @@ def special_commands(response:dict, args:list):
         state.roomsFile[response['sender_id']] = args[1::]
         return 0
     
+    # Room Member
+    if(command == state.system_codes['new_room_member']):
+        state.roomsFile[response['sender_id']].append(args[1])
+        return
+    
     # If Just Created Room, update Receiver
     if(command == state.system_codes['room_live']):
         state.receiver_id_change(response['sender_id'])
