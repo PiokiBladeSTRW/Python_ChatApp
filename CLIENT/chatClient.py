@@ -27,7 +27,7 @@ class ChatClient:
         self.clientSock = await websockets.connect(self.serverAddress)
         await self.clientSock.send(
             json.dumps(
-                {"command": state.system_codes['user_join'],"content": state.clientUUID, "type":state.msgTypes['system']})
+                {"command": state.client_codes['user_join'],"content": state.clientUUID, "type":state.msgTypes['system']})
             )    
         state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")     
 

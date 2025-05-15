@@ -105,9 +105,8 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object=None, user_uu
 def user_exit() -> tuple:
     return ('*', '/exit')
 
-def user_join(response:dict) -> tuple:
-    user_uuid = response['content']
-    clientSock = state.uuid_sock[user_uuid]
+def user_join(clientSock:object, response:dict) -> tuple:
+    user_uuid = response['content']    
 
     if(user_uuid in state.uuid_sock):
         state.log(f"User Relogging: {user_uuid}")

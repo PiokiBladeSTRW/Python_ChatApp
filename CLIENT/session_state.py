@@ -94,7 +94,7 @@ class ClientState:
             213 : "The Member is the Room Owner",
             214 : "You are not the OWNER of the Room" 
         }
-        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115)
+        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115, 119)
         self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)
         # self.change_codes = (101,208, 112, 113)
         # self.force_change_codes = (204, 205, 209)

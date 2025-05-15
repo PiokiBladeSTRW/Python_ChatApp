@@ -32,7 +32,7 @@ def system(clientSock:object, response:dict) -> tuple:
     if (command == state.client_codes['room_unban']):   return system_handler.room_unban(response)  
     if (command == state.client_codes['room_transfer']):return system_handler.transfer(response)
     if (command == state.client_codes['room_leave']):   return system_handler.room_leave(response)
-    if (command == state.client_codes['user_join']):    return system_handler.user_join(response)
+    if (command == state.client_codes['user_join']):    return system_handler.user_join(clientSock, response)
 
     raise ValueError(f"●→INVALID COMMAND RECEIVED: {command}")
 
@@ -51,7 +51,7 @@ def parse_response( clientSock:object, response:dict) -> tuple:
 
 '''Response Types'''
 types ={
-    state.msgTypes['heartBeat']: heartbeats,    
+    state.msgTypes['heartbeat']: heartbeats,    
     state.msgTypes['message']: handle_messages,
     state.msgTypes['system']: system    
 }

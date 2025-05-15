@@ -15,6 +15,12 @@ class ServerState:
 
         self.username_uuid = {}             # Username : UUID [Stored only in Memory]
         self.roomName_roomUuid = {}     # Room Name : Room UUID [Stored Only in Memory]
+
+        self.msgTypes ={
+            'heartbeat' : 'hbp',
+            'message': 'msg',
+            'system': 'sys'
+        }
         
         with open("accounts.json", 'r') as fileHandle:
             self.accountsFile: dict = json.load(fileHandle)
