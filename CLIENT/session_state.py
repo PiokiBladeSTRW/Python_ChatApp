@@ -50,16 +50,14 @@ class ClientState:
             "er_Not_room_member": 204,
             "er_Room_exists": 205,
             "er_Member_in_room": 206,
-            "er_Member_is_admin": 207,
-            "er_Invalid_user": 208,
-            'er_Invalid_room': 209,
-            'er_Not_in_room': 210, 
+            "er_Member_is_admin": 207,        
             'er_Member_not_ban' : 211,
             'er_Member_not_admin': 212,
             'er_Member_owner' : 213,
             'er_Not_owner': 214,
 
-            'no_display': 300
+            'no_display': 300,
+            'room_data' : 301
         }
         
         self.sys_code_msg={
@@ -89,21 +87,18 @@ class ClientState:
             205 : "This Room Already Exists",
             206 : "Member already in room",
             207 : "Member already admin",
-            208 : "The user doesn't exist",
-            209 : "The room doesn't exist",
             210 : "The Member isn't in Room",
             211 : "The Member isn't Banned",
             212 : "The Member isn't an Admin",
             213 : "The Member is the Room Owner",
-            214 : "You are not the OWNER of the Room",
-
-            300 : ""
+            214 : "You are not the OWNER of the Room" 
         }
         self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115)
         self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)
-        self.change_codes = (101,208, 112, 113)
-        self.force_change_codes = (204, 205, 209)
-        self.special_commands = (109,)        
+        # self.change_codes = (101,208, 112, 113)
+        # self.force_change_codes = (204, 205, 209)
+        # self.special_commands = (109,)        
+        self.modify_codes = (101, 104, 105, 112, 113, 204, 205, 300, 301)
 
         self.client_codes ={
             'user_exit': 1,           
@@ -217,7 +212,7 @@ class ClientState:
         else:
             uuid = requests.get(f"http://127.0.0.1:8000/name_to_uuid/{name}").json()['content']
             if(uuid == 0):
-                print("Account/Room of such Name doesn't Exist")
+                print("{System}: Account/Room of such Name doesn't Exist")
                 return 0
             
             state.log(f"Updated UUIDs file with {uuid}:{name}")

@@ -4,7 +4,7 @@ import argparse
 import requests
 import websockets
 
-import interface
+import interface.routing as interface
 import auth
 import commands.command_handler as command_handler
 from chatClient import chat_client

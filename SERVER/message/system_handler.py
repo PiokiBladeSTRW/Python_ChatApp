@@ -110,9 +110,7 @@ def user_exit() -> tuple:
 def room_join(clientSock:object, response:dict) -> tuple:    
     room_uuid = response['receiver_id']
 
-    #ERROR HANDLING [NOT DONE BY ERROR CLASS DUE TO SECOND CONDITION BEING MASSING AND DEPENDENT ON FIRST]
-    if(data := error.error_handle(room_uuid not in state.roomsFile, 'er_Invalid_room')): return data
-
+    #ERROR HANDLING [NOT DONE BY ERROR CLASS DUE TO SECOND CONDITION BEING MASSING AND DEPENDENT ON FIRST]   
     if(not(clientSock in state.room_sock[room_uuid] or state.sock_uuid[clientSock] in state.roomsFile[room_uuid]['invites'])): 
         return ('/s', encode_payload(state.system_codes['er_Not_room_member']))  
     
@@ -121,7 +119,7 @@ def room_join(clientSock:object, response:dict) -> tuple:
         members = [x for x in state.roomsFile[room_uuid]['members']].remove(response['sender_id'])
         return (
             (room_uuid, encode_payload(state.system_codes['new_room_member'],[response['sender_id']], room_uuid)),
-            ('/s', encode_payload(state.system_codes['no_display'], members, room_uuid)))
+            ('/s', encode_payload(state.system_codes['room_data'], members, room_uuid)))
     else:         
         return ('*', None)  
 
@@ -141,8 +139,7 @@ def room_invite(response:dict) -> tuple:
     room_uuid, user_uuid = response['receiver_id'], response['content']
 
     #Catch Errors
-    possible_errors = {
-        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
+    possible_errors = {        
         'user_exit':        (user_uuid not in state.uuid_sock, [user_uuid]),
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
         'er_Member_in_room':(
@@ -162,8 +159,7 @@ def room_admin(response:dict) -> tuple:
     room_uuid, user_uuid = response['receiver_id'], response['content']
 
     #Catch Errors
-    possible_errors = {
-        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
+    possible_errors = {        
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
         'er_Member_is_admin':(user_uuid in state.roomsFile[room_uuid]['admins'], None)
     }
@@ -179,8 +175,7 @@ def room_demote(response:dict) -> tuple:
     room_uuid, user_uuid = response['receiver_id'], response['content']
 
     #Catch Errors
-    possible_errors = {
-        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
+    possible_errors = {        
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
         'er_Member_not_admin':(user_uuid not in state.roomsFile[room_uuid]['admins'], None),
         'er_Member_owner': (user_uuid == state.roomsFile[room_uuid]['owner'], None)
@@ -197,10 +192,8 @@ def room_kick(response:dict) -> tuple:
     room_uuid, user_uuid = response['receiver_id'], response['content'] 
 
     #Catch Errors
-    possible_errors = {
-        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
-        'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Not_in_room':   (user_uuid not in state.roomsFile[room_uuid]['members'], None),
+    possible_errors = {        
+        'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),        
         'er_Member_owner': (user_uuid == state.roomsFile[room_uuid]['owner'], None)
     }
     if(data := error.multiple_error_handle(possible_errors)): return data
@@ -217,10 +210,8 @@ def room_ban(response:dict) -> tuple:
     room_uuid, user_uuid = response['receiver_id'], response['content']  
 
     #Catch Errors
-    possible_errors = {
-        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
-        'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Not_in_room':   (user_uuid not in state.roomsFile[room_uuid]['members'], None),
+    possible_errors = {        
+        'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),        
         'member_ban' :       (user_uuid in state.roomsFile[room_uuid]['bans'], [room_uuid, user_uuid]),
         'er_Member_owner': (user_uuid == state.roomsFile[room_uuid]['owner'], None)
     }
@@ -238,8 +229,7 @@ def room_unban(response:dict) -> tuple:
     room_uuid, user_uuid = response['receiver_id'], response['content']  
 
     #Catch Errors
-    possible_errors = {
-        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
+    possible_errors = {        
         'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
         'er_Member_not_ban': (user_uuid not in state.roomsFile[room_uuid]['bans'], None)
     }
@@ -257,8 +247,7 @@ def transfer(response:dict) -> tuple:
     room_uuid, user_uuid = response['receiver_id'], response['content']
 
     #Catch Errors
-    possible_errors = {
-        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
+    possible_errors = {        
         'er_Not_owner':     (response['sender_id'] != state.roomsFile[room_uuid]['owner'], None)
     }
     if(data := error.multiple_error_handle(possible_errors)): return data

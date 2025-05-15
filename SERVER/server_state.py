@@ -78,16 +78,14 @@ class ServerState:
             "er_Not_room_member": 204,
             "er_Room_exists": 205,
             "er_Member_in_room": 206,
-            "er_Member_is_admin": 207,
-            "er_Invalid_user": 208,
-            'er_Invalid_room': 209,
-            'er_Not_in_room': 210, 
+            "er_Member_is_admin": 207,        
             'er_Member_not_ban' : 211,
             'er_Member_not_admin': 212,
             'er_Member_owner' : 213,
             'er_Not_owner': 214,
 
-            'no_display': 300
+            'no_display': 300,
+            'room_data' : 301
         }
 
         self.client_codes ={
