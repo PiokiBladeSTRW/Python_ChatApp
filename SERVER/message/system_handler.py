@@ -193,8 +193,7 @@ def room_kick(response:dict) -> tuple:
 
     #Catch Errors
     possible_errors = {        
-        'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Not_in_room':   (user_uuid not in state.roomsFile[room_uuid]['members'], None),
+        'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),        
         'er_Member_owner': (user_uuid == state.roomsFile[room_uuid]['owner'], None)
     }
     if(data := error.multiple_error_handle(possible_errors)): return data
@@ -212,8 +211,7 @@ def room_ban(response:dict) -> tuple:
 
     #Catch Errors
     possible_errors = {        
-        'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),
-        'er_Not_in_room':   (user_uuid not in state.roomsFile[room_uuid]['members'], None),
+        'er_Not_admin':     (response['sender_id'] not in state.roomsFile[room_uuid]['admins'], None),        
         'member_ban' :       (user_uuid in state.roomsFile[room_uuid]['bans'], [room_uuid, user_uuid]),
         'er_Member_owner': (user_uuid == state.roomsFile[room_uuid]['owner'], None)
     }
