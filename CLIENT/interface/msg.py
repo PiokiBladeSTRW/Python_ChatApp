@@ -1,12 +1,14 @@
 import formatting
 from session_state import state
+from sql_handle import sql_db
 
 def update_history(sender_id:str, content:str, timestamp:float, room_id:str=''):
     sql_query = '''INSERT INTO msgHistory(sender_id, room_id, content, timestamp)
     VALUES (?,?,?,?)'''
     args = (sender_id, room_id, content, int(timestamp))
 
-    state.sql_write(sql_query, args)
+    sql_db.call_write(sql_query, args)
+    sql_db.cleanup()
 
 def dms(response: dict): 
     username = state.uuid_name(response['sender_id'])

@@ -9,6 +9,7 @@ import auth
 import commands.command_handler as command_handler
 from chatClient import chat_client
 from session_state import state
+from sql_handle import sql_db
 
 async def entry():
     # Basic Setup
@@ -18,6 +19,8 @@ async def entry():
 
     state.profileBased(args.profile)   
     state.log(f"Event Loop started w/ Profile {args.profile}")
+
+    sql_db.setup(args.profile)
 
     # Connect & Reconnect Mechanism
     recon_attempt = 20
@@ -33,13 +36,13 @@ async def entry():
                 user_uuid, username = auth.start_auth()
 
                 # Create a History.db if not existing already
-                sql_quer = '''CREATE TABLE IF NOT EXISTS msgHistory(
+                sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
                 id INT PRIMARY KEY AUTO INCREMENT,
                 sender_id TEXT
                 room_id TEXT
                 content TEXT
                 timestamp INT)'''     
-                state.sql_write(sql_quer)              
+                await sql_db.write(sql_query)             
 
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")

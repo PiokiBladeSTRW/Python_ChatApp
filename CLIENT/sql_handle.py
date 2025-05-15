@@ -9,7 +9,7 @@ class SQLHandle:
         self.conn = await aiosqlite.connect(f"client_data/history/{profile}.db")
         self.cursor = await self.conn.cursor()
 
-    async def sql_write(self, query:str, args:tuple):
+    async def write(self, query:str, args:tuple =()):
         if(args):
             await self.cursor.execute(query, args)
         else:
@@ -17,7 +17,7 @@ class SQLHandle:
 
         await self.conn.commit()
 
-    async def sql_read(self, query:str, args:tuple):
+    async def read(self, query:str, args:tuple =()):
         if(args):
             await self.cursor.execute(query, args)
         else:
@@ -39,9 +39,11 @@ class SQLHandle:
         self.task_list.append(task)
 
     def call_write(self, query:str, args:tuple =()):
-        task = asyncio.create_task(self.sql_write(query, args))
+        task = asyncio.create_task(self.write(query, args))
         self.task_list.append(task)
 
     def call_read(self, query:str, args:tuple =()):
-        task = asyncio.create_task(self.sql_write(query, args))
+        task = asyncio.create_task(self.write(query, args))
         self.task_list.append(task)
+
+sql_db = SQLHandle()
