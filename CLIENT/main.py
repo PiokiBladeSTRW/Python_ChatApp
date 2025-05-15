@@ -36,11 +36,11 @@ async def entry():
                 sql_quer = '''CREATE TABLE IF NOT EXISTS msgHistory(
                 id INT PRIMARY KEY AUTO INCREMENT,
                 sender_id TEXT
-                room_id TEXT DEFAULT ''
+                room_id TEXT
                 content TEXT
                 timestamp INT)'''     
                 state.sql_write(sql_quer)              
-                
+
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")
                 attempt += 1
