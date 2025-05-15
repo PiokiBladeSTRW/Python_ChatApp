@@ -50,16 +50,14 @@ class ClientState:
             "er_Not_room_member": 204,
             "er_Room_exists": 205,
             "er_Member_in_room": 206,
-            "er_Member_is_admin": 207,            
-            'er_Invalid_room': 209,
-            'er_Not_in_room': 210, 
+            "er_Member_is_admin": 207,        
             'er_Member_not_ban' : 211,
             'er_Member_not_admin': 212,
             'er_Member_owner' : 213,
             'er_Not_owner': 214,
 
             'no_display': 300,
-            'room_data': 301
+            'room_data' : 301
         }
         
         self.sys_code_msg={
@@ -100,7 +98,7 @@ class ClientState:
         # self.change_codes = (101,208, 112, 113)
         # self.force_change_codes = (204, 205, 209)
         # self.special_commands = (109,)        
-        self.modify_codes = (101, 112, 113, 204, 205, 208, 209)
+        self.modify_codes = (101, 104, 105, 112, 113, 204, 205, 300, 301)
 
         self.client_codes ={
             'user_exit': 1,           

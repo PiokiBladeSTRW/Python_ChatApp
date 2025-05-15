@@ -18,12 +18,14 @@ def disp_formatting(command: int, args:list):
     if(command in state.sys_format): 
         
         if(disp_msg == '0'):                
-            return '\n'.join(args[1::])  
+            disp_msg = '\n'.join(args[1::])  
 
         else:
-            return disp_msg.format(*args)
+            disp_msg = disp_msg.format(*args)
         
-def special_commands(response:dict, args:list): 
+    return disp_msg
+        
+def special_commands(response:dict, args:list =[]): 
     command = response['command']
 
     # No Display
@@ -32,29 +34,30 @@ def special_commands(response:dict, args:list):
     
     # Room Data
     if(command == state.system_codes['room_data']):
-        state.roomsFile[response['sender_id']] = args[1::]
+        data = [state.clientUUID] + args[1::]
+        state.roomsFile[response['sender_id']] = data
         return 0
     
     # Room Member
-    if(command == state.system_codes['new_room_member']):
+    if(command == state.system_codes['new_room_member']):        
         state.roomsFile[response['sender_id']].append(args[1])
         return
     
     # If Just Created Room, update Receiver
     if(command == state.system_codes['room_live']):
-        state.roomsFile[response['sender_id']] = []
+        state.roomsFile[response['sender_id']] = [state.clientUUID]
         state.receiver_id_change(response['sender_id'])
         return
     
     # If Current Receiver is no longer Contactable, reset Receiver
     rec_change =(
-        state.system_codes['user_exit'], state.system_codes['got_kicked'], state.system_codes['got_banned'], state.system_codes['er_Invalid_user'], state.system_codes['er_Invalid_room'], state.system_codes['er_Not_room_member'])
+        state.system_codes['user_exit'], state.system_codes['got_kicked'], state.system_codes['got_banned'])
     if(command in rec_change and state.receiver_id == args[0]):
         state.receiver_id_change('', False)
         return
 
     # If Tried to join a non-existent room, reset Receiver
-    if(command == state.system_codes['er_Room_exists']):
+    if(command in (state.system_codes['er_Room_exists'], state.system_codes['er_Not_room_member'])):
         state.receiver_id_change('', False)
         return
 
@@ -83,7 +86,8 @@ def rooms(response:dict):
 
 
 def std(response:dict):
-    # If Arguments
+    args = []
+    # If Arguments    
     if(response.get('content')): 
         args = args_conversion(response['content'])
 

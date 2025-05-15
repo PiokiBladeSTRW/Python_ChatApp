@@ -5,7 +5,7 @@ Functions to be Utilized for Room Subcommands.
 
 #Header
 from session_state import state
-from error_handle import error_handle
+from commands.error_handle import error_handle
 
 '''----------------------------------------------'''
 
