@@ -4,6 +4,7 @@ import aiosqlite
 class SQLHandle:
     def __init__(self):
         self.task_list: list[asyncio.Task] = []
+        self.return_data = None
 
     async def setup(self, profile:str):
         self.conn = await aiosqlite.connect(f"client_data/history/{profile}.db")
@@ -23,7 +24,8 @@ class SQLHandle:
         else:
             await self.cursor.execute(query)
 
-        return await self.cursor.fetchall()
+        self.return_data = await self.cursor.fetchall()
+        return self.return_data
     
     async def cleanup(self):
         for task in self.task_list:
