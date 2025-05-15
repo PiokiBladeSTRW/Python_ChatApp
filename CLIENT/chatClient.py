@@ -3,7 +3,7 @@ import json
 import asyncio
 import websockets
 
-import interface
+import interface.routing as interface
 from session_state import state
 
 '''
