@@ -51,9 +51,9 @@ def parse_response( clientSock:object, response:dict) -> tuple:
 
 '''Response Types'''
 types ={
-    'hbp': heartbeats,    
-    "msg": handle_messages,
-    "sys": system    
+    state.msgTypes['heartBeat']: heartbeats,    
+    state.msgTypes['message']: handle_messages,
+    state.msgTypes['system']: system    
 }
 
 '''

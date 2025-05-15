@@ -160,11 +160,11 @@ class ClientState:
         
         
         # Additional Data Entries
-        if(data['type'] in ('msg')):
+        if(data['type'] in (self.msgTypes['message'])):
             data['receiver_id'] = self.receiver_id
             data['timestamp'] = str(time.time())
         
-        elif(data['type'] == 'sys'):
+        elif(data['type'] == self.msgTypes['system']):
             #payload[0] = (command_code, arguments)
             data["command"] = payload[0][0]
             data["content"] = payload[0][1]

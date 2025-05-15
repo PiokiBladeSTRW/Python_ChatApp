@@ -122,7 +122,8 @@ def user_join(response:dict) -> tuple:
         state.room_sock[room].append(clientSock)                
         state.sock_rooms[clientSock].append(room)
 
-    return ('/.', json.dumps({"command":state.system_codes['user_join'],"content": [user_uuid],"type": "sys"}))
+    return ('/.', json.dumps(
+        {"command":state.system_codes['user_join'],"content": [user_uuid],"type": state.msgTypes['system']}))
 
 
 '''# Join a Room [/room join]'''

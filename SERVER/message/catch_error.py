@@ -18,8 +18,10 @@ class ErrorHandle:
         '''
 
         if(condition):
-            if(args): payload = json.dumps({'command': state.system_codes[error], 'content':args, 'type': "sys"})
-            else: payload = json.dumps({'command': state.system_codes[error], 'type': "sys"})
+            if(args): payload = json.dumps(
+                {'command': state.system_codes[error], 'content':args, 'type': state.msgTypes['system']})
+                
+            else: payload = json.dumps({'command': state.system_codes[error], 'type': state.msgTypes['system']})
             
             return('/s', payload)
         

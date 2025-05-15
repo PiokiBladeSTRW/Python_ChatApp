@@ -94,7 +94,8 @@ class ChatServer:
         if(destination.startswith('room_') or destination == '/.'): return
         
         #If receiving client does not exist
-        payload = json.dumps({"command":state.system_codes['user_exit'], "content": destination, "type":"sys"})
+        payload = json.dumps(
+            {"command":state.system_codes['user_exit'], "content": destination, "type":state.msgTypes['system']})
         await self.send(clientSock, payload)
        
        
@@ -125,16 +126,19 @@ class ChatServer:
         oldClientSock = state.uuid_sock[uuid] 
 
         try:    
-            await oldClientSock.send(json.dumps({"command": state.system_codes['account_risk'], "type":"sys"}))
+            await oldClientSock.send(json.dumps(
+                {"command": state.system_codes['account_risk'], "type":state.msgTypes['system']}))
 
         except websockets.exceptions.ConnectionClosed:  
             pass
         else:
-            await clientSock.send(json.dumps({"command": state.system_codes['session_active'], "type": "sys"}))
+            await clientSock.send(json.dumps(
+                {"command": state.system_codes['session_active'], "type": state.msgTypes['system']}))
             return
 
         #So User knows to wait while they Relog
-        await self.send(clientSock, json.dumps({"command": state.system_codes['relog_begin'], "type":"sys"}))
+        await self.send(clientSock, json.dumps(
+            {"command": state.system_codes['relog_begin'], "type":state.msgTypes['system']}))
         await self.disconnectionPending.put(oldClientSock)  
 
         #Once Disconnect Finishes        
@@ -152,9 +156,10 @@ class ChatServer:
 
         # Let user and others know
         await self.broadcast(clientSock,  '/.', json.dumps(
-            {"command": state.system_codes['user_join'],"content":[uuid],"type": "sys" }))
+            {"command": state.system_codes['user_join'],"content":[uuid],"type": state.msgTypes['system'] }))
 
-        await self.send(clientSock, json.dumps({"command": state.system_codes['relog_finish'], "type": "sys"}))
+        await self.send(clientSock, json.dumps(
+            {"command": state.system_codes['relog_finish'], "type": state.msgTypes['system']}))
         return
 
     async def Disconnect(self) -> None: 
@@ -177,7 +182,7 @@ class ChatServer:
                 state.log(f"UUID {uuid} disconnected")              
                 
                 #Broadcast others that User is Offline                
-                payload = json.dumps({"command": state.system_codes['user_exit'], "content": [uuid], "type":"sys"})                
+                payload = json.dumps({"command": state.system_codes['user_exit'], "content": [uuid], "type":state.msgTypes['system']})                
                 await self.broadcast(leavingClient, '/.', payload)
 
                 await leavingClient.close()

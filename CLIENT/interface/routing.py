@@ -56,6 +56,6 @@ def parse_response(response:dict):
 
 '''Response Types'''
 types ={
-    "msg": incoming_message,    
-    "sys": system
+    state.msgTypes['message']: incoming_message,    
+    state.msgTypes['system']: system
 }
