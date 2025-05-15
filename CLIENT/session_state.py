@@ -218,7 +218,7 @@ class ClientState:
         else:
             uuid = requests.get(f"http://127.0.0.1:8000/name_to_uuid/{name}").json()['content']
             if(uuid == 0):
-                print("Account/Room of such Name doesn't Exist")
+                print("{System}: Account/Room of such Name doesn't Exist")
                 return 0
             
             state.log(f"Updated UUIDs file with {uuid}:{name}")
