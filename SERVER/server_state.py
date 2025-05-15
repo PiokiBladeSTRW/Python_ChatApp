@@ -68,7 +68,8 @@ class ServerState:
             "got_banned": 113,
             "member_unban":114,
             "room_members":115, 
-            "member_demote":116,            
+            "member_demote":116,  
+            'member_owner': 117,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -83,6 +84,7 @@ class ServerState:
             'er_Member_not_ban' : 211,
             'er_Member_not_admin': 212,
             'er_Member_owner' : 213,
+            'er_Not_owner': 214,
 
             'no_display': 300
         }
@@ -96,7 +98,8 @@ class ServerState:
             'room_kick' : 6,
             'room_ban' : 7,            
             'room_unban' : 8, 
-            'room_demote': 9
+            'room_demote': 9,
+            'room_transfer': 10
         }
 
 

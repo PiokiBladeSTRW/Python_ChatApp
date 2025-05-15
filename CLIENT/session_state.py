@@ -40,7 +40,8 @@ class ClientState:
             "got_banned": 113,
             "member_unban":114,
             "room_members":115, 
-            "member_demote":116,            
+            "member_demote":116,  
+            'member_owner': 117,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -55,6 +56,7 @@ class ClientState:
             'er_Member_not_ban' : 211,
             'er_Member_not_admin': 212,
             'er_Member_owner' : 213,
+            'er_Not_owner': 214,
 
             'no_display': 300
         }
@@ -76,6 +78,7 @@ class ClientState:
             114 : "{1} has been Unbanned",
             115 : "0",
             116 : "Removed {1} as Admin",
+            117 : "{1} IS NOW THE OWNER OF ROOM",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
@@ -90,6 +93,7 @@ class ClientState:
             211 : "The Member isn't Banned",
             212 : "The Member isn't an Admin",
             213 : "The Member is the Room Owner",
+            214 : "You are not the OWNER of the Room",
 
             300 : ""
         }
@@ -108,7 +112,8 @@ class ClientState:
             'room_kick' : 6,
             'room_ban' : 7,            
             'room_unban' : 8, 
-            'room_demote': 9
+            'room_demote': 9,
+            'room_transfer': 10
         }
 
 

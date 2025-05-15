@@ -103,3 +103,13 @@ def set_desc(description: list) -> tuple:
 
     description = ' '.join(description)
     return ('ap_post', ('room_desc', description))
+
+'''Make user the New Owner'''
+def transfer(username:str) -> tuple:
+    state.log(f"Running room:transfer {username}")    
+
+    uuid = state.name_uuid(username)
+    if(uuid == 0): return (None, None)
+    
+    payload = ((state.client_codes['room_transfer'], uuid), state.msgTypes['system'])
+    return ('ws_send', payload)

@@ -87,6 +87,10 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object=None, user_uu
     if('UNBAN' in operation):            
         state.roomsFile[room_uuid]['bans'].remove(user_uuid)  
 
+    # Ran by OWNER Targetted to Member
+    if('TRANSFER' in operation):
+        state.roomsFile[room_uuid]['owner'] = user_uuid
+
 
 '''----------------------------------------------'''
 '''# Lets user close safely [/exit]'''
@@ -238,3 +242,20 @@ def room_unban(response:dict) -> tuple:
     return (
         (room_uuid, encode_payload( state.system_codes['member_unban'],  [user_uuid], room_uuid))
         )
+
+'''# Makes someone the Owner of Room [/room transfer]'''
+def transfer(response:dict) -> tuple:    
+    # !!! NEEDS A CONFIRMATION MENU LATER !!!
+    room_uuid, user_uuid = response['receiver_id'], response['content']
+
+    #Catch Errors
+    possible_errors = {
+        'er_Invalid_user':  (user_uuid not in state.accountsFile, [user_uuid]),
+        'er_Not_owner':     (response['sender_id'] != state.roomsFile[room_uuid]['owner'], None)
+    }
+    if(data := error.multiple_error_handle(possible_errors)): return data
+ 
+    # Modify and Send
+    modify_room(room_uuid, ('TRANSFER',), user_uuid= user_uuid)          
+    return (room_uuid,
+            encode_payload( state.system_codes['member_owner'],[user_uuid], room_uuid))
