@@ -70,6 +70,7 @@ class ServerState:
             "room_members":115, 
             "member_demote":116,  
             'member_owner': 117,
+            'new_owner': 118,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -99,7 +100,8 @@ class ServerState:
             'room_ban' : 7,            
             'room_unban' : 8, 
             'room_demote': 9,
-            'room_transfer': 10
+            'room_transfer': 10,
+            'room_leave': 11
         }
 
 

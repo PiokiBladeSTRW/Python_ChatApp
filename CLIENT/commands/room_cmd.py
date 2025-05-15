@@ -113,3 +113,12 @@ def transfer(username:str) -> tuple:
     
     payload = ((state.client_codes['room_transfer'], uuid), state.msgTypes['system'])
     return ('ws_send', payload)
+
+'''Leave a Room'''
+def leave() -> tuple:    
+    state.log(f"Running room:leave")
+
+    state.receiver_id_change('')
+
+    payload = ((state.client_codes['room_leave'], ''), state.msgTypes['system'])
+    return ('ws_send', payload)  

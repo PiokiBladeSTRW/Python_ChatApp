@@ -52,7 +52,15 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object=None, user_uu
         state.sock_rooms[clientSock].append(room_uuid)       
 
         state.roomsFile[room_uuid]['members'].append(state.sock_uuid[clientSock])
-        state.uuidsFile[state.sock_uuid[clientSock]]['rooms'].append(room_uuid)      
+        state.uuidsFile[state.sock_uuid[clientSock]]['rooms'].append(room_uuid)   
+
+    # Ran by Person leaving Server
+    if('LEAVE' in operation):
+        state.room_sock[room_uuid].remove(clientSock)
+        state.sock_rooms[clientSock].remove(room_uuid)
+
+        state.roomsFile[room_uuid]['members'].remove(state.sock_uuid[clientSock])
+        state.uuidsFile[state.sock_uuid[clientSock]]['rooms'].remove(room_uuid)
     
     # Ran by Admin Targetted to Invitee
     if('INVITE' in operation):
@@ -258,4 +266,14 @@ def transfer(response:dict) -> tuple:
     # Modify and Send
     modify_room(room_uuid, ('TRANSFER',), user_uuid= user_uuid)          
     return (room_uuid,
-            encode_payload( state.system_codes['member_owner'],[user_uuid], room_uuid))
+            encode_payload( state.system_codes['new_owner'],[user_uuid], room_uuid))
+
+'''# Leave a Room [/room leave]'''
+def room_leave(clientSock:object, response:dict) -> tuple:    
+    room_uuid = response['receiver_id']  
+
+    if(data:= error.error_handle(response['sender'] == state.roomsFile[room_uuid]['owner'], 'member_owner')): return data
+
+    modify_room(room_uuid, ('LEAVE', 'DEMOTE'), clientSock)
+    
+    return (room_uuid, encode_payload( state.system_codes['member_left'], [response['sender_id']], room_uuid))  

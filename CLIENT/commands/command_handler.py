@@ -88,6 +88,7 @@ def room(args:list) -> tuple:
         case "info": return room_cmd.info()
         case "members": return room_cmd.members()
         case "transfer": return room_cmd.transfer(args[1])
+        case "leave": return room_cmd.leave()
         case _: return errors.error_handle("Invalid Command!")
 
 

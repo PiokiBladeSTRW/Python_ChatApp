@@ -50,6 +50,7 @@ def system(clientSock:object, response:dict) -> tuple:
     if (command == state.client_codes['room_ban']):     return system_handler.room_ban(response)    
     if (command == state.client_codes['room_unban']):   return system_handler.room_unban(response)  
     if (command == state.client_codes['room_transfer']):return system_handler.transfer(response)
+    if (command == state.client_codes['room_leave']):   return system_handler.room_leave(response)
 
     raise ValueError(f"●→INVALID COMMAND RECEIVED: {command}")
 
