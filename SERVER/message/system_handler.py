@@ -119,7 +119,7 @@ def room_join(clientSock:object, response:dict) -> tuple:
         members = [x for x in state.roomsFile[room_uuid]['members']].remove(response['sender_id'])
         return (
             (room_uuid, encode_payload(state.system_codes['new_room_member'],[response['sender_id']], room_uuid)),
-            ('/s', encode_payload(state.system_codes['no_display'], members, room_uuid)))
+            ('/s', encode_payload(state.system_codes['room_data'], members, room_uuid)))
     else:         
         return ('*', None)  
 

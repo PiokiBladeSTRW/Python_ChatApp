@@ -28,11 +28,17 @@ def special_commands(response:dict, args:list):
 
     # No Display
     if(command == state.system_codes['no_display']):
-        return
+        return 0
+    
+    # Room Data
+    if(command == state.system_codes['room_data']):
+        state.roomsFile[response['sender_id']] = args[1::]
+        return 0
     
     # If Just Created Room, update Receiver
     if(command == state.system_codes['room_live']):
         state.receiver_id_change(response['sender_id'])
+        return
     
     # If Current Receiver is no longer Contactable, reset Receiver
     rec_change =(
@@ -60,7 +66,8 @@ def rooms(response:dict):
         args = args_conversion(response['content'], args)
 
     if(response['command'] in state.modify_codes):
-        special_commands(response, args)
+        code = special_commands(response, args)
+        if(code==0): return
 
     disp_msg = disp_formatting(response['command'], args)
 
@@ -75,7 +82,8 @@ def std(response:dict):
         args = args_conversion(response['content'])
 
     if(response['command'] in state.modify_codes):
-        special_commands(response, args)
+        code = special_commands(response, args)
+        if(code==0): return
 
     disp_msg = disp_formatting(response['command'], args)
 

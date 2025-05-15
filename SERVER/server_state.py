@@ -85,7 +85,8 @@ class ServerState:
             'er_Member_owner' : 213,
             'er_Not_owner': 214,
 
-            'no_display': 300
+            'no_display': 300,
+            'room_data' : 301
         }
 
         self.client_codes ={

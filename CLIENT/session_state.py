@@ -58,7 +58,8 @@ class ClientState:
             'er_Member_owner' : 213,
             'er_Not_owner': 214,
 
-            'no_display': 300
+            'no_display': 300,
+            'room_data': 301
         }
         
         self.sys_code_msg={
@@ -92,9 +93,7 @@ class ClientState:
             211 : "The Member isn't Banned",
             212 : "The Member isn't an Admin",
             213 : "The Member is the Room Owner",
-            214 : "You are not the OWNER of the Room",
-
-            300 : ""
+            214 : "You are not the OWNER of the Room" 
         }
         self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115)
         self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)
