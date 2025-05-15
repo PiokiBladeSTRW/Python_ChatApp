@@ -50,8 +50,7 @@ class ClientState:
             "er_Not_room_member": 204,
             "er_Room_exists": 205,
             "er_Member_in_room": 206,
-            "er_Member_is_admin": 207,
-            "er_Invalid_user": 208,
+            "er_Member_is_admin": 207,            
             'er_Invalid_room': 209,
             'er_Not_in_room': 210, 
             'er_Member_not_ban' : 211,
@@ -89,7 +88,7 @@ class ClientState:
             205 : "This Room Already Exists",
             206 : "Member already in room",
             207 : "Member already admin",
-            208 : "The user doesn't exist",
+            
             209 : "The room doesn't exist",
             210 : "The Member isn't in Room",
             211 : "The Member isn't Banned",
