@@ -1,3 +1,4 @@
+# Header
 from server_state import state
 import auth.auth_handle as auth_handle
 import message.api_commands as api_cmd
@@ -8,7 +9,7 @@ from pydantic import BaseModel
 
 chatApp = FastAPI()
 
-# Authentication
+'''------------------------------ AUTHENTICATION'''
 class authPayload(BaseModel):
     username: str
     password: str
@@ -22,7 +23,8 @@ def login(credentials: authPayload) -> dict:
 def register(credentials: authPayload) -> dict: 
     return auth_handle.register(credentials)
 
-# System
+'''------------------------------ SYSTEM'''
+
 @chatApp.get("/uuid_to_name/{uuid}")
 def uuid_to_name(uuid: str) -> dict:    
     if(uuid in state.accountsFile):
@@ -46,7 +48,7 @@ def name_to_uuid(name: str) -> dict:
     
     return {"content": 0}
 
-# Commands
+'''------------------------------ COMMANDS'''
 class cmdPayload(BaseModel):
     sender_id: str = ''
     content: str = ''
@@ -72,7 +74,6 @@ def profile_get(user_id: str):
 def room_members(room_id: str):
     return api_cmd.room_members(room_id)
 
-
 @chatApp.post("/room_desc")
 def room_desc(payload: cmdPayload):    
     return api_cmd.room_desc(payload)
@@ -82,13 +83,18 @@ def profile_set(payload: cmdPayload):
     return api_cmd.profile_set(payload)    
 
 
-# Check for Server being online
+'''------------------------------ ONLINE_CHECK'''
 @chatApp.get("/")
 def online() -> bool:
     return True
 
-#Entry point to server
+
+'''------------------------------------------'''
+
+
 async def api_eventLoop():   
+    '''Entry Function'''
+
     host, port = "127.0.0.1" , 8000
     config = uvicorn.Config(chatApp, host, port)
     server = uvicorn.Server(config)
