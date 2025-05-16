@@ -33,7 +33,8 @@ async def main(uuid:str, name:str):
         ORDER BY id'''
         args = (uuid, uuid)
 
-    messages = await sql_db.read(sql_query, args)
+    await sql_db.exec(sql_query, args, False)
+    messages = await sql_db.cursor.fetchall()
 
     # Loop Through History
     for msg in messages:
@@ -66,7 +67,7 @@ async def main(uuid:str, name:str):
     
 async def process_begin():
     '''Entry Function to History View'''
-    
+
     print("\nIn Display: /e to Exit and /o to Change User\n")
     while True:
         name = input("ENTER USERNAME: ")

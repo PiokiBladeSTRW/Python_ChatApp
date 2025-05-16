@@ -9,13 +9,14 @@ class SQLHandle:
         self.conn = await aiosqlite.connect(f"client_data/history/{profile}.db")
         self.cursor = await self.conn.cursor()
 
-    async def exec(self, query:str, args:tuple =()):
+    async def exec(self, query:str, args:tuple =(), commit:bool =True):
         if(args):
             await self.cursor.execute(query, args)
         else:
             await self.cursor.execute(query)
 
-        await self.conn.commit()
+        if(commit):
+            await self.conn.commit()
 
     async def write(self, sender_id:str, content:str, timestamp:int, second_id:str = ''):
         
@@ -36,13 +37,5 @@ class SQLHandle:
             VALUES (?,?,?,?)'''
             await self.exec(sql_query, (sender_id, content, timestamp))   
             return
-
-    async def read(self, query:str, args:tuple =()):
-        if(args):
-            await self.cursor.execute(query, args)
-        else:
-            await self.cursor.execute(query)
-
-        return await self.cursor.fetchall()
         
 sql_db = SQLHandle()
