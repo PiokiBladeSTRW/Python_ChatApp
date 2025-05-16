@@ -127,9 +127,8 @@ async def start_methods():
     return chat_client.exit_code
 
 
-
-
 async def cleanup():
+    # Close All tasks + Close SQL connector
     for task in asyncio.all_tasks():            
         if(task != asyncio.current_task()):
             task.cancel()
@@ -138,8 +137,8 @@ async def cleanup():
 
     await sql_db.conn.close()
 
-# __MAIN_-
 
+# __MAIN__
 api_address = "http://127.0.0.1:8000/"
 
 '''Connect and Reconnect to Server UNTIL Error or User Exits. Then Cleanup'''
