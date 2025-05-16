@@ -7,17 +7,18 @@ import interface.routing as interface
 from sql_handle import sql_db
 from session_state import state
 
-'''
-The Client Object
-Purpose: The primary handler of the Client's Activity
-Acitivities:
-    Handling the Usage of Modules
-    Connecting to Server
-    Logging-In    
-    Receiving and Sending Messages
-    Heartbeats & Elegant Disconnection during Crash
-'''
-class ChatClient:    
+class ChatClient: 
+    '''
+    The Client Object
+    Purpose: The primary handler of the Client's Sockets Activity
+    Acitivities:
+        Connecting to Server
+        Sending Messages (not Input)
+        Receiving Messages
+        Sending Heartbeats
+        Updating Files                
+    '''   
+
     def __init__(self):       
         self.heartbeatPing = 20
         self.fileIOFrequency = 30
@@ -25,25 +26,28 @@ class ChatClient:
         self.exit_code = None               
         
     async def connectClient(self) -> None: 
+
+        # Connect to the Socket Server
         self.clientSock = await websockets.connect(self.serverAddress)
-        await self.clientSock.send(
-            json.dumps(
-                {"command": state.client_codes['user_join'],"content": state.clientUUID, "type":state.msgTypes['system']})
-            )    
+
+        await self.clientSock.send(json.dumps(
+                {"command": state.client_codes['user_join'],"content": state.clientUUID, "type":state.msgTypes['system']}
+            ))    
         state.log(f"CONNECTED TO SERVER AT: {self.serverAddress}")     
 
         asyncio.create_task(self.fileHandle())        
-        print("Connected to Server! ")        
+        print("\nConnected to Server! ")        
 
     '''------------------------------------------------'''
 
     async def receive(self) -> None:
         state.log(f"Receive Up & Running")
+
         try:
             async for dataReceived in self.clientSock:
                 response = json.loads(dataReceived)
-                state.log(f"Received from Server: {response} \n")
-
+                state.log(f"Received from Server: {response} \n")                
+                
                 task = await interface.parse_response(response) 
                 if(task=='kick'):                     
                     self.exit_code= 0
@@ -55,8 +59,9 @@ class ChatClient:
             self.exit_code = 1
             return 
 
-    async def sendPayload(self, payload: tuple) -> None:  #To avoid Client Crash due to Down Server
-        '''Payload : ( Message, Type )'''
+    async def sendPayload(self, payload: tuple) -> None:
+
+        '''Payload : ( Message, Type ) or ( (Command, Arguments), 'sys)'''
         try: 
             state.log(f"Sending Payload: {payload} \n")
             enc_payload = state.encode(payload)            
@@ -89,13 +94,10 @@ class ChatClient:
         while True:            
             await self.sendPayload( ('', state.msgTypes['heartbeat']) )
             await asyncio.sleep(self.heartbeatPing)
-   
 
-    '''------------------------------------------------'''
-
-
-    '''Handle File I/O'''
-    async def fileHandle(self) -> None:
+    async def fileHandle(self) -> None:        
+        '''Handle File Updating'''
+        
         while True:   
             state.log("Client Files Reupdated")
             
