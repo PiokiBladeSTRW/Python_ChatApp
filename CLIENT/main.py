@@ -1,3 +1,4 @@
+# HEADER (chonky one)
 import asyncio
 import aioconsole
 import argparse
@@ -13,7 +14,13 @@ from session_state import state
 from sql_handle import sql_db
 
 async def entry():
-    # Basic Setup
+    '''
+    Sets Up USER and Attempts Connection to Server;
+    In case Server is or goes down, attempts Reconnection;
+    Performs Authentication, Socket Booting, Message Input and Handling.
+    '''
+
+    # Connect to Proper Files based on User Profile
     parser = argparse.ArgumentParser()
     parser.add_argument('--profile', type=str, required=True)
     args = parser.parse_args()
@@ -30,20 +37,11 @@ async def entry():
     while attempt < recon_attempt:
         print("Connecting to Server... ")
 
-        # Handle User Authentication
+        # Handle User Authentication ; username = False, unless user just Registered
         if(not user_uuid):
-            try:
-                requests.get(api_address)
-                user_uuid, username = auth.start_auth()    
-                # Create a History.db if not existing already
-                sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
-                'id' INTEGER PRIMARY KEY AUTOINCREMENT,
-                'sender_id' TEXT,
-                'receiver_id' TEXT DEFAULT '',
-                'room_id' TEXT DEFAULT '',
-                'content' TEXT,
-                'timestamp' INTEGER)'''     
-                await sql_db.write(sql_query)    
+            try:                
+                requests.get(api_address)               
+                user_uuid, username = auth.start_auth()   
 
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")
@@ -54,12 +52,14 @@ async def entry():
             state.log(f"UUID OBTAINED: {user_uuid}")
             state.clientUUID = user_uuid
 
-            # If Username is returned, i.e, Registration
+            # REGISTRATION. Set Files Up with Data
             if(username):
+
+                # UUID-Mappin
                 state.uuidsFile[user_uuid] = username
                 state.name_uuid_dict[username] = user_uuid
 
-                # Create a History.db if not existing already
+                # SQL Table Creation
                 sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
                 'id' INTEGER PRIMARY KEY AUTOINCREMENT,
                 'sender_id' TEXT,
@@ -69,15 +69,15 @@ async def entry():
                 'timestamp' INTEGER)'''     
                 await sql_db.write(sql_query)
 
-        try:
+
+        # Socket Connection Establishment
+        try:            
             await chat_client.connectClient()
             exit_code = await start_methods()
             state.log(f"Exited Program with Exit Code {exit_code}")
 
-            # Client Close
-            if(exit_code==0): 
-                await sql_db.conn.close()
-                break
+            # Client Closed Properly
+            if(exit_code==0): break
 
             # Other Issues [Add Edge cases in cases of other forms of crash instead of Server Crash]
             chat_client.exit_code=None                   
@@ -92,11 +92,19 @@ async def entry():
             await asyncio.sleep(5)
             continue
 
+    # If We Run out of Attempts of Reconnection
     else:
-        print("\nServer taking too long, Try Later")
-        await sql_db.conn.close()
+        print("\nServer taking too long, Try Later")        
+
 
 async def start_methods():
+    '''
+    Start all the Tasks Required Here for Centralized Control
+    Tasks: 
+        (main) Message_Input & Handling
+        (Socket) Receiving Message, Updating Files, Sending HeartBeats
+    '''
+
     tasks = [
         asyncio.create_task(user_input()),
         asyncio.create_task(chat_client.receive()),
@@ -104,23 +112,29 @@ async def start_methods():
         asyncio.create_task(chat_client.fileHandle())
     ]
     state.log(f"Starting Co-routines")
-    #Remove var later
-    completed_task = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+
+    # Start Tasks until anyone has a `return`
+    await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
 
     state.log("Program Exited")     
     await chat_client.clientSock.close()
 
-    # Cancel The
-    for task in asyncio.all_tasks():            
-        if(task != asyncio.current_task()):
-            task.cancel()
-            try: await task
-            except asyncio.CancelledError: pass
+    # Cancel The Processes if Reconnection will be Attempted [As cleanup() will clean otherwise]
+    if(chat_client.exit_code != 0):
+        for task in asyncio.all_tasks():            
+            if(task != asyncio.current_task()):
+                task.cancel()
+                try: await task
+                except asyncio.CancelledError: pass
     
     return chat_client.exit_code
 
 
 async def user_input():
+    '''
+    Function Responsible for User INPUT
+    '''
+
     state.log(f"Message Up & Running")
     while True:            
         msgInput = await aioconsole.ainput()            
@@ -178,14 +192,16 @@ async def cleanup():
 
     await sql_db.conn.close()
 
+# __MAIN_-
 
 api_address = "http://127.0.0.1:8000/"
+
+'''Connect and Reconnect to Server UNTIL Error or User Exits. Then Cleanup'''
 try:
     asyncio.run(entry())
+
 except Exception as e:
     print(f"ERROR OCCURED: {e}")
     
 finally:   
     asyncio.run(cleanup())
-
-'''Entry Point to Client; Any Time Client Closes without Exit-Code 0, it'll keep retrying connection'''
