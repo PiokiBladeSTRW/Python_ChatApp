@@ -6,7 +6,7 @@ legal_char = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890@#"
 
 def login() -> str:   
     '''Takes credentials as Input from user and sends request to server to verify them
-    Returns: uuid if Succesful ; False if server denies request''' 
+    @return: uuid if Succesful ; False if server denies request''' 
 
     # Username Entry
     username = input("\nENTER USERNAME: ").strip()
@@ -25,7 +25,7 @@ def login() -> str:
 
 def register() -> str: 
     '''Takes credentials as Input from user and sends request to server to create an account
-    Returns: uuid if Succesful ; False if server denies request'''
+    @return: uuid if Succesful ; False if server denies request'''
     
     def is_invalid_email(email):
         if('@' not in email):
@@ -54,8 +54,10 @@ def register() -> str:
     return authRes, username
 
 
-'''Start the Process by determining New or Old account'''
+
 def start_auth() -> str:
+    '''Entry Function handling the Loop'''
+
     ch = input("0: Login to Account\n1: Register an Account\n>")
 
     while True:       
