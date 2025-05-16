@@ -34,17 +34,7 @@ async def entry():
         if(not user_uuid):
             try:
                 requests.get(api_address)
-                user_uuid, username = auth.start_auth()
-
-                # Create a History.db if not existing already
-                sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
-                'id' INTEGER PRIMARY KEY AUTOINCREMENT,
-                'sender_id' TEXT,
-                'receiver_id' TEXT,
-                'room_id' TEXT,
-                'content' TEXT,
-                'timestamp' INTEGER)'''     
-                await sql_db.write(sql_query)             
+                user_uuid, username = auth.start_auth()        
 
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")
@@ -54,10 +44,21 @@ async def entry():
             
             state.log(f"UUID OBTAINED: {user_uuid}")
             state.clientUUID = user_uuid
+
             # If Username is returned, i.e, Registration
             if(username):
                 state.uuidsFile[user_uuid] = username
                 state.name_uuid_dict[username] = user_uuid
+
+                # Create a History.db if not existing already
+                sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
+                'id' INTEGER PRIMARY KEY AUTOINCREMENT,
+                'sender_id' TEXT,
+                'receiver_id' TEXT,
+                'room_id' TEXT,
+                'content' TEXT,
+                'timestamp' INTEGER)'''     
+                await sql_db.write(sql_query)
 
         try:
             await chat_client.connectClient()
