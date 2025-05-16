@@ -6,9 +6,11 @@ import websockets
 
 import interface.routing as interface
 import auth
+import commands.history_view as history
 import commands.command_handler as command_handler
 from chatClient import chat_client
 from session_state import state
+from sql_handle import sql_db
 
 async def entry():
     # Basic Setup
@@ -18,6 +20,8 @@ async def entry():
 
     state.profileBased(args.profile)   
     state.log(f"Event Loop started w/ Profile {args.profile}")
+
+    await sql_db.setup(args.profile)
 
     # Connect & Reconnect Mechanism
     recon_attempt = 20
@@ -30,7 +34,17 @@ async def entry():
         if(not user_uuid):
             try:
                 requests.get(api_address)
-                user_uuid, username = auth.start_auth()                
+                user_uuid, username = auth.start_auth()    
+                # Create a History.db if not existing already
+                sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
+                'id' INTEGER PRIMARY KEY AUTOINCREMENT,
+                'sender_id' TEXT,
+                'receiver_id' TEXT DEFAULT '',
+                'room_id' TEXT DEFAULT '',
+                'content' TEXT,
+                'timestamp' INTEGER)'''     
+                await sql_db.write(sql_query)    
+
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")
                 attempt += 1
@@ -39,10 +53,21 @@ async def entry():
             
             state.log(f"UUID OBTAINED: {user_uuid}")
             state.clientUUID = user_uuid
+
             # If Username is returned, i.e, Registration
             if(username):
                 state.uuidsFile[user_uuid] = username
                 state.name_uuid_dict[username] = user_uuid
+
+                # Create a History.db if not existing already
+                sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
+                'id' INTEGER PRIMARY KEY AUTOINCREMENT,
+                'sender_id' TEXT,
+                'receiver_id' TEXT DEFAULT '',
+                'room_id' TEXT DEFAULT '',
+                'content' TEXT,
+                'timestamp' INTEGER)'''     
+                await sql_db.write(sql_query)
 
         try:
             await chat_client.connectClient()
@@ -50,7 +75,9 @@ async def entry():
             state.log(f"Exited Program with Exit Code {exit_code}")
 
             # Client Close
-            if(exit_code==0): break
+            if(exit_code==0): 
+                await sql_db.conn.close()
+                break
 
             # Other Issues [Add Edge cases in cases of other forms of crash instead of Server Crash]
             chat_client.exit_code=None                   
@@ -64,8 +91,10 @@ async def entry():
             attempt += 1
             await asyncio.sleep(5)
             continue
+
     else:
         print("\nServer taking too long, Try Later")
+        await sql_db.conn.close()
 
 async def start_methods():
     tasks = [
@@ -110,19 +139,23 @@ async def user_input():
                 case 'ap_get': 
                     response = requests.get(f"{api_address}/{payload[0]}/{payload[1]}").json()
                     response['type'] = state.msgTypes['system']
-                    interface.parse_response(response)
+                    await interface.parse_response(response)
 
                 case 'ap_post':                     
                     data = {"sender_id": state.clientUUID, "content": payload[1], "receiver_id": state.receiver_id}
                     response = requests.post(f"{api_address}/{payload[0]}", json= data).json()
                     if(response.get('content') != 0):
                         response['type'] = state.msgTypes['system']
-                        interface.parse_response(response)
+                        await interface.parse_response(response)
 
                 case 'exit': 
                     chat_client.exit_code = await chat_client.sendPayload(
                         ((state.client_codes['user_exit'], ''), state.msgTypes['system']) )                        
                     chat_client.exit_code = 0                        
+
+                case 'view':
+                    await history.process_begin()
+
                 case None: pass              
                 case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
@@ -136,8 +169,23 @@ async def user_input():
 
         print()
 
+async def cleanup():
+    for task in asyncio.all_tasks():            
+        if(task != asyncio.current_task()):
+            task.cancel()
+            try: await task
+            except asyncio.CancelledError: pass
+
+    await sql_db.conn.close()
+
 
 api_address = "http://127.0.0.1:8000/"
-asyncio.run(entry())
+try:
+    asyncio.run(entry())
+except Exception as e:
+    print(f"ERROR OCCURED: {e}")
+    
+finally:   
+    asyncio.run(cleanup())
 
 '''Entry Point to Client; Any Time Client Closes without Exit-Code 0, it'll keep retrying connection'''

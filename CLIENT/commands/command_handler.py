@@ -110,6 +110,9 @@ def chat_help(args:list) -> tuple:
     import help
     return (None, None)
 
+def history(args:list)->tuple:
+    return ('view', None)
+
 
 '''-------------------------------------'''
 
@@ -153,7 +156,9 @@ commands = {
 
     "/room": room,
 
-    "/profile": profile
+    "/profile": profile,
+
+    "/history": history,
 }
 
 

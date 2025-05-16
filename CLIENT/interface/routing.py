@@ -9,12 +9,12 @@ import interface.sys as sys
 from session_state import state
 
 '''Handle Default Messages'''
-def incoming_message(response:dict):    
+async def incoming_message(response:dict):    
     if( type(response['sender_id']) == list):         
-        msg.rooms(response)
+        await msg.rooms(response)
 
     else:
-        msg.dms(response)
+        await msg.dms(response)
 
 '''Handle System Messages'''
 def system(response:dict):       
@@ -44,18 +44,15 @@ def system(response:dict):
 
 
 '''Handle Responses'''
-def parse_response(response:dict): 
+async def parse_response(response:dict): 
     # For future purpose of Storing in DB
     if(not response.get('timestamp')): response['timestamp'] = time.time()
 
-    if(response['type'] in types):          
-        return types[response['type']](response)        
-    else:                
-        raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")
-    
+    if(response['type'] == state.msgTypes['message']):
+        await incoming_message(response)
 
-'''Response Types'''
-types ={
-    state.msgTypes['message']: incoming_message,    
-    state.msgTypes['system']: system
-}
+    elif(response['type'] == state.msgTypes['system']):
+        system(response)
+      
+    else:         
+        raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")

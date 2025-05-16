@@ -140,7 +140,7 @@ class ClientState:
         with open(f"client_data/rooms/{clientProfile}.json", 'r') as roomsHandler:
             self.roomsFile: dict = json.load(roomsHandler)
 
-        with open(f"client_data/uuid_map/{state.clientProfile}.json", 'r') as uuidHandle:
+        with open(f"client_data/uuid_map/{clientProfile}.json", 'r') as uuidHandle:
             self.uuidsFile: dict = json.load(uuidHandle)
         
         self.name_uuid_dict=  {}
@@ -188,7 +188,7 @@ class ClientState:
         ->con: Displays new users logins
         '''   
 
-        return json.dumps(data)
+        return data
     
     '''Change receiver_ids'''
     def receiver_id_change(self, receiver, update_past = True):           
@@ -233,6 +233,5 @@ class ClientState:
             state.uuidsFile[uuid] = name
             state.name_uuid_dict[name] = uuid
             return name
-
 
 state = ClientState()
