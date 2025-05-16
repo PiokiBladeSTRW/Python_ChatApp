@@ -188,7 +188,7 @@ class ClientState:
         ->con: Displays new users logins
         '''   
 
-        return json.dumps(data)
+        return data
     
     '''Change receiver_ids'''
     def receiver_id_change(self, receiver, update_past = True):           

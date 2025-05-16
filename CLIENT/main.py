@@ -34,7 +34,16 @@ async def entry():
         if(not user_uuid):
             try:
                 requests.get(api_address)
-                user_uuid, username = auth.start_auth()        
+                user_uuid, username = auth.start_auth()    
+                # Create a History.db if not existing already
+                sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
+                'id' INTEGER PRIMARY KEY AUTOINCREMENT,
+                'sender_id' TEXT,
+                'receiver_id' TEXT DEFAULT '',
+                'room_id' TEXT DEFAULT '',
+                'content' TEXT,
+                'timestamp' INTEGER)'''     
+                await sql_db.write(sql_query)    
 
             except requests.exceptions.ConnectionError:
                 state.log(f"API Server Failed; Reconnecting")
@@ -173,7 +182,10 @@ async def cleanup():
 api_address = "http://127.0.0.1:8000/"
 try:
     asyncio.run(entry())
-except KeyboardInterrupt:
+except Exception as e:
+    print(f"ERROR OCCURED: {e}")
+    
+finally:   
     asyncio.run(cleanup())
 
 '''Entry Point to Client; Any Time Client Closes without Exit-Code 0, it'll keep retrying connection'''

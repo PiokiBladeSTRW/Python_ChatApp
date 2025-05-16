@@ -55,7 +55,7 @@ async def main(uuid:str, name:str):
                    
     else:
         print("\n --END OF HISTORY--")
-        return 1
+        return 0
     
 async def process_begin():
     print("\nIn Display: /e to Exit and /o to Change User\n")

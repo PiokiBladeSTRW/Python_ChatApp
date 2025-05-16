@@ -60,20 +60,20 @@ class ChatClient:
         try: 
             state.log(f"Sending Payload: {payload} \n")
             enc_payload = state.encode(payload)            
-            await self.clientSock.send(enc_payload)
+            await self.clientSock.send(json.dumps(enc_payload))
 
             if(enc_payload['type'] == 'msg'):
 
                 if(state.receiver_id.startswith('room_')):
-                    sql_query = '''INSERT INTO msgHistory (sender_id, room_uuid, content, timestamp)
+                    sql_query = '''INSERT INTO msgHistory (sender_id, room_id, content, timestamp)
                     VALUES (?,?,?,?)'''                   
                 else:
-                    sql_query = '''INSERT INTO msgHistory (sender_id, receiver_uuid, content, timestamp)
+                    sql_query = '''INSERT INTO msgHistory (sender_id, receiver_id, content, timestamp)
                     VALUES (?,?,?,?)'''
                 
                 args = (state.clientUUID, state.receiver_id, enc_payload['content'], int(float(enc_payload['timestamp'])))
 
-                sql_db.write(sql_query, args)
+                await sql_db.write(sql_query, args)
 
         except websockets.ConnectionClosedError:
             state.log(f"Server Closed")
