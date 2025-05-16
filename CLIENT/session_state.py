@@ -1,7 +1,6 @@
 '''Holds Global Variable per session'''
 
 # Header
-import time
 import json
 import requests
 from loguru import logger
@@ -148,7 +147,7 @@ class ClientState:
             self.name_uuid_dict[self.uuidsFile[uuid]] = uuid
 
     '''Encode the data'''
-    def encode(self, payload:tuple):
+    def encode(self, payload:tuple, time:float = 0):
         #Payload = (Content, Type) [or ( (Command, Arguments+), Type)]
 
         # Data always to be sent regardless of Type
@@ -162,7 +161,7 @@ class ClientState:
         # Additional Data Entries
         if(data['type'] in (self.msgTypes['message'])):
             data['receiver_id'] = self.receiver_id
-            data['timestamp'] = str(time.time())
+            data['timestamp'] = str(time)
         
         elif(data['type'] == self.msgTypes['system']):
             #payload[0] = (command_code, arguments)
@@ -188,7 +187,7 @@ class ClientState:
         ->con: Displays new users logins
         '''   
 
-        return data
+        return json.dumps(data)
     
     '''Change receiver_ids'''
     def receiver_id_change(self, receiver, update_past = True):           

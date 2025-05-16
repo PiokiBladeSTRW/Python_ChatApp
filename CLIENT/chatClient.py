@@ -1,5 +1,6 @@
 # Header
 import json
+import time
 import asyncio
 import websockets
 
@@ -68,17 +69,7 @@ class ChatClient:
             await self.clientSock.send(json.dumps(enc_payload))
 
             if(enc_payload['type'] == 'msg'):
-
-                if(state.receiver_id.startswith('room_')):
-                    sql_query = '''INSERT INTO msgHistory (sender_id, room_id, content, timestamp)
-                    VALUES (?,?,?,?)'''                   
-                else:
-                    sql_query = '''INSERT INTO msgHistory (sender_id, receiver_id, content, timestamp)
-                    VALUES (?,?,?,?)'''
-                
-                args = (state.clientUUID, state.receiver_id, enc_payload['content'], int(float(enc_payload['timestamp'])))
-
-                await sql_db.write(sql_query, args)
+                sql_db.write(state.clientUUID, payload[0], timestamp, state.receiver_id)
 
         except websockets.ConnectionClosedError:
             state.log(f"Server Closed")
@@ -97,7 +88,7 @@ class ChatClient:
 
     async def fileHandle(self) -> None:        
         '''Handle File Updating'''
-        
+
         while True:   
             state.log("Client Files Reupdated")
             

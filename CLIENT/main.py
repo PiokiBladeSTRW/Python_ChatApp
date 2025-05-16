@@ -64,7 +64,7 @@ async def entry():
                 'room_id' TEXT DEFAULT '',
                 'content' TEXT,
                 'timestamp' INTEGER)'''     
-                await sql_db.write(sql_query)
+                await sql_db.exec(sql_query)
 
 
         # Socket Connection Establishment

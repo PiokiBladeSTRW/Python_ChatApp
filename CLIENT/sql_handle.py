@@ -9,13 +9,33 @@ class SQLHandle:
         self.conn = await aiosqlite.connect(f"client_data/history/{profile}.db")
         self.cursor = await self.conn.cursor()
 
-    async def write(self, query:str, args:tuple =()):
+    async def exec(self, query:str, args:tuple =()):
         if(args):
             await self.cursor.execute(query, args)
         else:
             await self.cursor.execute(query)
 
         await self.conn.commit()
+
+    async def write(self, sender_id:str, content:str, timestamp:int, second_id:str = ''):
+        
+        if(not second_id):
+            sql_query = '''INSERT INTO msgHistory (sender_id, content, timestamp)
+            VALUES (?,?,?)'''
+            await self.exec(sql_query, (sender_id, content, timestamp))
+            return
+        
+        if(second_id.startswith('user_')):      
+            sql_query = '''INSERT INTO msgHistory (sender_id, receiver_id, content, timestamp)
+            VALUES (?,?,?,?)'''
+            await self.exec(sql_query, (sender_id,  content, timestamp))   
+            return
+        
+        if(second_id.startswith('room_')):
+            sql_query = '''INSERT INTO msgHistory (sender_id, room_id, content, timestamp)
+            VALUES (?,?,?,?)'''
+            await self.exec(sql_query, (sender_id, content, timestamp))   
+            return
 
     async def read(self, query:str, args:tuple =()):
         if(args):
