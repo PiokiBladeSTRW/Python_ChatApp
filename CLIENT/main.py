@@ -1,14 +1,11 @@
 # HEADER (chonky one)
 import asyncio
-import aioconsole
 import argparse
 import requests
 import websockets
 
-import interface.routing as interface
 import auth
-import commands.history_view as history
-import commands.command_handler as command_handler
+import commands.user_input as input_module
 from chatClient import chat_client
 from session_state import state
 from sql_handle import sql_db
@@ -101,12 +98,12 @@ async def start_methods():
     '''
     Start all the Tasks Required Here for Centralized Control
     Tasks: 
-        (main) Message_Input & Handling
+        (Input) Message_Input & Handling
         (Socket) Receiving Message, Updating Files, Sending HeartBeats
     '''
 
     tasks = [
-        asyncio.create_task(user_input()),
+        asyncio.create_task(input_module.user_input()),
         asyncio.create_task(chat_client.receive()),
         asyncio.create_task(chat_client.heartbeat()),
         asyncio.create_task(chat_client.fileHandle())
@@ -130,58 +127,7 @@ async def start_methods():
     return chat_client.exit_code
 
 
-async def user_input():
-    '''
-    Function Responsible for User INPUT
-    '''
 
-    state.log(f"Message Up & Running")
-    while True:            
-        msgInput = await aioconsole.ainput()            
-        
-        if(command_handler.is_command(msgInput)):
-            action, payload = command_handler.parse_command(msgInput)
-            '''Action: ws_send, ap_get, ap_post, exit, None
-                Websocket Payload Format: (content, type)  
-                API Format: (url, content)              
-                '''
-            
-            # Check what to do to Payload
-            match action:
-                case 'ws_send': chat_client.exit_code = await chat_client.sendPayload(payload)
-
-                case 'ap_get': 
-                    response = requests.get(f"{api_address}/{payload[0]}/{payload[1]}").json()
-                    response['type'] = state.msgTypes['system']
-                    await interface.parse_response(response)
-
-                case 'ap_post':                     
-                    data = {"sender_id": state.clientUUID, "content": payload[1], "receiver_id": state.receiver_id}
-                    response = requests.post(f"{api_address}/{payload[0]}", json= data).json()
-                    if(response.get('content') != 0):
-                        response['type'] = state.msgTypes['system']
-                        await interface.parse_response(response)
-
-                case 'exit': 
-                    chat_client.exit_code = await chat_client.sendPayload(
-                        ((state.client_codes['user_exit'], ''), state.msgTypes['system']) )                        
-                    chat_client.exit_code = 0                        
-
-                case 'view':
-                    await history.process_begin()
-
-                case None: pass              
-                case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
-
-        elif(state.receiver_id):
-            chat_client.exit_code = await chat_client.sendPayload( (msgInput, state.msgTypes['message']) )
-
-        else:
-            print("[!!ERROR: No Destination Chosen]")       
-        
-        if(chat_client.exit_code): return
-
-        print()
 
 async def cleanup():
     for task in asyncio.all_tasks():            
