@@ -4,6 +4,7 @@ import asyncio
 import websockets
 
 import interface.routing as interface
+from sql_handle import sql_db
 from session_state import state
 
 '''
@@ -58,7 +59,21 @@ class ChatClient:
         '''Payload : ( Message, Type )'''
         try: 
             state.log(f"Sending Payload: {payload} \n")
-            await self.clientSock.send(state.encode(payload))
+            enc_payload = state.encode(payload)            
+            await self.clientSock.send(enc_payload)
+
+            if(enc_payload['type'] == 'msg'):
+
+                if(state.receiver_id.startswith('room_')):
+                    sql_query = '''INSERT INTO msgHistory (sender_id, room_uuid, content, timestamp)
+                    VALUES (?,?,?,?)'''                   
+                else:
+                    sql_query = '''INSERT INTO msgHistory (sender_id, receiver_uuid, content, timestamp)
+                    VALUES (?,?,?,?)'''
+                
+                args = (state.clientUUID, state.receiver_id, enc_payload['content'], int(float(enc_payload['timestamp'])))
+
+                sql_db.write(sql_query, args)
 
         except websockets.ConnectionClosedError:
             state.log(f"Server Closed")
