@@ -13,7 +13,7 @@ Commands and Actions
 # Header
 from session_state import state
 import commands.room_cmd as room_cmd
-import commands.error_handle as errors
+from commands.error_display import error_display
 
 
 '''========================== type: msg'''
@@ -22,7 +22,7 @@ import commands.error_handle as errors
 '''Handle DMS'''
 def handle_dm(args:list) -> tuple:  
 
-    if(len(args)<2): return errors.error_handle("Invalid Arguments!")
+    if(len(args)<2): return error_display("Invalid Arguments!")
 
     '''Args[0]= Username, Args[1::]= Message''' 
     uuid = state.name_uuid(args[0])
@@ -31,6 +31,7 @@ def handle_dm(args:list) -> tuple:
     state.receiver_id_change(uuid)
     payload = (' '.join(args[1::]), state.msgTypes['message'])
     return ('ws_send', payload)
+
 
 '''========================== type : sys'''
    
@@ -46,7 +47,7 @@ def rooms_list(args:list) -> tuple:
 '''Profile Management'''
 def profile(args:list) -> tuple:
 
-    if(len(args)<2): return errors.error_handle("Invalid Arguments!")
+    if(len(args)<2): return error_display("Invalid Arguments!")
 
     match args[0]:
         case "get": 
@@ -59,7 +60,7 @@ def profile(args:list) -> tuple:
             content= ' '.join(args[1::])
             return ('ap_post', ('profile_set', content))
 
-        case _: return errors.error_handle("Invalid Command!")
+        case _: return error_display("Invalid Command!")
 
 
 '''Exit Program'''
@@ -68,12 +69,11 @@ def close(args:list) -> tuple:
 
 '''Room Related Commands'''
 def room(args:list) -> tuple: 
-
     
-    if(len(args)<2 and args[0] not in ('members', 'info')): return errors.error_handle("Invalid Arguments!")
+    if(len(args)<2 and args[0] not in ('members', 'info')): return error_display("Invalid Arguments!")
 
     if(args[0] not in ('create', 'join') and not state.receiver_id.startswith('room_')): 
-        return errors.error_handle("Invalid Room")
+        return error_display("Invalid Room")
 
     match args[0]:
         case "join": return room_cmd.join_room(args[1])
@@ -89,7 +89,7 @@ def room(args:list) -> tuple:
         case "members": return room_cmd.members()
         case "transfer": return room_cmd.transfer(args[1])
         case "leave": return room_cmd.leave()
-        case _: return errors.error_handle("Invalid Command!")
+        case _: return error_display("Invalid Command!")
 
 
 '''========================== type : none'''
@@ -110,6 +110,7 @@ def chat_help(args:list) -> tuple:
     import help
     return (None, None)
 
+'''View Message History'''
 def history(args:list)->tuple:
     return ('view', None)
 
@@ -117,14 +118,17 @@ def history(args:list)->tuple:
 '''-------------------------------------'''
 
  
-'''Check if inputted Message is a Command'''
 def is_command(msg:str):
+    '''Check if inputted Message is a Command'''
+
     if(msg.startswith('/')):
         return True
     return False
 
-'''Match Command to Function'''
-def parse_command(input_cmd:str) -> tuple:    
+
+def parse_command(input_cmd:str) -> tuple:       
+    '''Match Command to Function''' 
+
     parts = input_cmd.split()    
 
     # Check if the command has arguments
@@ -139,7 +143,7 @@ def parse_command(input_cmd:str) -> tuple:
         state.log(f"Running Command: {cmd}")       
         return commands[cmd](args)        
     
-    return errors.error_handle("Invalid Command!")
+    return error_display("Invalid Command!")
     
 
 '''Convert Command to Function call in One Step'''
@@ -170,6 +174,7 @@ PAYLOAD: Returned Data
 ACTION ->   'ws_send': Send Payload to chat server with pending encoding
             'ap_get': Send Payload to api server for GET
             'ap_post': Send Payload to api server for POST
+            'view': Open up history_view; Not opened here to avoid async hell
             'exit': Special Handling Disconnection
             None : Client need do nothing, work is done           
 '''
