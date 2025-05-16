@@ -27,7 +27,6 @@ class ChatClient:
         self.exit_code = None               
         
     async def connectClient(self) -> None: 
-
         # Connect to the Socket Server
         self.clientSock = await websockets.connect(self.serverAddress)
 
@@ -43,7 +42,6 @@ class ChatClient:
 
     async def receive(self) -> None:
         state.log(f"Receive Up & Running")
-
         try:
             async for dataReceived in self.clientSock:
                 response = json.loads(dataReceived)
@@ -61,7 +59,6 @@ class ChatClient:
             return 
 
     async def sendPayload(self, payload: tuple) -> None:
-
         '''Payload : ( Message, Type ) or ( (Command, Arguments), 'sys)'''
         try: 
             state.log(f"Sending Payload: {payload} \n")
@@ -69,6 +66,7 @@ class ChatClient:
             timestamp = time.time()                    
             await self.clientSock.send(state.encode(payload, timestamp))
 
+            # Write to SQL DB
             if(payload[1] == 'msg'):
                 sql_db.write(state.clientUUID, payload[0], timestamp, state.receiver_id)
 
