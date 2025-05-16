@@ -103,7 +103,7 @@ async def start_methods():
     '''
 
     tasks = [
-        asyncio.create_task(input_module.user_input()),
+        asyncio.create_task(input_module.user_input(api_address, chat_client)),
         asyncio.create_task(chat_client.receive()),
         asyncio.create_task(chat_client.heartbeat()),
         asyncio.create_task(chat_client.fileHandle())
