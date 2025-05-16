@@ -1,11 +1,11 @@
-'''Holds Global Variable per session'''
-
 # Header
 import json
 import requests
 from loguru import logger
 
 class ClientState:
+    '''Class to hold all Global Variables and Functions'''
+
     def __init__(self):
         self.clientUUID = ''
         self.receiver_id = ''
@@ -13,9 +13,7 @@ class ClientState:
         self.clientSock = None        
         self.clientProfile = ''
 
-        logger.remove()
-        
-
+        # Mapped-Values to avoid Magic Values
         self.msgTypes= {
             "message": "msg",            
             "system": "sys",
@@ -93,12 +91,6 @@ class ClientState:
             213 : "The Member is the Room Owner",
             214 : "You are not the OWNER of the Room" 
         }
-        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115, 119)
-        self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)
-        # self.change_codes = (101,208, 112, 113)
-        # self.force_change_codes = (204, 205, 209)
-        # self.special_commands = (109,)        
-        self.modify_codes = (101, 104, 105, 112, 113, 204, 205, 300, 301)
 
         self.client_codes ={
             'user_exit': 1,           
@@ -115,12 +107,18 @@ class ClientState:
             'user_join': 12,
         }
 
+        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115, 119)
+        self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)     
+        self.modify_codes = (101, 104, 105, 112, 113, 204, 205, 300, 301)
 
-    '''Tasks that requires clientProfile'''
+    
     def profileBased(self, clientProfile):
+        '''Tasks that requires clientProfile'''
+
         self.clientProfile = clientProfile
 
-        #Log Setup
+        # Log Setup
+        logger.remove()
         log_format = (
             "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
             "<level>{level: <8}</level> |"
@@ -135,43 +133,24 @@ class ClientState:
             encoding= 'utf-8',            
         )
 
-        #Room Handling setup
+        # Files Setup
         with open(f"client_data/rooms/{clientProfile}.json", 'r') as roomsHandler:
             self.roomsFile: dict = json.load(roomsHandler)
 
         with open(f"client_data/uuid_map/{clientProfile}.json", 'r') as uuidHandle:
             self.uuidsFile: dict = json.load(uuidHandle)
         
+        # Reverse Dictionary
         self.name_uuid_dict=  {}
         for uuid in self.uuidsFile:
             self.name_uuid_dict[self.uuidsFile[uuid]] = uuid
 
-    '''Encode the data'''
+    
     def encode(self, payload:tuple, time:float = 0):
-        #Payload = (Content, Type) [or ( (Command, Arguments+), Type)]
-
-        # Data always to be sent regardless of Type
-        data = {
-                "sender_id": self.clientUUID,                      
-                "content": payload[0], 
-                "type": payload[1]
-            }
-        
-        
-        # Additional Data Entries
-        if(data['type'] in (self.msgTypes['message'])):
-            data['receiver_id'] = self.receiver_id
-            data['timestamp'] = str(time)
-        
-        elif(data['type'] == self.msgTypes['system']):
-            #payload[0] = (command_code, arguments)
-            data["command"] = payload[0][0]
-            data["content"] = payload[0][1]
-
-            if(self.receiver_id.startswith('room_')): data['receiver_id'] = self.receiver_id            
-            if(data['content'] == ''): data.pop('content')
-
-        '''   
+        '''
+        Encode the Payload Appropriately
+        Payload = (Content, Type) [or ( (Command, Arguments+), Type)]
+                  
         Message Fields:
             sender_id    = UUID of sender_id
             receiver_id  = UUID of receiver_id            
@@ -183,18 +162,42 @@ class ClientState:
         Types:
         ->msg: Default String Message
         ->sys: System Message / Commands
-        ->hbp: Heartbeat Pings. Letting Server know you are there.
-        ->con: Displays new users logins
-        '''   
+        ->hbp: Heartbeat Pings. Letting Server know you are there.        
+          
+        '''
+
+        # Data always to be sent regardless of Type
+        data = {
+                "sender_id": self.clientUUID,                      
+                "content": payload[0], 
+                "type": payload[1]
+            }
+
+        # Additional Data Entries
+        if(data['type'] in (self.msgTypes['message'])):
+            data['receiver_id'] = self.receiver_id
+            data['timestamp'] = str(time)
+        
+        elif(data['type'] == self.msgTypes['system']):
+            #payload[0] = (command_code, arguments)
+            data["command"] = payload[0][0]
+            data["content"] = payload[0][1]
+
+            if(self.receiver_id.startswith('room_')): data['receiver_id'] = self.receiver_id            
+            if(data['content'] == ''): data.pop('content') 
 
         return json.dumps(data)
     
-    '''Change receiver_ids'''
-    def receiver_id_change(self, receiver, update_past = True):           
+
+    def receiver_id_change(self, receiver, update_past = True):   
+        '''Change receiver_ids'''    
+
         if(update_past): 
             self.preceiver_id = self.receiver_id
+
         self.receiver_id = receiver       
         
+        # Display
         if(receiver==''): receiver = 'No One'
         else : receiver = state.uuidsFile[receiver]
 
@@ -202,35 +205,47 @@ class ClientState:
 
         print('', "="*25, f"Now Chatting with {receiver}", "="*25, sep='\n')
 
-    '''Log Something'''
+    
     def log(self, msg):
+        '''Log Something'''
         logger.opt(depth=1).info(msg)
 
+
     def name_uuid(self, name: str) -> str:
+        '''Convert a Name to UUID; Either Locally Mapped or Requested by Server'''
+
         state.log(f"Converting {name} to UUID")
+
         if(name in state.name_uuid_dict): 
             return state.name_uuid_dict[name]
+        
         else:
             uuid = requests.get(f"http://127.0.0.1:8000/name_to_uuid/{name}").json()['content']
             if(uuid == 0):
                 print("{System}: Account/Room of such Name doesn't Exist")
                 return 0
             
+            # Updated Local Mapping
             state.log(f"Updated UUIDs file with {uuid}:{name}")
             state.uuidsFile[uuid] = name
             state.name_uuid_dict[name] = uuid
             return uuid
         
     def uuid_name(self, uuid: str) -> str:
+        '''Convert a UUID to Name; Either Locally Mapped or Requested by Server'''
         state.log(f"Converting {uuid} to Name")
+
         if(uuid in state.uuidsFile): 
             return state.uuidsFile[uuid]
+        
         else:
             name = requests.get(f"http://127.0.0.1:8000/uuid_to_name/{uuid}").json()['content']
 
+            # Updated Local Mapping
             state.log(f"Updated UUIDs file with {uuid}:{name}")            
             state.uuidsFile[uuid] = name
             state.name_uuid_dict[name] = uuid
             return name
 
+#__MAIN__
 state = ClientState()
