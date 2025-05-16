@@ -7,7 +7,9 @@ from server_state import state
 
 def login(credentials: object) -> dict: 
     '''Verify the credentials sent are Valid'''
+
     if(credentials.username in state.username_uuid):
+
         #Hash password
         user_uuid = state.username_uuid[credentials.username]
         salt = state.accountsFile[user_uuid]['salt']
@@ -38,8 +40,7 @@ def register(credentials: object) -> dict:
         "username":credentials.username, 
         "passwd": passwd, 
         "email": credentials.email,
-        "salt": salt
-                                           
+        "salt": salt                                           
         }
     
     state.uuidsFile[user_uuid] ={        
