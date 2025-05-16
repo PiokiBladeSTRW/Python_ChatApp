@@ -54,8 +54,8 @@ async def entry():
                 sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
                 'id' INTEGER PRIMARY KEY AUTOINCREMENT,
                 'sender_id' TEXT,
-                'receiver_id' TEXT,
-                'room_id' TEXT,
+                'receiver_id' TEXT DEFAULT '',
+                'room_id' TEXT DEFAULT '',
                 'content' TEXT,
                 'timestamp' INTEGER)'''     
                 await sql_db.write(sql_query)
