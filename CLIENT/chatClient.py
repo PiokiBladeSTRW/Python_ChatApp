@@ -65,10 +65,11 @@ class ChatClient:
         '''Payload : ( Message, Type ) or ( (Command, Arguments), 'sys)'''
         try: 
             state.log(f"Sending Payload: {payload} \n")
-            enc_payload = state.encode(payload)            
-            await self.clientSock.send(json.dumps(enc_payload))
 
-            if(enc_payload['type'] == 'msg'):
+            timestamp = time.time()                    
+            await self.clientSock.send(state.encode(payload, timestamp))
+
+            if(payload[1] == 'msg'):
                 sql_db.write(state.clientUUID, payload[0], timestamp, state.receiver_id)
 
         except websockets.ConnectionClosedError:
