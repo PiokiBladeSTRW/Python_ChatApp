@@ -43,7 +43,7 @@ class ChatClient:
                 response = json.loads(dataReceived)
                 state.log(f"Received from Server: {response} \n")
 
-                task = interface.parse_response(response) 
+                task = await interface.parse_response(response) 
                 if(task=='kick'):                     
                     self.exit_code= 0
                 

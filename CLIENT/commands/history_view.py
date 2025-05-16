@@ -13,14 +13,13 @@ async def main(uuid:str, name:str):
     
     room = uuid.startswith('room_')
 
-    print(await sql_db.cursor.fetchall())
     for msg in messages:
-
+        # msg : (id, sender_id, room_id, content, timestamp)
         if(room):
-            sender = f"[{name}] {state.uuid_name(msg['sender_id'])}"
-            data = (msg['timestamp'], sender, msg['content'])
+            sender = f"[{name}] {state.uuid_name(msg[1])}"
+            data = (msg[4], sender, msg[3])
         else:
-            data = (msg['timestamp'], name, msg['content'])
+            data = (msg[4], name, msg[3])
 
         print(formatting.format(data, ('bt', 's', 'cl', 'c')))
 
@@ -29,7 +28,10 @@ async def main(uuid:str, name:str):
             return 0
         if(inp == '/o'):
             return 1             
-
+    else:
+        print("\n --END OF HISTORY--")
+        return 1
+    
 async def process_begin():
     print("\nIn Display: /e to Exit and /o to Change User\n")
     while True:

@@ -7,7 +7,7 @@ async def update_history(sender_id:str, content:str, timestamp:str, room_id:str=
     VALUES (?,?,?,?)'''
     args = (sender_id, room_id, content, int(float(timestamp)))
 
-    sql_db.write(sql_query, args)
+    await sql_db.write(sql_query, args)
 
 async def dms(response: dict): 
     username = state.uuid_name(response['sender_id'])

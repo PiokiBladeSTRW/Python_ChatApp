@@ -38,11 +38,11 @@ async def entry():
 
                 # Create a History.db if not existing already
                 sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                sender_id TEXT
-                room_id TEXT
-                content TEXT
-                timestamp INTEGER)'''     
+                'id' INTEGER PRIMARY KEY AUTOINCREMENT,
+                'sender_id' TEXT,
+                'room_id' TEXT,
+                'content' TEXT,
+                'timestamp' INTEGER)'''     
                 await sql_db.write(sql_query)             
 
             except requests.exceptions.ConnectionError:
@@ -128,14 +128,14 @@ async def user_input():
                 case 'ap_get': 
                     response = requests.get(f"{api_address}/{payload[0]}/{payload[1]}").json()
                     response['type'] = state.msgTypes['system']
-                    interface.parse_response(response)
+                    await interface.parse_response(response)
 
                 case 'ap_post':                     
                     data = {"sender_id": state.clientUUID, "content": payload[1], "receiver_id": state.receiver_id}
                     response = requests.post(f"{api_address}/{payload[0]}", json= data).json()
                     if(response.get('content') != 0):
                         response['type'] = state.msgTypes['system']
-                        interface.parse_response(response)
+                        await interface.parse_response(response)
 
                 case 'exit': 
                     chat_client.exit_code = await chat_client.sendPayload(
