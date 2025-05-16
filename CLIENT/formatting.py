@@ -5,7 +5,7 @@ import time
 time_format = "%H:%M"
 
 def format(data:tuple, tags:tuple) -> str:   
-    '''DATA: (timestamp, sender_id, content)'''
+    '''DATA: (timestamp, sender_id, content, receiver_id)'''
 
     # Make timestamp Readable as originally it is time.time()
     if(data[0]): timestamp = time.strftime(time_format, time.localtime( float( data[0] ) ))
@@ -17,6 +17,7 @@ def format(data:tuple, tags:tuple) -> str:
         match tag:
             case 't': msg_bits.append(timestamp)
             case 's': msg_bits.append(data[1])
+            case 'r': msg_bits.append(data[3])
             case 'c': msg_bits.append(data[2])
             case 'bt': msg_bits.append(f"[{timestamp}]")
             case 'cl': msg_bits.append(':')

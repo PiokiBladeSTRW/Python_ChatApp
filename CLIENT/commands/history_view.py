@@ -3,31 +3,56 @@ import formatting
 from session_state import state
 from sql_handle import sql_db
 
+'''
+FIELDS: (id, sender_id, receiver_id, room_id, content, timestamp)
 
-async def main(uuid:str, name:str):     
-    sql_query= '''SELECT * FROM msgHistory
-    WHERE sender_id = ?
-    ORDER BY id'''
+Primary Key: id
+Optional Fields: receiver_id, room_id
 
-    messages = await sql_db.read(sql_query, (uuid,))
-    
+Receiver_id: Signifies the Message is SENT by the user not Received
+room_id: Signifies the message is a Room message. 
+
+Receiver & Room ID, NEVER CO-EXIST. Presence of One means the other is ''
+'''
+
+async def main(uuid:str, name:str):  
     room = uuid.startswith('room_')
 
+    if(room):
+        sql_query= '''SELECT * FROM msgHistory        
+            WHERE room_id = ?
+            ORDER BY id'''
+        args = (uuid,)
+    else:
+        sql_query= '''SELECT * FROM msgHistory
+        WHERE sender_id = ? OR receiver_id = ?
+        ORDER BY id'''
+        args = (uuid, uuid)
+
+    messages = await sql_db.read(sql_query, args)
+
     for msg in messages:
-        # msg : (id, sender_id, room_id, content, timestamp)
+
         if(room):
             sender = f"[{name}] {state.uuid_name(msg[1])}"
-            data = (msg[4], sender, msg[3])
+            data = (msg[5], sender, msg[4])       
+            format = ('bt', 's', 'cl', 'c')     
         else:
-            data = (msg[4], name, msg[3])
+            if(msg[1] == uuid):
+                data = (msg[5], name, msg[4])
+                format = ('bt', 's', 'cl', 'c')     
+            else:
+                data = (msg[5], state.uuidsFile[state.clientUUID], msg[4], name)
+                format = ('bt', 's', 'a', 'r', 'cl', 'c')     
 
-        print(formatting.format(data, ('bt', 's', 'cl', 'c')))
+        print(formatting.format(data, format))
 
         inp = await aioconsole.ainput(">")
         if(inp == '/e'):
             return 0
         if(inp == '/o'):
-            return 1             
+            return 1  
+                   
     else:
         print("\n --END OF HISTORY--")
         return 1
