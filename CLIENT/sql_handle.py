@@ -24,8 +24,8 @@ class SQLHandle:
         else:
             await self.cursor.execute(query)
 
-        self.return_data = await self.cursor.fetchall()
-        return self.return_data
+        # self.return_data = await self.cursor.fetchall()
+        # return self.return_data
     
     async def cleanup(self):
         for task in self.task_list:
@@ -44,8 +44,5 @@ class SQLHandle:
         task = asyncio.create_task(self.write(query, args))
         self.task_list.append(task)
 
-    def call_read(self, query:str, args:tuple =()):
-        task = asyncio.create_task(self.write(query, args))
-        self.task_list.append(task)
 
 sql_db = SQLHandle()

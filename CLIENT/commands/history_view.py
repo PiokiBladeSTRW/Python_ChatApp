@@ -4,7 +4,7 @@ from session_state import state
 from sql_handle import sql_db
 
 
-async def main(uuid:str, name:str): 
+async def main(uuid:str, name:str):     
     sql_query= '''SELECT * FROM msgHistory
     WHERE sender_id = ?
     ORDER BY id'''
@@ -13,6 +13,7 @@ async def main(uuid:str, name:str):
     
     room = uuid.startswith('room_')
 
+    print(await sql_db.cursor.fetchall())
     for msg in messages:
 
         if(room):

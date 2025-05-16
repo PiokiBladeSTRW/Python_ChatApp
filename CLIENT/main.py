@@ -21,7 +21,7 @@ async def entry():
     state.profileBased(args.profile)   
     state.log(f"Event Loop started w/ Profile {args.profile}")
 
-    sql_db.setup(args.profile)
+    await sql_db.setup(args.profile)
 
     # Connect & Reconnect Mechanism
     recon_attempt = 20
@@ -38,11 +38,11 @@ async def entry():
 
                 # Create a History.db if not existing already
                 sql_query = '''CREATE TABLE IF NOT EXISTS msgHistory(
-                id INT PRIMARY KEY AUTO INCREMENT,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 sender_id TEXT
                 room_id TEXT
                 content TEXT
-                timestamp INT)'''     
+                timestamp INTEGER)'''     
                 await sql_db.write(sql_query)             
 
             except requests.exceptions.ConnectionError:
@@ -64,7 +64,9 @@ async def entry():
             state.log(f"Exited Program with Exit Code {exit_code}")
 
             # Client Close
-            if(exit_code==0): break
+            if(exit_code==0): 
+                await sql_db.conn.close()
+                break
 
             # Other Issues [Add Edge cases in cases of other forms of crash instead of Server Crash]
             chat_client.exit_code=None                   
@@ -78,8 +80,10 @@ async def entry():
             attempt += 1
             await asyncio.sleep(5)
             continue
+
     else:
         print("\nServer taking too long, Try Later")
+        await sql_db.conn.close()
 
 async def start_methods():
     tasks = [
@@ -140,7 +144,7 @@ async def user_input():
 
                 case 'view':
                     await history.process_begin()
-                    
+
                 case None: pass              
                 case _: raise ValueError(f"●→ INVALID PAYLOAD ACTION RECEIVED: {action}")
 
@@ -154,8 +158,20 @@ async def user_input():
 
         print()
 
+async def cleanup():
+    for task in asyncio.all_tasks():            
+        if(task != asyncio.current_task()):
+            task.cancel()
+            try: await task
+            except asyncio.CancelledError: pass
+
+    await sql_db.conn.close()
+
 
 api_address = "http://127.0.0.1:8000/"
-asyncio.run(entry())
+try:
+    asyncio.run(entry())
+except KeyboardInterrupt:
+    asyncio.run(cleanup())
 
 '''Entry Point to Client; Any Time Client Closes without Exit-Code 0, it'll keep retrying connection'''
