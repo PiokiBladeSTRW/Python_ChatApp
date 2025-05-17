@@ -74,7 +74,7 @@ def close(args:list) -> tuple:
 '''Room Related Commands'''
 def room(args:list) -> tuple: 
     
-    if(len(args)<2 and args[0] not in ('members', 'info')): return error_display("Invalid Arguments!")
+    if(len(args)<2 and args[0] not in ('members', 'info', 'leave')): return error_display("Invalid Arguments!")
 
     if(args[0] not in ('create', 'join') and not state.receiver_id.startswith('room_')): 
         return error_display("Invalid Room")
