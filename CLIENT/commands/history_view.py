@@ -29,7 +29,7 @@ async def main(uuid:str, name:str):
         args = (uuid,)
     else:
         sql_query= '''SELECT * FROM msgHistory
-        WHERE sender_id = ? OR receiver_id = ?
+        WHERE (sender_id = ? OR receiver_id = ?) AND room_id =''
         ORDER BY id'''
         args = (uuid, uuid)
 
@@ -38,6 +38,7 @@ async def main(uuid:str, name:str):
 
     # Loop Through History
     for msg in messages:
+        print(f"\n{msg}\n")
         
         # Format the Messages Appropriately
         if(room):
