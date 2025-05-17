@@ -68,7 +68,7 @@ class ChatClient:
 
             # Write to SQL DB
             if(payload[1] == 'msg'):
-                sql_db.write(state.clientUUID, payload[0], timestamp, state.receiver_id)
+                await sql_db.write(state.clientUUID, payload[0], timestamp, state.receiver_id)
 
         except websockets.ConnectionClosedError:
             state.log(f"Server Closed")
