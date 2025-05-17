@@ -45,6 +45,15 @@ def special_commands(response:dict, args:list =[]):
         state.roomsFile[response['sender_id']] = data
         return 0
     
+    # Update receiver if user left room
+    if(command == state.system_codes['member_left']):
+
+        if(state.clientUUID == state.uuid_name(args[1])):
+            state.receiver_id_change('', False)
+            return 0
+        else:
+            state.roomsFile[response['sender_id']].remove(args[1])
+    
     # Update roomsFile with new Room Member
     if(command == state.system_codes['new_room_member']):        
         state.roomsFile[response['sender_id']].append(args[1])
