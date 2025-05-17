@@ -59,7 +59,8 @@ def special_commands(response:dict, args:list =[]):
     # If Current Receiver is no longer Contactable, reset Receiver
     rec_change =(
         state.system_codes['user_exit'], state.system_codes['got_kicked'], state.system_codes['got_banned'])
-    if(command in rec_change and state.receiver_id == args[0]):
+    if(command in rec_change and state.receiver_id == state.name_uuid(args[0])):
+        print("boo")
         state.receiver_id_change('', False)
         return
 
