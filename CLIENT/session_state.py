@@ -40,6 +40,7 @@ class ClientState:
             'member_owner': 117,
             'new_owner': 118,
             'user_join': 119,
+            'member_left': 120,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -54,7 +55,8 @@ class ClientState:
             'er_Not_owner': 214,
 
             'no_display': 300,
-            'room_data' : 301
+            'room_data' : 301,
+            'room_left' : 302,
         }
         
         self.sys_code_msg={
@@ -77,6 +79,7 @@ class ClientState:
             117 : "You are the OWNER of the Room",
             118 : "{1} IS NOW THE OWNER OF ROOM",
             119 : "{0} is ONLINE",
+            120 : "{1} has Left {0}",
 
             201 : "Invalid Login Credentials",
             202 : "Username already in Use",            
@@ -107,9 +110,9 @@ class ClientState:
             'user_join': 12,
         }
 
-        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115, 116, 118, 119)
+        self.sys_format = (101,104,105,106,107, 110, 111, 112, 113, 114, 115, 116, 118, 119, 120)
         self.sys_uuid_format = (101, 104, 107,110,111,112,113,114)     
-        self.modify_codes = (101, 104, 105, 112, 113, 204, 205, 300, 301)
+        self.modify_codes = (101, 104, 105, 112, 113, 204, 205, 300, 301, 302)
 
     
     def profileBased(self, clientProfile):

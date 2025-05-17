@@ -79,6 +79,7 @@ class ServerState:
             'member_owner': 117,
             'new_owner': 118,
             'user_join': 119,
+            'member_left': 120,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -93,7 +94,8 @@ class ServerState:
             'er_Not_owner': 214,
 
             'no_display': 300,
-            'room_data' : 301
+            'room_data' : 301,
+            'room_left' : 302,
         }
 
         self.client_codes ={

@@ -45,14 +45,14 @@ def special_commands(response:dict, args:list =[]):
         state.roomsFile[response['sender_id']] = data
         return 0
     
-    # Update receiver if user left room
+    # Reset receiver if you leave room
+    if(command == state.system_codes['room_left']):
+        state.receiver_id_change('', False)        
+        return 0
+    
+    # Update roomsFile with a leaving member
     if(command == state.system_codes['member_left']):
-
-        if(state.clientUUID == state.uuid_name(args[1])):
-            state.receiver_id_change('', False)
-            return 0
-        else:
-            state.roomsFile[response['sender_id']].remove(args[1])
+        state.roomsFile[response['sender_id']].remove(args[1])
     
     # Update roomsFile with new Room Member
     if(command == state.system_codes['new_room_member']):        
@@ -68,8 +68,7 @@ def special_commands(response:dict, args:list =[]):
     # If Current Receiver is no longer Contactable, reset Receiver
     rec_change =(
         state.system_codes['user_exit'], state.system_codes['got_kicked'], state.system_codes['got_banned'])
-    if(command in rec_change and state.receiver_id == state.name_uuid(args[0])):
-        print("boo")
+    if(command in rec_change and state.receiver_id == state.name_uuid(args[0])):        
         state.receiver_id_change('', False)
         return
 

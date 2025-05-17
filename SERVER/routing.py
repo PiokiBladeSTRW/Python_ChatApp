@@ -15,7 +15,8 @@ def room(clientSock, destination:str)-> tuple:
     '''Room Broadcasts'''
 
     rC = list(state.room_sock[destination])
-    rC.remove(clientSock)
+    if(clientSock in state.room_sock[destination]):
+        rC.remove(clientSock)
 
     return tuple(rC)
 

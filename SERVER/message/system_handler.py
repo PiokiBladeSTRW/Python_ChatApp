@@ -298,9 +298,12 @@ def room_leave(clientSock:object, response:dict) -> tuple:
     room_uuid = response['receiver_id']  
 
     # Catch Error
-    if(data:= error.error_handle(response['sender'] == state.roomsFile[room_uuid]['owner'], 'member_owner')): return data
+    if(data:= error.error_handle(response['sender_id'] == state.roomsFile[room_uuid]['owner'], 'member_owner')): return data
 
     # Modify and Send
     modify_room(room_uuid, ('LEAVE', 'DEMOTE'), clientSock)
     
-    return (room_uuid, encode_payload( state.system_codes['member_left'], [response['sender_id']], room_uuid))  
+    return (
+        (room_uuid, encode_payload( state.system_codes['member_left'], [response['sender_id']], room_uuid)) ,
+        ('/s', encode_payload( state.system_codes['room_left'] ))
+        )

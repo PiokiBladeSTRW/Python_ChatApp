@@ -47,7 +47,7 @@ def system(response:dict):
 '''Handle (bring about requried changes) and Display Incoming Data from Server'''
 
 async def parse_response(response:dict): 
-    '''Entry Function; Async purely to incorporate SQL'''
+    '''Entry Function; Async purely to incorporate SQL'''    
 
     if(response['type'] == state.msgTypes['message']):
         await incoming_message(response)
