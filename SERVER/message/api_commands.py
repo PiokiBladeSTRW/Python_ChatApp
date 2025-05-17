@@ -5,17 +5,6 @@ from server_state import state
 
 '''----------------------------------------------- API: GET'''
 
-'''# Gives user a list of online members [/online]'''
-def online_list(sender_id: str) -> tuple:
-    uuid_data = list(state.uuid_sock)
-    uuid_data.remove(sender_id)
-    
-    user_data = [state.uuid_user(x) for x in uuid_data]
-    data = '\n'.join(user_data)    
-
-    return {"content": data}
-
-
 '''# Gives user a list of rooms [/rooms]'''
 def room_list() -> tuple:
     data = '\n'.join(state.roomName_roomUuid)
@@ -46,6 +35,18 @@ def room_members(room_id: str) -> tuple:
 
 '''----------------------------------------------- API: POST'''
 
+'''# Gives user a list of online members [/online]'''
+def online_list(response: object) -> tuple:
+    uuids: list = response.content
+    data = []
+
+    for uuid in uuids:
+        if(uuid in state.uuid_sock and uuid != response.sender_id):
+            data.append(state.accountsFile[uuid]['username'])
+    
+    data = '\n'.join(data)
+
+    return {"content": data}
 
 '''# Sets Room's Description [/room desc]'''
 def room_desc(response: object) -> tuple:

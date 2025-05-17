@@ -6,6 +6,7 @@ import message.api_commands as api_cmd
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import Any
 
 chatApp = FastAPI()
 
@@ -51,12 +52,8 @@ def name_to_uuid(name: str) -> dict:
 '''------------------------------ COMMANDS'''
 class cmdPayload(BaseModel):
     sender_id: str = ''
-    content: str = ''
+    content : Any = ''
     receiver_id: str = ''
-
-@chatApp.get("/online_list/{sender_id}")
-def online_list(sender_id: str):
-    return api_cmd.online_list(sender_id)
 
 @chatApp.get("/rooms_list/")
 def rooms_list():
@@ -73,6 +70,10 @@ def profile_get(user_id: str):
 @chatApp.get("/room_members/{room_id}")
 def room_members(room_id: str):
     return api_cmd.room_members(room_id)
+
+@chatApp.post("/online_list")
+def online_list(payload: cmdPayload):
+    return api_cmd.online_list(payload)
 
 @chatApp.post("/room_desc")
 def room_desc(payload: cmdPayload):    

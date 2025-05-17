@@ -37,8 +37,9 @@ def handle_dm(args:list) -> tuple:
    
 
 '''List of every Online Client'''
-def online_list(args:list) -> tuple:    
-    return ('ap_get', ("online_list", state.clientUUID))
+def online_list(args:list) -> tuple:   
+    content = [x for x in state.uuidsFile if x.startswith('user_')] 
+    return ('ap_post', ("online_list", content))
 
 '''List of every Online Room'''    
 def rooms_list(args:list) -> tuple:     
