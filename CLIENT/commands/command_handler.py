@@ -27,6 +27,8 @@ def handle_dm(args:list) -> tuple:
     '''Args[0]= Username, Args[1::]= Message''' 
     uuid = state.name_uuid(args[0])
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): return error_display("Account of such Name doesn't Exist")
+
 
     state.receiver_id_change(uuid)
     payload = (' '.join(args[1::]), state.msgTypes['message'])
@@ -54,6 +56,7 @@ def profile(args:list) -> tuple:
         case "get": 
             uuid = state.name_uuid(args[1])
             if(uuid == 0): return (None, None)
+            if(uuid.startswith('room_')): return error_display("Account of such Name doesn't Exist")
             
             return ('ap_get', ('profile_get', uuid))
         

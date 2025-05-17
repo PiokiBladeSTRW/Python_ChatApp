@@ -23,6 +23,7 @@ def invite_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
         return error_display("Member already in room")
@@ -36,6 +37,8 @@ def join_room(room_name:str) -> tuple:
 
     uuid = state.name_uuid(room_name)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('user_')): error_display("Room of such Name doesn't Exist")
+
     state.receiver_id_change(uuid)
 
     payload = ((state.client_codes['room_join'], ''), state.msgTypes['system'])
@@ -48,6 +51,7 @@ def admin_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
         return error_display("The Member isn't in Room")
@@ -61,6 +65,7 @@ def demote_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
         return error_display("The Member isn't in Room")
@@ -75,6 +80,7 @@ def kick_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
         return error_display("The Member isn't in Room")
@@ -88,6 +94,7 @@ def ban_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
         return error_display("The Member isn't in Room")
@@ -101,6 +108,7 @@ def unban_user(username: str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
         return error_display("The Member isn't in Room")
@@ -115,6 +123,7 @@ def transfer(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
         return error_display("The Member isn't in Room")
