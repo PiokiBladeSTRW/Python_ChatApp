@@ -1,9 +1,9 @@
-'''Handle and Parse errors for modular message_handling'''
-
 import json
 from server_state import state
 
 class ErrorHandle:
+    '''Handle and Parse errors for modular message_handling'''
+    
     def __init__(self):
         self.error_list = []
 

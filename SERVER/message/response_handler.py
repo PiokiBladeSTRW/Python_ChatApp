@@ -1,25 +1,28 @@
 #Header
 from server_state import state
-import json
 import message.message_handler as message_handle
 import message.system_handler as system_handler
 
+
 '''Handle user heartbeats- Ensuring the Client is Alive'''
-def heartbeats(clientSock:object, response:dict) -> tuple: 
-    #Nothing to do here, main class adds time to timeout
+def heartbeats() -> tuple: 
     return ('*', '/hbp')   
 
+
 '''Handle regular old messages'''
-def handle_messages(clientSock:object, response:dict) -> tuple: 
+def handle_messages(response:dict) -> tuple: 
     # Seperately Handle Room and Normal Messages
+
     if(response['receiver_id'].startswith('room_')):
         return message_handle.room_handle(response)    
     else:
         return message_handle.dm_handle(response) 
 
+
 '''Handle system messages, that is, commands'''
 def system(clientSock:object, response:dict) -> tuple: 
-    # Obtain Command
+
+    # Obtain Command and execute according function
     command = response['command']    
     if (command == state.client_codes['user_exit']):    return system_handler.user_exit()
     if (command == state.client_codes['room_join']):    return system_handler.room_join(clientSock, response)
@@ -43,26 +46,24 @@ def system(clientSock:object, response:dict) -> tuple:
 '''Parse Response Received by Clients'''
 def parse_response( clientSock:object, response:dict) -> tuple:
 
-    if(response['type'] in types): 
-        data = types[response['type']](clientSock, response)        
-        return data  
-    else:
-        raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")
+    if(response['type'] == state.msgTypes['heartbeat']):
+        return heartbeats()        
 
-'''Response Types'''
-types ={
-    state.msgTypes['heartbeat']: heartbeats,    
-    state.msgTypes['message']: handle_messages,
-    state.msgTypes['system']: system    
-}
+    if(response['type'] == state.msgTypes['message']):
+        return handle_messages(response)
+
+    if(response['type'] == state.msgTypes['system']):
+        return system(clientSock, response)
+    
+    raise ValueError(f"●→INVALID MESSAGE TYPE RECEIVED: {response['type']}")
 
 '''
 RETURN FORMAT: (DESTINATION, PAYLOAD, STATE)
     receiver_id: 
         '/.'     : All Online
-        '/r--'  : All in a Room        
-        '/s'    : User Alert   
-        '<user>': Specific Username
-        '*'     : Special Case, Need Handling
-        None    : No Sending Data         
+        'room_'  : All in a Room            [returns uuid]   
+        '/s'     : User Alert   
+        'user_'  : Specific Username        [returns uuid]
+        '*'      : Special Case, Need Handling
+        None     : No Sending Data         
 '''
