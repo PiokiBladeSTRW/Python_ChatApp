@@ -13,7 +13,7 @@ def room_list() -> tuple:
 
 '''# Gives user a detailed info on room [/room info]'''
 def room_info(room_id: str) -> tuple:
-    info_data = f"Room Name: {state.roomsFile[room_id]['name']}\n Description: {state.roomsFile[room_id]['desc']}\n Current Owner: {state.roomsFile[room_id]['owner']}\n Created On: {state.roomsFile[room_id]['creation']}"
+    info_data = f"Room Name: {state.roomsFile[room_id]['name']}\n Description: {state.roomsFile[room_id]['desc']}\n Current Owner: {state.accountsFile[state.roomsFile[room_id]['owner']]['username']}\n Created On: {state.roomsFile[room_id]['creation']}"
     
     return {"content": info_data}
 
