@@ -10,7 +10,7 @@ async def dms(response: dict):
     data = (response['timestamp'], username, response['content'])
 
     # Writing to DB
-    await sql_db.write(response['sender_id'], response['content'], response['timestamp'])
+    await sql_db.write(response['sender_id'], response['content'], int(float(response['timestamp'])))
 
     # DISPLAY-
     if(response['sender_id'] == state.receiver_id): 
@@ -31,7 +31,7 @@ async def rooms(response: dict):
     data = (response['timestamp'], f"[{room_name}] {username}", response['content'])
 
     # Writing to DB
-    await sql_db.write(response['sender_id'], response['content'], response['timestamp'], room_uuid)
+    await sql_db.write(response['sender_id'], response['content'], int(float(response['timestamp'])), room_uuid)
 
     # DISPLAY -
     if(room_uuid == state.receiver_id):
