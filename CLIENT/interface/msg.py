@@ -2,39 +2,42 @@ import formatting
 from session_state import state
 from sql_handle import sql_db
 
-async def update_history(sender_id:str, content:str, timestamp:str, room_id:str=''):
-    sql_query = '''INSERT INTO msgHistory(sender_id, room_id, content, timestamp)
-    VALUES (?,?,?,?)'''
-    args = (sender_id, room_id, content, int(float(timestamp)))
-
-    await sql_db.write(sql_query, args)
-
 async def dms(response: dict): 
+    '''Handle Display & Storage of DMs'''
+    
+    # Data Arrangement
     username = state.uuid_name(response['sender_id'])
     data = (response['timestamp'], username, response['content'])
 
-    await update_history(response['sender_id'], response['content'], response['timestamp'])
+    # Writing to DB
+    await sql_db.write(response['sender_id'], response['content'], int(float(response['timestamp'])))
 
-    # Direct Message : [Time] > Message
+    # DISPLAY-
     if(response['sender_id'] == state.receiver_id): 
-        print(formatting.format(data, ('bt', 'a', 'c')))  
-        
-    # Incoming Message : < sender_id : Message >
+        # Direct Message : [Time] > Message
+        print(formatting.format(data, ('bt', 'a', 'c'))) 
+
     else:
+        # Incoming Message : < sender_id : Message >
         print(formatting.format(data, ('s', 'cl', 'c', 'A')))
 
 async def rooms(response: dict):
+    '''Handle Display & Storage of Room Broadcasts'''
+
+    # Data Arrangement
     room_uuid, user_uuid =response['sender_id'][0], response['sender_id'][1]        
     
     room_name, username = state.uuid_name(room_uuid), state.uuid_name(user_uuid)
     data = (response['timestamp'], f"[{room_name}] {username}", response['content'])
 
-    await update_history(user_uuid, response['content'],response['timestamp'], room_uuid)
+    # Writing to DB
+    await sql_db.write(user_uuid, response['content'], int(float(response['timestamp'])), room_uuid)
 
-    # Direct Room Broadcast
+    # DISPLAY -
     if(room_uuid == state.receiver_id):
+        # Direct Room Broadcast
         print(formatting.format(data, ('bt', 's', 'cl', 'c')))
 
-    # Incoming Room Broadcast
     else:
+        # Incoming Room Broadcast
         print(formatting.format(data, ('s', 'cl', 'c', 'A')))

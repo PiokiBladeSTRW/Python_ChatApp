@@ -8,6 +8,8 @@ error = ErrorHandle()
 '''----------------------------------------------'''
 
 def room_handle(response:dict) -> tuple:
+    '''Handle Messages sent to Rooms'''
+
     room_uuid = response.pop('receiver_id')        
     response['sender_id'] = (room_uuid, response['sender_id'])
     
@@ -17,16 +19,11 @@ def room_handle(response:dict) -> tuple:
 
 
 def dm_handle(response:dict) -> tuple: 
+    '''Handle Messages sent Directly'''
 
     # Handle Errors
-    possible_errors = {
-        'er_Invalid_user':  (response['receiver_id'] not in state.accountsFile, [response['receiver_id']]),
-        'user_exit':        (response['receiver_id'] not in state.uuid_sock, [response['receiver_id']])
-    }
-    
-    if(data := error.multiple_error_handle(possible_errors)): return data
+    if(data := error.error_handle(response['receiver_id'] not in state.uuid_sock, 'user_exit',[response['receiver_id']])):
+        return data
 
-    #sender_id: UUID->USERNAME  ; receiver_id: USERNAME->UUID       
     receiver_id = response.pop('receiver_id')
-
     return (receiver_id, json.dumps(response))

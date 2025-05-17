@@ -1,19 +1,19 @@
-'''Global Variables of the Server'''
-
 #Header
 import json
 from loguru import logger
 
 class ServerState:
+    '''Class to store Global Variables & Functions of the Server'''
+
     def __init__(self):
         self.sock_uuid= {}              # socket : uuid
-        self.uuid_sock = {}             # uuid : socket       
+        self.uuid_sock = {}             # uuid : socket
          
-        self.sock_rooms = {}            # socket : [rooms]                  -Auth
-        self.room_sock= {}             # room name : [sockets]             -State
+        self.sock_rooms = {}            # socket : [rooms]
+        self.room_sock= {}              # room name : [sockets]
         self.timeout= {}                # socket: last heartbeat  
 
-        self.username_uuid = {}             # Username : UUID [Stored only in Memory]
+        self.username_uuid = {}         # Username : UUID [Stored only in Memory]
         self.roomName_roomUuid = {}     # Room Name : Room UUID [Stored Only in Memory]
 
         self.msgTypes ={
@@ -22,6 +22,7 @@ class ServerState:
             'system': 'sys'
         }
         
+        # File Variables
         with open("accounts.json", 'r') as fileHandle:
             self.accountsFile: dict = json.load(fileHandle)
             
@@ -34,14 +35,14 @@ class ServerState:
         for room in self.roomsFile:
             self.room_sock[room] = []
 
-
+        # Reverse List Making
         for uuid in self.accountsFile:
             self.username_uuid[self.accountsFile[uuid]['username']] = uuid
 
         for room_uuid in self.roomsFile:
             self.roomName_roomUuid[self.roomsFile[room_uuid]['name']] = room_uuid
 
-
+        # Logging
         logger.remove()
         log_format = (
             "<green>{time:YYYY-MM-DD HH:mm:ss} </green> |"
@@ -57,7 +58,7 @@ class ServerState:
             encoding= 'utf-8'            
         )
 
-        '''Codes for System Messages. 'er' prefix for Errors'''
+        '''Codes for System and Client Commands. 'er' prefix for Errors'''
         self.system_codes ={            
             "user_exit": 101,
             "relog_begin": 102,
@@ -78,6 +79,7 @@ class ServerState:
             'member_owner': 117,
             'new_owner': 118,
             'user_join': 119,
+            'member_left': 120,
 
             "er_Invalid_login": 201,
             "er_Exists_username": 202,
@@ -92,7 +94,8 @@ class ServerState:
             'er_Not_owner': 214,
 
             'no_display': 300,
-            'room_data' : 301
+            'room_data' : 301,
+            'room_left' : 302,
         }
 
         self.client_codes ={
@@ -110,14 +113,10 @@ class ServerState:
             'user_join': 12,
         }
 
-
-    def uuid_user(self, uuid:str):
-        return self.accountsFile.get(uuid)['username']
-    
-    def user_uuid(self, username:str):
-        return self.username_uuid.get(username)
     
     def log(self, msg:str):
+        '''Log something to server'''
         logger.opt(depth=1).info(msg)
-    
+
+#__MAIN__
 state = ServerState()

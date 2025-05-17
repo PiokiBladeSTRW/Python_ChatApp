@@ -1,3 +1,4 @@
+# HEADER
 import aioconsole
 import formatting
 from session_state import state
@@ -15,9 +16,12 @@ room_id: Signifies the message is a Room message.
 Receiver & Room ID, NEVER CO-EXIST. Presence of One means the other is ''
 '''
 
-async def main(uuid:str, name:str):  
-    room = uuid.startswith('room_')
+async def main(uuid:str, name:str):
+    '''Viewing Function'''  
 
+    room: bool = uuid.startswith('room_')
+
+    # Retrieve Appropriate Message History
     if(room):
         sql_query= '''SELECT * FROM msgHistory        
             WHERE room_id = ?
@@ -25,14 +29,18 @@ async def main(uuid:str, name:str):
         args = (uuid,)
     else:
         sql_query= '''SELECT * FROM msgHistory
-        WHERE sender_id = ? OR receiver_id = ?
+        WHERE (sender_id = ? OR receiver_id = ?) AND room_id =''
         ORDER BY id'''
         args = (uuid, uuid)
 
-    messages = await sql_db.read(sql_query, args)
+    await sql_db.exec(sql_query, args, False)
+    messages = await sql_db.cursor.fetchall()
 
+    # Loop Through History
     for msg in messages:
-
+        print(f"\n{msg}\n")
+        
+        # Format the Messages Appropriately
         if(room):
             sender = f"[{name}] {state.uuid_name(msg[1])}"
             data = (msg[5], sender, msg[4])       
@@ -45,6 +53,7 @@ async def main(uuid:str, name:str):
                 data = (msg[5], state.uuidsFile[state.clientUUID], msg[4], name)
                 format = ('bt', 's', 'a', 'r', 'cl', 'c')     
 
+        # Display & Continuation Input
         print(formatting.format(data, format))
 
         inp = await aioconsole.ainput(">")
@@ -58,6 +67,8 @@ async def main(uuid:str, name:str):
         return 0
     
 async def process_begin():
+    '''Entry Function to History View'''
+
     print("\nIn Display: /e to Exit and /o to Change User\n")
     while True:
         name = input("ENTER USERNAME: ")

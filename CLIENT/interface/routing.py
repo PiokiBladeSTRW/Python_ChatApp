@@ -1,33 +1,34 @@
-'''Handle (bring about requried changes) and Display Incoming Data from Server'''
-
 #Header
 import formatting
-import time
 
 import interface.msg as msg
 import interface.sys as sys
 from session_state import state
 
-'''Handle Default Messages'''
-async def incoming_message(response:dict):    
+async def incoming_message(response:dict):  
+    '''Handle Default Messages'''
+
     if( type(response['sender_id']) == list):         
         await msg.rooms(response)
 
     else:
         await msg.dms(response)
 
-'''Handle System Messages'''
-def system(response:dict):       
-    # Guard Clause  (if not a command)
+
+def system(response:dict):   
+    '''Handle System Messages'''   
+
+    # Non-Command Messages
     if(not response.get('command')):
         data = ('', '{System}', response['content']) 
 
         print(formatting.format(data, ('s', 'cl', 'c')))           
         return    
     
-    # Guard Clause (if kicked)
+    # If To-Be Kicked
     if(response['command'] == state.system_codes['session_active']): 
         state.log(f"Tried Logging with an Active Session; Disconnecting")
+
         print(formatting.format(('', '{System}', state.sys_code_msg[response['command']]), ('s', 'cl', 'c')))
         return 'kick'
 
@@ -43,10 +44,10 @@ def system(response:dict):
 '''-------------------------------------'''
 
 
-'''Handle Responses'''
+'''Handle (bring about requried changes) and Display Incoming Data from Server'''
+
 async def parse_response(response:dict): 
-    # For future purpose of Storing in DB
-    if(not response.get('timestamp')): response['timestamp'] = time.time()
+    '''Entry Function; Async purely to incorporate SQL'''    
 
     if(response['type'] == state.msgTypes['message']):
         await incoming_message(response)

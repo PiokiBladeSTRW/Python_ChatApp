@@ -5,6 +5,7 @@ import time
 from server_state import state
 from message.catch_error import ErrorHandle
 
+error = ErrorHandle()
 '''
 Commands and their Arguments:
 1: Exit -> None
@@ -12,11 +13,14 @@ Commands and their Arguments:
 3: Rooms List -> None
 4: Create Room -> Room_Name
 5: Room Invite -> (Room Name, Username)
-6: Room Admin -> (Room Name, Username)'''
+6: Room Admin -> (Room Name, Username)
+'''
 
-error = ErrorHandle()
+'''System Functions'''
 
 def encode_payload(command:int=None, content=None,  sender_id: str = None) -> str:
+    '''Encode System Payload with command & content'''
+
     data = {
         'command': command,
         'content': content,
@@ -26,9 +30,13 @@ def encode_payload(command:int=None, content=None,  sender_id: str = None) -> st
     return json.dumps(data)
 
 def modify_room(room_uuid:str, operation: tuple, clientSock:object=None, user_uuid:str=None, room_name:str=None):
-    '''Types of Operation: (CREATE, N_JOIN, INVITE, R_INVITE, ADMIN, KICK, BAN)
-    clientSock: Person using Command ;  uuid: Person on receiving End of Command
-    Returning Operations: (CREATE,)'''    
+    '''
+    Modify a Room Dynamically.
+        Types of Operation: (CREATE, N_JOIN, LEAVE, INVITE, R_INVITE, ADMIN, DEMOTE KICK, BAN, UNBAN)
+        clientSock: Person using Command ;  uuid: Person on receiving End of Command
+
+        Returning Operations: (CREATE)
+    '''    
 
     # Ran By Person Creating Server
     if('CREATE' in operation):        
@@ -43,7 +51,8 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object=None, user_uu
                                     'invites': [], 
                                     'bans': [],
                                     'creation': time.strftime("%D", time.localtime()),
-                                    'desc': ""}          
+                                    'desc': ""
+                                }          
         return room_uuid
 
     # Ran by Person joining Server
@@ -101,10 +110,13 @@ def modify_room(room_uuid:str, operation: tuple, clientSock:object=None, user_uu
 
 
 '''----------------------------------------------'''
+
+
 '''# Lets user close safely [/exit]'''
 def user_exit() -> tuple:
     return ('*', '/exit')
 
+'''# User Joining Server Handling [--]'''
 def user_join(clientSock:object, response:dict) -> tuple:
     user_uuid = response['content']    
 
@@ -153,6 +165,7 @@ def room_create(clientSock:object, response:dict) -> tuple:
 
     return ('/s', encode_payload(state.system_codes['room_live'], sender_id= room_uuid))
 
+
 '''# Invites someone to a room [/room invite]'''
 def room_invite(response:dict) -> tuple:    
     room_uuid, user_uuid = response['receiver_id'], response['content']
@@ -173,6 +186,7 @@ def room_invite(response:dict) -> tuple:
     modify_room(room_uuid, ('INVITE',), user_uuid= user_uuid)
     return (user_uuid, encode_payload(state.system_codes['room_invite'], sender_id= room_uuid))
 
+
 '''# Makes someone an Admin of Room [/room admin]'''
 def room_admin(response:dict) -> tuple:    
     room_uuid, user_uuid = response['receiver_id'], response['content']
@@ -188,6 +202,7 @@ def room_admin(response:dict) -> tuple:
     modify_room(room_uuid, ('ADMIN',), user_uuid= user_uuid)          
     return (room_uuid,
             encode_payload( state.system_codes['member_admin'],[user_uuid], room_uuid))
+
 
 '''# Makes someone no longer Admin of Room [/room demote]'''
 def room_demote(response:dict) -> tuple:    
@@ -206,6 +221,7 @@ def room_demote(response:dict) -> tuple:
     return (room_uuid,
             encode_payload( state.system_codes['member_demote'],[user_uuid], room_uuid))
 
+
 '''# Kick someone from the Room [/room kick]'''
 def room_kick(response:dict) -> tuple:
     room_uuid, user_uuid = response['receiver_id'], response['content'] 
@@ -223,6 +239,7 @@ def room_kick(response:dict) -> tuple:
         (room_uuid, encode_payload( state.system_codes['member_kick'], [user_uuid], room_uuid)),
         (user_uuid, encode_payload( state.system_codes['got_kicked'], [user_uuid], room_uuid))
         )
+
 
 '''# Ban someone from the Room [/room ban]'''
 def room_ban(response:dict) -> tuple:
@@ -243,6 +260,7 @@ def room_ban(response:dict) -> tuple:
         (user_uuid, encode_payload( state.system_codes['got_banned'], [user_uuid], room_uuid))
         )
 
+
 '''# Unban someone from the Room [/room unban]'''
 def room_unban(response:dict) -> tuple:    
     room_uuid, user_uuid = response['receiver_id'], response['content']  
@@ -260,28 +278,32 @@ def room_unban(response:dict) -> tuple:
         (room_uuid, encode_payload( state.system_codes['member_unban'],  [user_uuid], room_uuid))
         )
 
+
 '''# Makes someone the Owner of Room [/room transfer]'''
 def transfer(response:dict) -> tuple:    
     # !!! NEEDS A CONFIRMATION MENU LATER !!!
     room_uuid, user_uuid = response['receiver_id'], response['content']
 
     #Catch Errors
-    possible_errors = {        
-        'er_Not_owner':     (response['sender_id'] != state.roomsFile[room_uuid]['owner'], None)
-    }
-    if(data := error.multiple_error_handle(possible_errors)): return data
+    if(data := error.error_handle(response['sender_id'] != state.roomsFile[room_uuid]['owner'], 'er_Not_owner')):
+        return data
  
     # Modify and Send
-    modify_room(room_uuid, ('TRANSFER',), user_uuid= user_uuid)          
-    return (room_uuid,
-            encode_payload( state.system_codes['new_owner'],[user_uuid], room_uuid))
+    modify_room(room_uuid, ('TRANSFER',), user_uuid= user_uuid)
+    return (room_uuid, encode_payload( state.system_codes['new_owner'],[user_uuid], room_uuid))
+
 
 '''# Leave a Room [/room leave]'''
 def room_leave(clientSock:object, response:dict) -> tuple:    
     room_uuid = response['receiver_id']  
 
-    if(data:= error.error_handle(response['sender'] == state.roomsFile[room_uuid]['owner'], 'member_owner')): return data
+    # Catch Error
+    if(data:= error.error_handle(response['sender_id'] == state.roomsFile[room_uuid]['owner'], 'member_owner')): return data
 
+    # Modify and Send
     modify_room(room_uuid, ('LEAVE', 'DEMOTE'), clientSock)
     
-    return (room_uuid, encode_payload( state.system_codes['member_left'], [response['sender_id']], room_uuid))  
+    return (
+        (room_uuid, encode_payload( state.system_codes['member_left'], [response['sender_id']], room_uuid)) ,
+        ('/s', encode_payload( state.system_codes['room_left'] ))
+        )

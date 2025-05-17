@@ -1,48 +1,52 @@
-#Solo File handling API data Request Parsing & Responding
+'''Solo File handling API data Request Parsing & Responding'''
+
+# Header
 from server_state import state
 
-'''# Gives user a list of online members [/online]'''
-def online_list(sender_id: str) -> tuple:
-    uuid_data = list(state.uuid_sock)
-    uuid_data.remove(sender_id)
-    
-    user_data = [state.uuid_user(x) for x in uuid_data]
-    data = '\n'.join(user_data)    
-
-    return {"content": data}
+'''----------------------------------------------- API: GET'''
 
 '''# Gives user a list of rooms [/rooms]'''
 def room_list() -> tuple:
     data = '\n'.join(state.roomName_roomUuid)
     return {"content": data}
 
+
 '''# Gives user a detailed info on room [/room info]'''
 def room_info(room_id: str) -> tuple:
-    info_data = f'''
-Room Name: {state.roomsFile[room_id]['name']}
-Description: {state.roomsFile[room_id]['desc']}
-Current Owner: {state.roomsFile[room_id]['owner']}
-Created On: {state.roomsFile[room_id]['creation']}'''
+    info_data = f"Room Name: {state.roomsFile[room_id]['name']}\n Description: {state.roomsFile[room_id]['desc']}\n Current Owner: {state.accountsFile[state.roomsFile[room_id]['owner']]['username']}\n Created On: {state.roomsFile[room_id]['creation']}"
     
     return {"content": info_data}
 
+
 '''# Gives user the profile of Asked Individual [/profile get]'''
 def profile_get(user_uuid: str) -> tuple:    
-    if(user_uuid not in state.accountsFile):
-        return {"command": state.system_codes['er_Invalid_user']}    
-
     profile = state.uuidsFile[user_uuid]['profile']   
     
     data = f"{state.accountsFile[user_uuid]['username']}> {profile}"
     return {"content": data}
 
-
 '''# Gives user a list of room members [/room members]'''
 def room_members(room_id: str) -> tuple:    
+    # Only API command with a System Code
     member_data = [x for x in state.roomsFile[room_id]['members']]
     
     return {"command": state.system_codes['room_members'], "content": member_data, "sender_id": room_id}
 
+
+'''----------------------------------------------- API: POST'''
+
+'''# Gives user a list of online members [/online]'''
+def online_list(response: object) -> tuple:
+    uuids: list = response.content
+    data = []
+
+    for uuid in uuids:
+        if(uuid in state.uuid_sock and uuid != response.sender_id):
+            data.append(state.accountsFile[uuid]['username'])
+    
+    data = '\n'.join(data)
+
+    return {"content": data}
 
 '''# Sets Room's Description [/room desc]'''
 def room_desc(response: object) -> tuple:
@@ -53,6 +57,7 @@ def room_desc(response: object) -> tuple:
 
     state.roomsFile[room_uuid]['desc'] = response.content
     return {"content": 0}  
+
 
 '''# Allows user to modify their profile [/profile set]'''
 def profile_set(response: object) -> tuple:

@@ -1,28 +1,33 @@
-'''Chooses the array of clients who'll receive the data to be broadcasted'''
 #Header
 from server_state import state
 
-'''Global Broadcasts'''
-def every(clientSock):
+def every(clientSock)-> tuple:
+    '''Global Broadcasts'''
+
     rC = list(state.sock_uuid)
     if(clientSock in state.sock_uuid):
         rC.remove(clientSock)
 
     return tuple(rC)
 
-'''Room Broadcasts'''
-def room(clientSock, destination:str): 
+
+def room(clientSock, destination:str)-> tuple: 
+    '''Room Broadcasts'''
+
     rC = list(state.room_sock[destination])
-    rC.remove(clientSock)    
+    if(clientSock in state.room_sock[destination]):
+        rC.remove(clientSock)
 
     return tuple(rC)
 
-'''User Alert'''
-def user(clientSock): 
+
+def user(clientSock)-> tuple: 
+    '''User Alert'''
     return (clientSock,)
 
-'''DM Broadcasts'''
-def direct(destination:str): 
+
+def direct(destination:str)-> tuple: 
+    '''DM Broadcasts'''
     if(destination not in state.uuid_sock):
         return None    
     
@@ -32,14 +37,10 @@ def direct(destination:str):
 '''-------------------------------------'''
 
 
-'''Parse Destination to determine receiver_ids'''
-def parse_destination(clientSock, destination:str):
+'''Parse Destination to determine receiver_ids and return an array of ids'''
+def parse_destination(clientSock, destination:str) -> tuple:
 
     if(destination == '/.'): return every(clientSock)
     if(destination == '/s'): return user(clientSock)
     if(destination.startswith('room_')): return room(clientSock, destination)
     if(destination.startswith('user_')): return direct(destination)
-
-'''Return Type: (receiving clients)
-   None Return -> Invalid Destination
-'''

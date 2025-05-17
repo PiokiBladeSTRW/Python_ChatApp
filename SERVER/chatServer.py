@@ -8,18 +8,18 @@ import routing
 import message.response_handler as response_handler
 from server_state import state
 
-'''
-The Server Object
-Purpose: The Server. Handles every client's request
-Acitivities:
-    Starting the Server
-    Handling Connection of Clients    
-    Receiving and Broadcasting Clients' Messages
-    Handling Disconenction of Clients
-    Handling File storage
-'''
+
 class ChatServer:
-    '''Initialize'''
+    '''
+    The Server Object
+    Purpose: The Socket Server, Obtains and acts accordingly based on Client Messages
+    Acitivities:
+        Starting the Server
+        Handling Connection of Clients    
+        Receiving and Broadcasting Clients' Messages
+        Handling Disconenction of Clients
+        Handling File storage
+    '''
     def __init__(self):        
         self.timeout = 40
         self.pingFrequency = 25        
@@ -28,21 +28,26 @@ class ChatServer:
         self.host = "localhost"
         self.port = 8765
 
-        self.disconnectionPending = asyncio.Queue()
+        self.disconnectionPending: asyncio.Queue[websockets.ClientConnection] = asyncio.Queue()
 
     async def start(self) -> None:
+        # Start up the Server
         async with websockets.serve(self.handleClient, self.host, self.port):            
             state.log(f"Chat Server Active & Listening at {self.host}:{self.port}")
             print("CHAT SERVER ACTIVE & LISTENING")
 
+            # Co-routines that need to run not per client
             asyncio.create_task(self.Disconnect())
             asyncio.create_task(self.fileHandle())
             asyncio.create_task(self.heartbeats())
+
             await asyncio.Future()  #while True: but with 0 CPU usage            
         
     async def handleClient(self, clientSock: websockets.ClientConnection) -> None:
+        # Per Client Function Process
         try:
             await asyncio.gather(self.receive(clientSock))
+
         except websockets.exceptions.ConnectionClosed:
             await self.disconnectionPending.put(clientSock)
             print("Closed")   
@@ -51,14 +56,14 @@ class ChatServer:
     '''------------------------------------------------'''
 
 
-    '''Receive and Broadcast Data'''
     async def receive(self, clientSock: websockets.ClientConnection) -> None:
+
         async for dataReceived in clientSock:   
             response = json.loads(dataReceived)
 
             state.log(f"{clientSock} Received Data: {response} \n")
 
-            '''Payload is json dumped message'''
+            '''Packet contains Either 1 or multiple payloads pre json-dumped'''
             packets = response_handler.parse_response(clientSock, response)
             
             # Multi-Broadcast
@@ -67,7 +72,9 @@ class ChatServer:
                     await self.broadcast(clientSock, *packet)
                 continue
 
+            # Regular-Broadcast
             destination, payload = packets
+
             # Handle Special Cases, otherwise broadcast
             if(destination=='*'):
                 match payload:
@@ -77,6 +84,7 @@ class ChatServer:
                 continue
             
             await self.broadcast(clientSock, destination, payload)
+
 
     async def broadcast(self, clientSock:websockets.ClientConnection, destination:str, payload:str) -> None:
         state.log(f"Sending data {payload} to {destination} \n")
@@ -102,15 +110,13 @@ class ChatServer:
     async def send(self, receiveClient:websockets.ClientConnection, payload:str) -> None:
         try:    
             await receiveClient.send(payload)                      
-        except websockets.exceptions.ConnectionClosed:    
+        except websockets.exceptions.ConnectionClosed:
             state.log(f"Disconenction Pending of {state.sock_uuid[receiveClient]}")   
             await self.disconnectionPending.put(receiveClient)
 
 
     '''------------------------------------------------'''
 
-
-    '''Disconnection Handling'''
     async def heartbeats(self) -> None:        
         while True:
             cTime = time.time()
@@ -121,16 +127,18 @@ class ChatServer:
                     await self.disconnectionPending.put(client)
             await asyncio.sleep(self.pingFrequency)
 
+
     async def relog(self, uuid:str, clientSock: websockets.ClientConnection) -> None:
+
         # Check if current user is offline
         oldClientSock = state.uuid_sock[uuid] 
-
         try:    
             await oldClientSock.send(json.dumps(
                 {"command": state.system_codes['account_risk'], "type":state.msgTypes['system']}))
 
         except websockets.exceptions.ConnectionClosed:  
-            pass
+            pass    # Current user confirmed offline
+
         else:
             await clientSock.send(json.dumps(
                 {"command": state.system_codes['session_active'], "type": state.msgTypes['system']}))
@@ -162,11 +170,14 @@ class ChatServer:
             {"command": state.system_codes['relog_finish'], "type": state.msgTypes['system']}))
         return
 
+
     async def Disconnect(self) -> None: 
         while True:
             await asyncio.sleep(3)   
             leavingClient = await self.disconnectionPending.get()  
-            if(leavingClient):                   
+
+            if(leavingClient):          
+
                 #Remove Client from Rooms
                 if(leavingClient in state.sock_rooms):
                     for room in state.sock_rooms[leavingClient]:
@@ -191,10 +202,10 @@ class ChatServer:
     '''------------------------------------------------'''
 
 
-    '''Handle File I/O'''
     async def fileHandle(self) -> None:
-        while True:  
-            state.log("Server Files Reupdated")            
+        while True:              
+            state.log("Server Files Reupdated")    
+                    
             #Open and store data to each file
             with open("accounts.json", 'w') as accountHandle, open("acc_uuids.json", 'w') as uuidHandle, open("rooms.json", 'w') as roomHandle:
                 json.dump(state.accountsFile, accountHandle, indent=4)         

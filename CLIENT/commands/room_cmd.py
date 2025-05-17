@@ -5,26 +5,16 @@ Functions to be Utilized for Room Subcommands.
 
 #Header
 from session_state import state
-from commands.error_handle import error_handle
+from commands.error_display import error_display
 
-'''----------------------------------------------'''
-
-'''Join a Room'''
-def join_room(room_name:str) -> tuple:    
-    state.log(f"Running room:join {room_name}")
-
-    uuid = state.name_uuid(room_name)
-    if(uuid == 0): return (None, None)
-    state.receiver_id_change(uuid)
-
-    payload = ((state.client_codes['room_join'], ''), state.msgTypes['system'])
-    return ('ws_send', payload)  
+'''---------------------------------------------- socket'''
 
 '''Create a Room'''
 def create_room(room_name:str) -> tuple: 
     state.log(f"Running room:create {room_name}") 
     
     payload = ((state.client_codes['room_create'], [room_name]), state.msgTypes['system'])
+    
     return ('ws_send', payload)
 
 '''Invite user to Room'''
@@ -33,12 +23,27 @@ def invite_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
-        return error_handle("Member already in room")
+        return error_display("Member already in room")
 
     payload = ((state.client_codes['room_invite'],  uuid), state.msgTypes['system'])
     return ('ws_send', payload)
+
+'''Join a Room'''
+def join_room(room_name:str) -> tuple:    
+    state.log(f"Running room:join {room_name}")
+
+    uuid = state.name_uuid(room_name)
+    if(uuid == 0): return (None, None)
+    if(uuid.startswith('user_')): error_display("Room of such Name doesn't Exist")
+
+    state.receiver_id_change(uuid)
+
+    payload = ((state.client_codes['room_join'], ''), state.msgTypes['system'])
+    return ('ws_send', payload) 
+
 
 '''Make user an Admin'''
 def admin_user(username:str) -> tuple:
@@ -46,9 +51,10 @@ def admin_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
-        return error_handle("The Member isn't in Room")
+        return error_display("The Member isn't in Room")
     
     payload = ((state.client_codes['room_admin'], uuid), state.msgTypes['system'])
     return ('ws_send', payload)
@@ -59,12 +65,14 @@ def demote_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
-        return error_handle("The Member isn't in Room")
+        return error_display("The Member isn't in Room")
     
     payload = ((state.client_codes['room_demote'], uuid), state.msgTypes['system'])
     return ('ws_send', payload)
+
 
 '''Kick User from Room'''
 def kick_user(username:str) -> tuple:
@@ -72,9 +80,10 @@ def kick_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
-        return error_handle("The Member isn't in Room")
+        return error_display("The Member isn't in Room")
     
     payload = ( (state.client_codes['room_kick'], uuid), state.msgTypes['system'])
     return ('ws_send', payload)
@@ -85,9 +94,10 @@ def ban_user(username:str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
-        return error_handle("The Member isn't in Room")
+        return error_display("The Member isn't in Room")
     
     payload = ( (state.client_codes['room_ban'], uuid), state.msgTypes['system'])
     return ('ws_send', payload)
@@ -98,12 +108,39 @@ def unban_user(username: str) -> tuple:
 
     uuid = state.name_uuid(username)
     if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
 
     if(uuid in state.roomsFile[state.receiver_id]):
-        return error_handle("The Member isn't in Room")
+        return error_display("The Member isn't in Room")
 
     payload = ( (state.client_codes['room_unban'], uuid), state.msgTypes['system'])
     return ('ws_send', payload)
+
+
+'''Make user the New Owner'''
+def transfer(username:str) -> tuple:
+    state.log(f"Running room:transfer {username}")    
+
+    uuid = state.name_uuid(username)
+    if(uuid == 0): return (None, None)
+    if(uuid.startswith('room_')): error_display("Account of such Name doesn't Exist")
+
+    if(uuid in state.roomsFile[state.receiver_id]):
+        return error_display("The Member isn't in Room")
+    
+    payload = ((state.client_codes['room_transfer'], uuid), state.msgTypes['system'])
+    return ('ws_send', payload)
+
+
+'''Leave a Room'''
+def leave() -> tuple:    
+    state.log(f"Running room:leave")
+
+    payload = ((state.client_codes['room_leave'], ''), state.msgTypes['system'])
+    return ('ws_send', payload)  
+
+
+'''---------------------------------------------- api'''
 
 
 '''Members in Room'''  
@@ -122,25 +159,3 @@ def set_desc(description: list) -> tuple:
 
     description = ' '.join(description)
     return ('ap_post', ('room_desc', description))
-
-'''Make user the New Owner'''
-def transfer(username:str) -> tuple:
-    state.log(f"Running room:transfer {username}")    
-
-    uuid = state.name_uuid(username)
-    if(uuid == 0): return (None, None)
-
-    if(uuid in state.roomsFile[state.receiver_id]):
-        return error_handle("The Member isn't in Room")
-    
-    payload = ((state.client_codes['room_transfer'], uuid), state.msgTypes['system'])
-    return ('ws_send', payload)
-
-'''Leave a Room'''
-def leave() -> tuple:    
-    state.log(f"Running room:leave")
-
-    state.receiver_id_change('')
-
-    payload = ((state.client_codes['room_leave'], ''), state.msgTypes['system'])
-    return ('ws_send', payload)  
