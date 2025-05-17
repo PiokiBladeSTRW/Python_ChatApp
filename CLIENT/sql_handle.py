@@ -38,14 +38,14 @@ class SQLHandle:
         if(second_id.startswith('user_')):      
             sql_query = '''INSERT INTO msgHistory (sender_id, receiver_id, content, timestamp)
             VALUES (?,?,?,?)'''
-            await self.exec(sql_query, (sender_id,  content, timestamp))   
+            await self.exec(sql_query, (sender_id, second_id, content, timestamp))   
             return
                 
         # Received/Sent Room Message
         if(second_id.startswith('room_')):
             sql_query = '''INSERT INTO msgHistory (sender_id, room_id, content, timestamp)
             VALUES (?,?,?,?)'''
-            await self.exec(sql_query, (sender_id, content, timestamp))   
+            await self.exec(sql_query, (sender_id, second_id, content, timestamp))   
             return
 
 #__MAIN__   
