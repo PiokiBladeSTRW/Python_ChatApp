@@ -1,26 +1,13 @@
-# Test Chat App
+# Test Python Chat App (Proof of Concept)
+
+**Note:** What started as a collaborative project to get my friends into coding evolved into a solo venture. Development is currently **dormant**, so the documentation reflects its original beginner-friendly intent. Proper backend documentation will be added when development resumes!
 
 *[SCROLL TO BOTTOM TO KNOW HOW TO TEST THE APP AND REPORT BUGS]*
 
 A **Chat App** coded for Fun and a Learning Experience, planned to be finalized eventually but a *Proof of Concept* for now. A Beginner project so take it all in with a mountain load of salt
 
-## Wanna Contribute?
-Head over to the Tutorial Folder to learn about the different Concepts you'll **NEED** to grasp to do any work. *Don't worry, they are all simple and easy to learn*.
-You don't have to use my docs to learn, you can look into online materials for help and learn seperate materials, but some fundamentals are necessary for any network based applications. Furthermore, the provided tutorials may not be up to mark with standards, rather made to help absolute beginners get a basic grasp; online materials from more experienced people will prove more useful.
 
-### Available Tutorials
-AS YOU GO THROUGH TUTORIALS, AVOID MEMORIZING, THIS IS NOT FOR SOME STUPID EXAM JUST FOR LEARNING. LEARN, TRY THE DEMO CODES AND HAVE FUN
-
-1. [OOP Basics](Tutorial/1.oop_basics.md)
-1. [Async Basics](Tutorial/2.async_basics.md)
-2. [Sockets Intro](Tutorial/3.sockets_intro.md)
-3. [Using Git](Tutorial/4.using_git.md)
-4. [After Completion](Tutorial/5.final.md)
-
-Happy Coding. Enjoy the Following description of this project 
-
-
-## Core Idea
+## 🔗 Core Idea [ Concepts not Final Project]
 
 -A More Secure and Fun take on Communication over Internet
 -Integration of best features of different sites and Original Spices
@@ -67,6 +54,23 @@ void main() {
 | Version | Git|
 | Host |  |
 | Auth |  |
+
+## 🤝 Wanna Contribute?
+Head over to the Tutorial Folder to learn about the different Concepts you'll **NEED** to grasp to do any work. *Don't worry, they are all simple and easy to learn*.
+You don't have to use my docs to learn, you can look into online materials for help and learn seperate materials, but some fundamentals are necessary for any network based applications. Furthermore, the provided tutorials may not be up to mark with standards, rather made to help absolute beginners get a basic grasp; online materials from more experienced people will prove more useful.
+
+### Available Tutorials
+AS YOU GO THROUGH TUTORIALS, AVOID MEMORIZING, THIS IS NOT FOR SOME STUPID EXAM JUST FOR LEARNING. LEARN, TRY THE DEMO CODES AND HAVE FUN
+
+1. [OOP Basics](Tutorial/1.oop_basics.md)
+1. [Async Basics](Tutorial/2.async_basics.md)
+2. [Sockets Intro](Tutorial/3.sockets_intro.md)
+3. [Using Git](Tutorial/4.using_git.md)
+4. [After Completion](Tutorial/5.final.md)
+
+Happy Coding. Enjoy the Following description of this project 
+
+
 
 ## Testing Tutorial
 
